@@ -219,6 +219,7 @@ body:hover #ui,#ui.show{opacity:1}
   <div id="vign"></div><div id="scan"></div><div id="flash"></div>
 </div></div>
 
+<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
 <div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
 <div id="ui">
   <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="92" step="0.01" value="0">
@@ -244,16 +245,16 @@ const SCENES = [
 ];
 const CLOCK = [[0, null], [9, "02:48"], [19, "02:49"], [29, "02:50"], [39, "02:55"], [48, "03:30"], [60, "03:41"], [71, "03:52"], [84, null]];
 const CAPS = [
-  [0.3, "Если в {y:2:47} ночи"], [1.6, "ваш телефон завибрирует,"], [3.0, "а на экране будет всего три строчки:"],
-  [5.0, "{r:молчите.}"], [6.0, "{r:не отвечайте.}"], [7.2, "{r:не открывайте.}"],
-  [9.3, "У вас есть всего {y:несколько минут.}"], [11.6, "От них зависит,"], [12.9, "доживёте ли вы до утра."], [15.0, "Одна {r:ошибка} — и всё."],
-  [19.3, "Первое, что делают почти все, —"], [21.3, "{y:звонят близким.}"], [23.0, "Это {r:ошибка номер один.}"], [25.3, "Оно {y:слышит} всё, что громче"], [27.2, "{y:40 децибел.}"],
-  [29.3, "Телефон — на {y:беззвучный.}"], [31.3, "Холодильник — {y:из розетки.}"], [33.3, "Часы — {y:батарейку вон.}"], [35.5, "Через минуту в квартире"], [37.0, "{g:31 децибел.}"],
-  [39.3, "Второе — {y:вода.}"], [40.8, "Наберите ванну,"], [42.0, "но {y:тонкой струйкой:}"], [43.4, "{r:гул в трубах} слышно"], [44.8, "по всему стояку."], [46.2, "{y:120 литров} за девять минут."],
-  [48.3, "В {y:3:30} в подъезде"], [49.8, "кто-то начинает звать соседей"], [51.6, "{r:по именам.}"], [53.0, "Тихо. Ласково."], [55.0, "Сосед с третьего {r:отвечает.}"], [57.4, "Его квартира {r:гаснет.}"],
-  [60.3, "{y:3:41.} Сообщение от папы."], [62.4, "«Ты дома?"], [63.8, "Я у твоей двери»."], [65.6, "Только сети {r:нет уже час.}"], [68.0, "А папа живёт"], [69.2, "{r:в другом городе.}"],
-  [71.3, "{y:Три} стука в дверь."], [74.0, "И голос:"], [75.5, "{r:«Открой. Это я».}"], [78.5, "Голос за дверью —"], [80.5, "{r:ваш собственный.}"],
-  [84.0, ""],
+  [0.3, "Если в {y:2:47} ночи"], [1.43, "ваш телефон завибрирует,"], [3.09, "а на экране будет всего три строчки:"],
+  [5.7, "{r:молчите.}"], [6.6, "{r:не отвечайте.}"], [7.6, "{r:не открывайте.}"],
+  [9.3, "У вас есть всего {y:несколько минут.}"], [11.6, "От них зависит,"], [12.75, "доживёте ли вы до утра."], [15, "Одна {r:ошибка} — и всё."],
+  [19.3, "Первое, что делают почти все, —"], [21.3, "{y:звонят близким.}"], [23, "Это {r:ошибка номер один.}"], [25.3, "Оно {y:слышит} всё, что громче"], [27.54, "{y:40 децибел.}"],
+  [29.3, "Телефон — на {y:беззвучный.}"], [31.3, "Холодильник — {y:из розетки.}"], [33.3, "Часы — {y:батарейку вон.}"], [35.5, "Через минуту в квартире"], [37.43, "{g:31 децибел.}"],
+  [39.3, "Второе — {y:вода.}"], [40.8, "Наберите ванну,"], [41.9, "но {y:тонкой струйкой:}"], [43.4, "{r:гул в трубах} слышно"], [44.72, "по всему стояку."], [46.2, "{y:120 литров} за девять минут."],
+  [48.3, "В {y:3:30} в подъезде"], [49.56, "кто-то начинает звать соседей"], [51.66, "{r:по именам.}"], [53, "Тихо. Ласково."], [55, "Сосед с третьего {r:отвечает.}"], [57.4, "Его квартира {r:гаснет.}"],
+  [60.3, "{y:3:41.} Сообщение от папы."], [62.4, "«Ты дома?"], [63.8, "Я у твоей двери»."], [65.6, "Только сети {r:нет уже час.}"], [68, "А папа живёт"], [68.82, "{r:в другом городе.}"],
+  [71.3, "{y:Три} стука в дверь."], [74, "И голос:"], [75.5, "{r:«Открой. Это я».}"], [78.5, "Голос за дверью —"], [80.5, "{r:ваш собственный.}"],
+  [84, ""],
 ];
 const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
 function parseCap(str) {
@@ -362,7 +363,7 @@ const UPD = {
     $("#alert").style.transform = `translateX(${vib}px) scale(${0.9 + 0.1 * easeOut(prog(lt, 0, .6))})`;
     $("#alert").style.opacity = prog(lt, 0, .4);
     $("#alert").style.boxShadow = `0 0 ${70 + 40 * Math.sin(lt * 6)}px rgba(255,40,60,.6),inset 0 0 60px rgba(0,0,0,.6)`;
-    show($("#l1"), lt, 5.0); show($("#l2"), lt, 6.0); show($("#l3"), lt, 7.2);
+    show($("#l1"), lt, 5.7); show($("#l2"), lt, 6.6); show($("#l3"), lt, 7.6);
     $("#s1tint").style.opacity = 0.6 + 0.4 * Math.sin(lt * 3);
   },
   s2(lt) {
@@ -545,7 +546,7 @@ function scheduleAudio(ctx, out, from) {
   for (let k = 0; k < 6; k++) EV.push([0.1 + k * 0.4, (t) => osc("square", k % 2 ? 660 : 880, t, .01, .07, .32)]);
   for (let k = 0; k < 4; k++) EV.push([0.05 + k * 0.6, (t) => osc("sawtooth", 58, t, .02, .18, .32)]);
   // badge blips
-  [5.0, 6.0, 7.2, 9.8, 11.6, 13.0, 14.4, 15.0, 19.6, 22.7, 30.0, 32.0, 34.0, 43.2, 45.9, 48.6, 65.6, 69.0, 72.9, 80.4].forEach((t) =>
+  [5.7, 6.6, 7.6, 9.8, 11.6, 13.0, 14.4, 15.0, 19.6, 22.7, 30.0, 32.0, 34.0, 43.2, 45.9, 48.6, 65.6, 69.0, 72.9, 80.4].forEach((t) =>
     EV.push([t, (a) => { osc("sine", 1320, a, .005, .07, .08); osc("sine", 1980, a + .05, .005, .04, .07); }]));
   // glitch on scene changes
   SCENES.slice(1).forEach((s) => EV.push([s.s - .08, (t) => noise(t, .18, "bandpass", 2500, .7, .22)]));
@@ -578,6 +579,8 @@ function scheduleAudio(ctx, out, from) {
 }
 
 let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+const vtrack = $("#vtrack"); let voiceFile = true; // записанная озвучка; если не загрузилась — голос браузера
+vtrack.addEventListener("error", () => { voiceFile = false; });
 function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
 function startAudio() {
   try {
@@ -589,21 +592,22 @@ function startAudio() {
     scheduleAudio(actx, bus, pos);
   } catch (e) { console.warn("audio", e); }
 }
-function stopAudio() { if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+function stopAudio() { vtrack.pause(); if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
 const synth = window.speechSynthesis;
 let ruVoice = null;
 function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
 if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
 function stopVoice() { if (synth) synth.cancel(); }
 function speak(text) {
-  if (!synth || !voiceOn) return;
+  if (!synth || !voiceOn || voiceFile) return;
   const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
   u.rate = 1.08; u.pitch = 0.75; u.volume = 1; synth.speak(u);
 }
 function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => v.t >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
 function play() {
   if (pos >= DUR) pos = 0;
-  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio(); $("#pp").textContent = "❚❚"; loop();
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
+  if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
 }
 function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
 function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, DUR); render(pos); updUI(pos); if (was) play(); }
@@ -612,6 +616,7 @@ function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / 
 function loop() {
   const t = now();
   while (vIdx < VOICE.length && VOICE[vIdx].t <= t) { if (t - VOICE[vIdx].t < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
   render(t); updUI(t);
   if (t >= DUR) { pos = DUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
   raf = requestAnimationFrame(loop);
@@ -633,7 +638,7 @@ if (qs.has("t")) { pos = +qs.get("t"); render(pos); }
 $("#start").onclick = () => { $("#start").style.display = "none"; play(); };
 $("#pp").onclick = () => (playing ? pause() : play());
 $("#seek").oninput = (e) => seek(+e.target.value);
-$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; if (!voiceOn) stopVoice(); };
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; vtrack.muted = !voiceOn; if (!voiceOn) stopVoice(); };
 $("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
 addEventListener("keydown", (e) => {
   if ($("#start").style.display !== "none") return;

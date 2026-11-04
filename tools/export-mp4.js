@@ -11,8 +11,13 @@ const OUT = process.argv[2], FPS = 30;
   const DUR = await p.evaluate(() => window.__DUR);
   const wav = await p.evaluate(() => window.__renderAudio());
   fs.writeFileSync(require('os').tmpdir() + '/tishina-audio.wav', Buffer.from(wav, 'base64'));
+  // озвучка voice.mp3 (если есть) подмешивается к звуковым эффектам; эффекты приглушаются под голосом
+  const voicePath = require('path').resolve(__dirname, '../voice.mp3');
+  const VOICE_ARGS = fs.existsSync(voicePath) ? ['-i', voicePath, '-filter_complex',
+    '[2:a]asplit=2[v][key];[1:a][key]sidechaincompress=threshold=0.05:ratio=4:attack=20:release=300[fx];[fx][v]amix=inputs=2:normalize=0[a]',
+    '-map', '0:v', '-map', '[a]'] : [];
   const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-i', require('os').tmpdir() + '/tishina-audio.wav', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'medium',
+    '-i', require('os').tmpdir() + '/tishina-audio.wav', ...VOICE_ARGS, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
   const N = Math.round(DUR * FPS);
   for (let i = 0; i < N; i++) {
