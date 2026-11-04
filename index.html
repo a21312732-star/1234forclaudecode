@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тишина — Часть 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080c; --ink:#f2f3f7; --dim:rgba(242,243,247,.28);
+  --yellow:#ffd23f; --red:#ff3b47; --green:#3ee08f; --cyan:#4fc3ff; --blue:#3a8dff;
+  --head:"Montserrat","Inter","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:var(--bg);overflow:hidden;transform-origin:50% 50%}
+.scene{position:absolute;inset:0;display:none}
+.abs{position:absolute}
+.mono{font-family:var(--mono)}
+/* night sky + city */
+.sky{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,#141a2b 0%,#07080c 60%)}
+.stars{position:absolute;inset:0}
+.city{position:absolute;left:0;right:0;bottom:0;height:900px}
+/* clock */
+#clock{position:absolute;top:64px;left:50%;transform:translateX(-50%);font:700 30px var(--mono);color:var(--yellow);
+  border:2px solid rgba(255,210,63,.45);padding:8px 22px;border-radius:8px;background:rgba(20,16,4,.6);letter-spacing:2px;z-index:20;white-space:nowrap}
+/* captions */
+#cap{position:absolute;left:60px;right:60px;top:1240px;min-height:260px;text-align:center;z-index:30;
+  font:900 84px/1.12 var(--head);text-transform:uppercase;letter-spacing:-1px;text-shadow:0 6px 30px rgba(0,0,0,.9)}
+#cap .w{display:inline-block;margin:0 .14em;transition:none}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)}
+/* badges */
+.badge{position:absolute;display:flex;align-items:center;gap:14px;padding:12px 20px;border:2px solid;border-radius:10px;
+  font:800 30px var(--mono);white-space:nowrap;backdrop-filter:blur(2px)}
+.badge small{display:block;font:500 16px var(--mono);opacity:.7;letter-spacing:1px;margin-top:2px}
+.badge i{font-style:normal;width:30px;height:30px;border:2px solid;border-radius:6px;display:grid;place-items:center;font-size:18px;flex:none}
+.b-red{color:#fff;border-color:var(--red);background:rgba(60,6,10,.82);box-shadow:0 0 30px rgba(255,59,71,.45)} .b-red i{color:var(--red)}
+.b-cyan{color:#fff;border-color:var(--cyan);background:rgba(4,26,40,.82);box-shadow:0 0 30px rgba(79,195,255,.35)} .b-cyan i{color:var(--cyan)}
+.b-green{color:#fff;border-color:var(--green);background:rgba(4,36,20,.82);box-shadow:0 0 30px rgba(62,224,143,.35)} .b-green i{color:var(--green)}
+.b-yellow{color:#fff;border-color:var(--yellow);background:rgba(40,30,4,.85);box-shadow:0 0 30px rgba(255,210,63,.35)} .b-yellow i{color:var(--yellow)}
+/* S1 alert phone */
+.phone{position:absolute;border-radius:56px;border:6px solid #2a1418}
+#alert{left:280px;top:150px;width:520px;height:860px;background:linear-gradient(180deg,#5a0a12,#2c0408);
+  box-shadow:0 0 90px rgba(255,40,60,.55),inset 0 0 60px rgba(0,0,0,.6);text-align:center;padding:90px 36px 0}
+#alert .tri{width:150px;margin:0 auto 24px;display:block}
+#alert h2{font:900 50px/1.05 var(--head);text-transform:uppercase}
+#alert .lvl{font:700 17px var(--mono);color:#ff8a92;letter-spacing:3px;margin:14px 0 22px;padding-bottom:18px;border-bottom:2px solid rgba(255,255,255,.12)}
+#alert .ln{font:900 27px/1.7 var(--head);text-transform:uppercase}
+#alert .ln.last{color:var(--red);text-shadow:0 0 18px rgba(255,59,71,.8)}
+#alert .stat{position:absolute;top:26px;left:44px;right:44px;display:flex;justify-content:space-between;font:700 18px var(--mono);color:#ff9aa2}
+/* S3 gauge */
+#dbnum{position:absolute;left:0;right:0;top:640px;text-align:center;font:800 150px var(--mono);letter-spacing:-4px}
+#dbnum span{font-size:56px;margin-left:8px;opacity:.7}
+#dblabel{position:absolute;left:0;right:0;top:830px;text-align:center;font:800 34px var(--mono);letter-spacing:4px}
+/* S4 checklist */
+.check{position:absolute;left:150px;width:780px;border:2px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(14,17,26,.92);padding:28px 34px}
+.check h4{font:700 20px var(--mono);color:var(--yellow);letter-spacing:3px;margin-bottom:18px}
+.item{display:flex;align-items:center;gap:22px;font:800 38px/1.9 var(--head);text-transform:uppercase}
+.box{width:42px;height:42px;border:3px solid rgba(255,255,255,.35);border-radius:8px;display:grid;place-items:center;flex:none}
+.item.on .box{background:var(--green);border-color:var(--green)}
+.item.on .box::after{content:"";width:12px;height:22px;border:solid #06140c;border-width:0 5px 5px 0;transform:rotate(45deg) translate(-2px,-3px)}
+.item:not(.on){color:rgba(255,255,255,.4)}
+.meterbar{position:absolute;left:150px;width:780px;height:56px;border-radius:12px;background:#11141d;border:2px solid rgba(255,255,255,.14);overflow:hidden}
+.meterbar .fill{position:absolute;left:0;top:0;bottom:0}
+.meterbar .thr{position:absolute;top:-4px;bottom:-4px;width:4px;background:var(--red)}
+.meterbar .txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font:800 26px var(--mono)}
+/* S5 tank */
+#tank{left:250px;top:250px;width:580px;height:280px;border:6px solid #e8ecf5;border-radius:44px;overflow:hidden;background:#0c1120}
+#tank .water{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#5fd0ff,#1f7cff);box-shadow:0 0 40px rgba(79,195,255,.6)}
+#tanklbl{left:250px;top:170px;font:800 22px var(--mono);color:#9fb4d6;letter-spacing:2px}
+#tanklbl b{display:block;font-size:56px;color:var(--cyan);letter-spacing:-1px}
+/* S7 chat */
+#chat{left:250px;top:150px;width:580px;height:900px;background:#0f1320;border-color:#262c3d;padding:30px 30px}
+.chatbar{display:flex;justify-content:space-between;font:700 20px var(--mono);color:#aab3c8;padding:0 14px}
+.chathead{display:flex;align-items:center;gap:16px;margin:26px 0 30px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ava{width:62px;height:62px;border-radius:50%;background:#2b3a66;display:grid;place-items:center;font:800 28px var(--head)}
+.chathead b{font:800 32px var(--head);display:block}
+.chathead span{font:500 18px var(--mono);color:#7d879e}
+.msg{background:#252b3d;border-radius:22px 22px 22px 6px;padding:18px 24px;font:600 30px/1.3 var(--head);margin-bottom:16px;max-width:430px;position:relative}
+.msg small{display:block;text-align:right;font:500 15px var(--mono);color:#7d879e;margin-top:4px}
+.typing{display:flex;gap:9px;background:#252b3d;border-radius:22px;padding:22px 24px;width:110px}
+.typing u{width:13px;height:13px;border-radius:50%;background:#9aa3ba;display:block}
+/* S8 door */
+#door{left:290px;top:180px;width:500px;height:920px;border-radius:10px;
+  background:linear-gradient(90deg,#2b1c14,#3d2a1e 50%,#2b1c14);box-shadow:inset 0 0 80px rgba(0,0,0,.7),0 0 0 14px #121014}
+#door .pan{position:absolute;left:50px;right:50px;border:3px solid rgba(0,0,0,.35);border-radius:6px;box-shadow:inset 0 0 20px rgba(0,0,0,.4)}
+#peep{position:absolute;left:226px;top:200px;width:48px;height:48px;border-radius:50%;background:radial-gradient(#666,#333);border:5px solid #888}
+#handle{position:absolute;left:330px;top:500px;width:110px;height:26px;border-radius:13px;background:linear-gradient(#ddd,#999)}
+#handle::before{content:"";position:absolute;right:-6px;top:-30px;width:38px;height:86px;border-radius:10px;background:linear-gradient(90deg,#aaa,#ddd);z-index:-1}
+#doorlight{position:absolute;left:290px;top:1100px;width:500px;height:10px;border-radius:5px}
+#wave{position:absolute;left:240px;top:1135px;width:600px;height:80px;display:flex;align-items:center;justify-content:center;gap:8px}
+#wave u{display:block;width:10px;border-radius:5px;background:var(--red)}
+/* end */
+#end{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end h1{font:900 190px/0.95 var(--head);letter-spacing:-6px}
+#end h3{font:900 76px var(--head);color:var(--red);letter-spacing:2px;margin-top:8px}
+#end p{font:600 38px var(--head);margin-top:70px;color:#d6d9e2}
+#end em{font:700 22px var(--mono);font-style:normal;color:var(--red);letter-spacing:4px;margin-top:20px}
+/* fx */
+#scan{position:absolute;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 2px,transparent 2px 4px)}
+#vign{position:absolute;inset:0;pointer-events:none;z-index:39;background:radial-gradient(ellipse at 50% 45%,transparent 50%,rgba(0,0,0,.75) 100%)}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--red);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#fff;border:3px solid var(--red);padding:18px 40px;border-radius:14px;box-shadow:0 0 40px rgba(255,59,71,.5)}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <div class="sky"></div><svg class="stars" id="stars" viewBox="0 0 1080 1920"></svg>
+
+  <!-- S1 -->
+  <div class="scene" id="s1">
+    <div class="abs" id="s1tint" style="inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(140,10,25,.55),transparent 70%)"></div>
+    <svg class="city" id="city1" viewBox="0 0 1080 900" preserveAspectRatio="none"></svg>
+    <div class="phone" id="alert">
+      <div class="stat"><span>02:47</span><span>SOS</span></div>
+      <svg class="tri" viewBox="0 0 100 90"><path d="M50 4 L96 86 H4 Z" fill="#ff2d3d" stroke="#ff2d3d" stroke-width="6" stroke-linejoin="round"/><rect x="45" y="30" width="10" height="32" rx="3" fill="#2c0408"/><circle cx="50" cy="73" r="6" fill="#2c0408"/></svg>
+      <h2>Экстренное<br>оповещение</h2>
+      <div class="lvl">УРОВЕНЬ УГРОЗЫ: КРАСНЫЙ</div>
+      <div class="ln" id="l1">Соблюдайте тишину</div>
+      <div class="ln" id="l2">Не отвечайте на голоса</div>
+      <div class="ln last" id="l3">Не открывайте дверь</div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="scene" id="s2">
+    <svg class="abs" id="bld" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+    <div class="badge b-cyan" id="t1" style="left:150px;top:210px"><i>▣</i><div>5 ЭТАЖ<small>ПОДЪЕЗД 3 · ПАНЕЛЬКА</small></div></div>
+    <div class="badge b-red" id="t2" style="left:640px;top:330px"><i>!</i><div>ЗАРЯД 23%<small>ТЕЛЕФОН</small></div></div>
+    <div class="badge b-cyan" id="t3" style="left:90px;top:780px"><i>≈</i><div>ВОДА: ПОКА ЕСТЬ<small>ДАВЛЕНИЕ ПАДАЕТ</small></div></div>
+    <div class="badge b-green" id="t4" style="left:640px;top:880px"><i>⌂</i><div>ДВЕРЬ<small>1 ЗАМОК · ЦЕПОЧКА</small></div></div>
+    <div class="badge b-red" id="t5" style="left:290px;top:1100px"><i>!</i><div>1 ОШИБКА = КОНЕЦ</div></div>
+  </div>
+
+  <!-- S3 -->
+  <div class="scene" id="s3">
+    <svg class="abs" id="gauge" style="left:140px;top:220px" width="800" height="440" viewBox="0 0 800 440"></svg>
+    <div id="dbnum"></div><div id="dblabel"></div>
+    <div class="badge b-yellow" id="thr" style="left:380px;top:160px"><i>◎</i><div>ПОРОГ: 40 дБ</div></div>
+    <div class="badge b-red" id="err1" style="left:250px;top:960px"><i>!</i><div>ОШИБКА №1: ЗВОНОК<small>ЕГО СЛЫШНО ЧЕРЕЗ 3 ЭТАЖА</small></div></div>
+  </div>
+
+  <!-- S4 -->
+  <div class="scene" id="s4">
+    <div class="check" style="top:230px">
+      <h4>ЧЕК-ЛИСТ · ПЕРВЫЕ 5 МИНУТ</h4>
+      <div class="item" id="c1"><div class="box"></div>Телефон — беззвучный</div>
+      <div class="item" id="c2"><div class="box"></div>Холодильник — из сети</div>
+      <div class="item" id="c3"><div class="box"></div>Часы — без батарейки</div>
+      <div class="item" id="c4"><div class="box"></div>Ванна · 120 л воды</div>
+    </div>
+    <div class="abs mono" style="left:150px;top:820px;font:700 20px var(--mono);color:#9aa3ba;letter-spacing:3px">ШУМ В КВАРТИРЕ</div>
+    <div class="meterbar" style="top:860px"><div class="fill" id="mfill"></div><div class="thr" style="left:40%"></div>
+      <div class="txt"><span id="mval">46 дБ</span><span style="color:var(--red);font-size:20px">ПОРОГ 40</span></div></div>
+  </div>
+
+  <!-- S5 -->
+  <div class="scene" id="s5">
+    <div class="abs" id="tanklbl">ЗАПАС ВОДЫ<b id="lit">0 Л</b></div>
+    <div class="abs" id="tank"><div class="water" id="water"></div></div>
+    <svg class="abs" id="riser" style="left:240px;top:580px" width="600" height="560" viewBox="0 0 600 560"></svg>
+    <div class="badge b-red" id="w1" style="left:270px;top:1110px"><i>!</i><div>ГУЛ ПО СТОЯКУ: 9 ЭТАЖЕЙ</div></div>
+    <div class="badge b-green" id="w2" style="left:290px;top:1110px"><i>✓</i><div>ТОНКАЯ СТРУЯ: 22 дБ</div></div>
+  </div>
+
+  <!-- S6 -->
+  <div class="scene" id="s6">
+    <svg class="abs" id="stairs" style="left:240px;top:170px" width="600" height="980" viewBox="0 0 600 980"></svg>
+    <div class="badge b-red" id="hunt" style="left:600px;top:150px"><i>!</i><div>В ПОДЪЕЗДЕ<small>ЗОВЁТ ПО ИМЕНАМ</small></div></div>
+  </div>
+
+  <!-- S7 -->
+  <div class="scene" id="s7">
+    <div class="phone" id="chat">
+      <div class="chatbar"><span id="ctime">03:41</span><span style="color:var(--red)">НЕТ СЕТИ</span></div>
+      <div class="chathead"><div class="ava">П</div><div><b>Папа</b><span id="cstat">был в сети в 02:31</span></div></div>
+      <div class="msg" id="m1">Ты дома?<small>03:41</small></div>
+      <div class="msg" id="m2">Я у твоей двери. Открой.<small>03:41</small></div>
+      <div class="typing" id="typ"><u></u><u></u><u></u></div>
+    </div>
+    <div class="badge b-red" id="nonet" style="left:170px;top:1080px"><i>!</i><div>СЕТИ НЕТ: 58 МИН<small>СООБЩЕНИЕ ВСЁ РАВНО ПРИШЛО</small></div></div>
+    <div class="badge b-yellow" id="dist" style="left:250px;top:1080px"><i>⌖</i><div>ПАПА: 600 КМ ОТСЮДА</div></div>
+  </div>
+
+  <!-- S8 -->
+  <div class="scene" id="s8">
+    <div class="abs" id="door">
+      <div class="pan" style="top:70px;height:330px"></div><div class="pan" style="top:460px;height:390px"></div>
+      <div id="peep"></div>
+      <svg class="abs" style="left:300px;top:300px" width="160" height="120" viewBox="0 0 160 120"><path d="M10 20 Q80 90 150 20" fill="none" stroke="#c9c9c9" stroke-width="7" stroke-dasharray="10 6"/><circle cx="150" cy="20" r="10" fill="#bbb"/></svg>
+      <div id="handle"></div>
+    </div>
+    <div id="doorlight"></div>
+    <div id="wave"></div>
+    <div class="badge b-red" id="knock" style="left:350px;top:110px"><i>!</i><div>СТУК: 3<small>ВХОДНАЯ ДВЕРЬ</small></div></div>
+    <div class="badge b-red" id="match" style="left:200px;top:110px"><i>!</i><div>ГОЛОС: СОВПАДЕНИЕ 100%<small>ЭТО ВАШ ГОЛОС</small></div></div>
+  </div>
+
+  <!-- S9 -->
+  <div class="scene" id="s9"><div class="abs" id="end" style="inset:0">
+    <h1>ЧАСТЬ 2</h1><h3>НЕ ОТВЕЧАЙ</h3><p>А ты бы ответил? Пиши в комментариях</p><em>ПОДПИШИСЬ, ЧТОБЫ НЕ ПРОПУСТИТЬ</em>
+  </div></div>
+
+  <div id="clock"></div>
+  <div id="cap"></div>
+  <div id="vign"></div><div id="scan"></div><div id="flash"></div>
+</div></div>
+
+<div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
+<div id="ui">
+  <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="92" step="0.01" value="0">
+  <span id="time">0:00 / 1:32</span><button id="vo">🔊 Голос: вкл</button><button id="fs">⛶</button>
+</div>
+
+<script>
+"use strict";
+const DUR = 92;
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const lerp = (a, b, x) => a + (b - a) * x;
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+/* ---------- timeline data ---------- */
+const SCENES = [
+  { id: "s1", s: 0, e: 9 }, { id: "s2", s: 9, e: 19 }, { id: "s3", s: 19, e: 29 },
+  { id: "s4", s: 29, e: 39 }, { id: "s5", s: 39, e: 48 }, { id: "s6", s: 48, e: 60 },
+  { id: "s7", s: 60, e: 71 }, { id: "s8", s: 71, e: 84 }, { id: "s9", s: 84, e: 92 },
+];
+const CLOCK = [[0, null], [9, "02:48"], [19, "02:49"], [29, "02:50"], [39, "02:55"], [48, "03:30"], [60, "03:41"], [71, "03:52"], [84, null]];
+const CAPS = [
+  [0.3, "Если в {y:2:47} ночи"], [1.6, "ваш телефон завибрирует,"], [3.0, "а на экране будет всего три строчки:"],
+  [5.0, "{r:молчите.}"], [6.0, "{r:не отвечайте.}"], [7.2, "{r:не открывайте.}"],
+  [9.3, "У вас есть всего {y:несколько минут.}"], [11.6, "От них зависит,"], [12.9, "доживёте ли вы до утра."], [15.0, "Одна {r:ошибка} — и всё."],
+  [19.3, "Первое, что делают почти все, —"], [21.3, "{y:звонят близким.}"], [23.0, "Это {r:ошибка номер один.}"], [25.3, "Оно {y:слышит} всё, что громче"], [27.2, "{y:40 децибел.}"],
+  [29.3, "Телефон — на {y:беззвучный.}"], [31.3, "Холодильник — {y:из розетки.}"], [33.3, "Часы — {y:батарейку вон.}"], [35.5, "Через минуту в квартире"], [37.0, "{g:31 децибел.}"],
+  [39.3, "Второе — {y:вода.}"], [40.8, "Наберите ванну,"], [42.0, "но {y:тонкой струйкой:}"], [43.4, "{r:гул в трубах} слышно"], [44.8, "по всему стояку."], [46.2, "{y:120 литров} за девять минут."],
+  [48.3, "В {y:3:30} в подъезде"], [49.8, "кто-то начинает звать соседей"], [51.6, "{r:по именам.}"], [53.0, "Тихо. Ласково."], [55.0, "Сосед с третьего {r:отвечает.}"], [57.4, "Его квартира {r:гаснет.}"],
+  [60.3, "{y:3:41.} Сообщение от папы."], [62.4, "«Ты дома?"], [63.8, "Я у твоей двери»."], [65.6, "Только сети {r:нет уже час.}"], [68.0, "А папа живёт"], [69.2, "{r:в другом городе.}"],
+  [71.3, "{y:Три} стука в дверь."], [74.0, "И голос:"], [75.5, "{r:«Открой. Это я».}"], [78.5, "Голос за дверью —"], [80.5, "{r:ваш собственный.}"],
+  [84.0, ""],
+];
+const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
+function parseCap(str) {
+  const out = []; const re = /\{(\w):([^}]*)\}|([^{]+)/g; let m;
+  while ((m = re.exec(str))) {
+    const cls = m[1] || "", txt = m[2] !== undefined ? m[2] : m[3];
+    txt.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, cls }));
+  }
+  return out;
+}
+/* voice lines: group caption chunks into sentences */
+const VOICE = [];
+(() => {
+  let cur = null;
+  CAPS.forEach(([t, s]) => {
+    const plain = s.replace(/\{\w:([^}]*)\}/g, "$1").trim();
+    if (!plain) return;
+    if (!cur) cur = { t, text: "" };
+    cur.text += (cur.text ? " " : "") + plain;
+    if (/[.!?:»—]$/.test(plain)) { VOICE.push(cur); cur = null; }
+  });
+  if (cur) VOICE.push(cur);
+})();
+
+/* ---------- static builders ---------- */
+function buildStars() {
+  let s = ""; for (let i = 0; i < 90; i++) s += `<circle cx="${rnd() * 1080}" cy="${rnd() * 1100}" r="${rnd() * 1.8 + .4}" fill="#fff" opacity="${rnd() * .5 + .1}"/>`;
+  $("#stars").innerHTML = s;
+}
+function buildCity(el, lit) {
+  let s = "", x = 0;
+  while (x < 1080) {
+    const w = 60 + rnd() * 110, h = 260 + rnd() * 520, y = 900 - h;
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#0b0d14"/>`;
+    for (let wy = y + 20; wy < 880; wy += 26) for (let wx = x + 10; wx < x + w - 12; wx += 20)
+      if (rnd() < 0.22) s += `<rect class="cw" x="${wx}" y="${wy}" width="9" height="13" fill="${lit}" opacity="${rnd() * .6 + .3}"/>`;
+    x += w + 4;
+  }
+  el.innerHTML = s;
+}
+const BW = { x: 260, y: 300, cols: 8, rows: 9, cw: 70, ch: 92 };
+const MY = { c: 3, r: 4 }; // 5th floor from bottom of 9
+function buildBuilding() {
+  let s = `<rect x="${BW.x - 30}" y="${BW.y - 40}" width="${BW.cols * BW.cw + 60}" height="${BW.rows * BW.ch + 80}" fill="#10131c" stroke="#1d2233" stroke-width="3"/>`;
+  for (let r = 0; r < BW.rows; r++) for (let c = 0; c < BW.cols; c++) {
+    const x = BW.x + c * BW.cw + 12, y = BW.y + r * BW.ch + 14, me = r === MY.r && c === MY.c;
+    const lit = !me && rnd() < 0.3;
+    s += `<rect class="${me ? "me" : "bw"}" data-lit="${lit ? 1 : 0}" x="${x}" y="${y}" width="44" height="58" fill="${me ? "#ffe066" : lit ? "#e0a948" : "#1a1f2e"}"/>`;
+  }
+  const mx = BW.x + MY.c * BW.cw + 34, my = BW.y + MY.r * BW.ch + 43;
+  s += `<rect id="mebox" x="${mx - 38}" y="${my - 45}" width="76" height="90" fill="none" stroke="#ffd23f" stroke-width="4"/>`;
+  [[200, 245, "#4fc3ff"], [780, 365, "#ff3b47"], [250, 815, "#4fc3ff"], [790, 915, "#3ee08f"]].forEach(([x, y, c], i) =>
+    s += `<line id="ln${i + 1}" x1="${mx}" y1="${my}" x2="${x}" y2="${y}" stroke="${c}" stroke-width="3" stroke-dasharray="8 7"/>`);
+  $("#bld").innerHTML = s;
+}
+function buildGauge() {
+  const cx = 400, cy = 400, R = 330; let s = "";
+  const pt = (db, r) => { const a = Math.PI - (db / 100) * Math.PI; return [cx + Math.cos(a) * r, cy - Math.sin(a) * r]; };
+  const arc = (a, b, col, w) => { const [x1, y1] = pt(a, R), [x2, y2] = pt(b, R); return `<path d="M${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="butt"/>`; };
+  s += arc(0, 40, "#3ee08f", 26) + arc(40, 100, "#ff3b47", 26);
+  for (let d = 0; d <= 100; d += 10) { const [a1, b1] = pt(d, R - 30), [a2, b2] = pt(d, R - 60); const [lx, ly] = pt(d, R - 92);
+    s += `<line x1="${a1}" y1="${b1}" x2="${a2}" y2="${b2}" stroke="#fff" stroke-width="4" opacity=".6"/><text x="${lx}" y="${ly + 8}" fill="#9aa3ba" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="22" font-weight="700" text-anchor="middle">${d}</text>`; }
+  s += `<line id="needle" x1="${cx}" y1="${cy}" x2="${cx - R + 40}" y2="${cy}" stroke="#fff" stroke-width="9" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="20" fill="#fff"/>`;
+  $("#gauge").innerHTML = s;
+}
+function buildRiser() {
+  let s = `<rect x="285" y="0" width="30" height="540" fill="#2a3145"/>`;
+  for (let f = 0; f < 9; f++) { const y = 20 + f * 60; const me = f === 4;
+    s += `<line x1="40" y1="${y + 40}" x2="560" y2="${y + 40}" stroke="#20263a" stroke-width="3"/><text x="20" y="${y + 30}" fill="${me ? "#ffd23f" : "#5d6782"}" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="22" font-weight="700">${9 - f}</text>`;
+    s += `<rect class="rf" data-f="${f}" x="320" y="${y + 6}" width="${me ? 120 : 90}" height="28" rx="6" fill="${me ? "#ffd23f" : "#1a2133"}"/>`;
+  }
+  s += `<g id="rings"></g>`;
+  $("#riser").innerHTML = s;
+}
+const FLOOR_Y = (f) => 900 - (f - 1) * 100; // floors 1..9
+const FLOOR_X = (f) => (f % 2 ? 80 : 520);
+function buildStairs() {
+  let s = "", pts = [];
+  for (let f = 1; f <= 9; f++) {
+    const y = FLOOR_Y(f);
+    s += `<line x1="20" y1="${y}" x2="580" y2="${y}" stroke="#1e2438" stroke-width="2"/><text x="0" y="${y - 10}" fill="#5d6782" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="20" font-weight="700">${f}</text>`;
+    pts.push(`${FLOOR_X(f)},${y}`);
+  }
+  s += `<polyline points="${pts.join(" ")}" fill="none" stroke="#5a64d8" stroke-width="4" opacity=".75"/>`;
+  s += `<circle id="nb" cx="${FLOOR_X(3)}" cy="${FLOOR_Y(3)}" r="16" fill="#e8ecf5"/>`;
+  s += `<circle id="me6" cx="${FLOOR_X(5)}" cy="${FLOOR_Y(5)}" r="18" fill="#3ee08f"/>`;
+  s += `<g id="meTag"><rect x="${FLOOR_X(5) + 30}" y="${FLOOR_Y(5) - 70}" width="250" height="50" rx="8" fill="rgba(4,36,20,.9)" stroke="#3ee08f" stroke-width="2"/><text x="${FLOOR_X(5) + 155}" y="${FLOOR_Y(5) - 37}" fill="#fff" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="22" font-weight="800" text-anchor="middle">ВЫ · МОЛЧИТЕ</text></g>`;
+  s += `<g id="nbTag" opacity="0"><rect x="${FLOOR_X(3) + 30}" y="${FLOOR_Y(3) - 70}" width="200" height="50" rx="8" fill="rgba(60,6,10,.9)" stroke="#ff3b47" stroke-width="2"/><text x="${FLOOR_X(3) + 130}" y="${FLOOR_Y(3) - 37}" fill="#fff" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="22" font-weight="800" text-anchor="middle">«ДА? КТО ТАМ?»</text></g>`;
+  s += `<circle id="hunter" r="18" fill="#ff3b47"/><circle id="hunterGlow" r="40" fill="#ff3b47" opacity=".25"/>`;
+  s += `<g id="bub1" opacity="0"><rect width="190" height="54" rx="27" fill="#fff"/><text x="95" y="36" fill="#111" font-family="Montserrat,Inter" font-size="26" font-weight="800" text-anchor="middle">«Даша?»</text></g>`;
+  s += `<g id="bub2" opacity="0"><rect width="330" height="54" rx="27" fill="#fff"/><text x="165" y="36" fill="#111" font-family="Montserrat,Inter" font-size="26" font-weight="800" text-anchor="middle">«Сергей Петрович?»</text></g>`;
+  $("#stairs").innerHTML = s;
+}
+function buildWave() { let s = ""; for (let i = 0; i < 34; i++) s += "<u></u>"; $("#wave").innerHTML = s; }
+
+/* ---------- per-frame updates ---------- */
+const show = (el, t, at, dur = 0.35, dy = 20) => {
+  const p = easeOut(prog(t, at, at + dur));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${0.96 + 0.04 * p})`;
+};
+const hide = (el, t, at, dur = 0.3) => { if (t > at) el.style.opacity = Math.min(+el.style.opacity, 1 - prog(t, at, at + dur)); };
+
+const UPD = {
+  s1(lt, t) {
+    const vib = lt < 2.6 ? Math.sin(lt * 90) * 9 * (Math.sin(lt * 7) > 0 ? 1 : 0.15) : 0;
+    $("#alert").style.transform = `translateX(${vib}px) scale(${0.9 + 0.1 * easeOut(prog(lt, 0, .6))})`;
+    $("#alert").style.opacity = prog(lt, 0, .4);
+    $("#alert").style.boxShadow = `0 0 ${70 + 40 * Math.sin(lt * 6)}px rgba(255,40,60,.6),inset 0 0 60px rgba(0,0,0,.6)`;
+    show($("#l1"), lt, 5.0); show($("#l2"), lt, 6.0); show($("#l3"), lt, 7.2);
+    $("#s1tint").style.opacity = 0.6 + 0.4 * Math.sin(lt * 3);
+  },
+  s2(lt) {
+    const z = 1.06 - 0.06 * easeOut(prog(lt, 0, 3));
+    $("#bld").style.transform = `scale(${z})`;
+    $("#mebox").setAttribute("opacity", 0.5 + 0.5 * Math.sin(lt * 6));
+    document.querySelectorAll("#bld .bw").forEach((w, i) => {
+      if (w.dataset.lit === "1") w.setAttribute("opacity", lt > 8 + hash(i) * 1.5 ? 0.08 : 0.9);
+    });
+    [[1, .8], [2, 2.6], [3, 4.0], [4, 5.4]].forEach(([n, a]) => {
+      show($("#t" + n), lt, a); $("#ln" + n).setAttribute("opacity", prog(lt, a, a + .3));
+    });
+    show($("#t5"), lt, 6.0);
+    $("#t5").style.transform += ` scale(${1 + 0.04 * Math.max(0, Math.sin(lt * 8)) * (lt > 6 ? 1 : 0)})`;
+  },
+  s3(lt) {
+    let db;
+    if (lt < 2.0) db = 30 + Math.sin(lt * 9) * 2 + hash(Math.floor(lt * 12)) * 2;
+    else if (lt < 7.5) db = lerp(31, 72, easeOut(prog(lt, 2.0, 2.4))) + hash(Math.floor(lt * 20)) * 4;
+    else db = lerp(74, 40, easeOut(prog(lt, 7.5, 9)));
+    const a = 180 - db * 1.8;
+    $("#needle").setAttribute("transform", `rotate(${a - 180} 400 400)`);
+    const red = db > 40;
+    $("#dbnum").innerHTML = `${Math.round(db)}<span>дБ</span>`;
+    $("#dbnum").style.color = red ? "var(--red)" : "var(--green)";
+    $("#dbnum").style.textShadow = `0 0 40px ${red ? "rgba(255,59,71,.6)" : "rgba(62,224,143,.5)"}`;
+    $("#dblabel").textContent = lt < 2.0 ? "ШЁПОТ" : lt < 7.5 ? "📞 ЗВОНОК ТЕЛЕФОНА" : "ПОРОГ";
+    $("#dblabel").style.color = red ? "var(--red)" : "var(--green)";
+    show($("#thr"), lt, 0.6); show($("#err1"), lt, 3.7);
+    $("#gauge").style.transform = lt > 2 && lt < 4 ? `translate(${(hash(lt * 50) - .5) * 14}px,${(hash(lt * 70) - .5) * 10}px)` : "";
+  },
+  s4(lt) {
+    const marks = [1.0, 3.0, 5.0];
+    marks.forEach((m, i) => $("#c" + (i + 1)).classList.toggle("on", lt > m));
+    $("#c4").classList.remove("on");
+    const steps = [[0, 46], [1.0, 42], [3.0, 38], [5.0, 34], [7.6, 31]];
+    let db = 46; for (let i = 1; i < steps.length; i++) db = lerp(db, steps[i][1], easeOut(prog(lt, steps[i][0], steps[i][0] + .8)));
+    db += (hash(Math.floor(lt * 10)) - .5) * 1.2;
+    $("#mfill").style.width = db + "%";
+    $("#mfill").style.background = db > 40 ? "linear-gradient(90deg,#7a1820,#ff3b47)" : "linear-gradient(90deg,#0f5a35,#3ee08f)";
+    $("#mval").textContent = Math.round(db) + " дБ";
+  },
+  s5(lt) {
+    const L = Math.round(120 * easeOut(prog(lt, 0.6, 8.2)));
+    $("#water").style.height = (L / 120 * 100) + "%";
+    $("#lit").textContent = L + " Л";
+    const loud = lt > 4.1 && lt < 6.6;
+    let r = "";
+    if (loud) for (let k = 0; k < 3; k++) { const p = ((lt * 0.9 + k / 3) % 1);
+      r += `<ellipse cx="300" cy="${20 + 4 * 60 + 20}" rx="${30 + p * 260}" ry="${20 + p * 280}" fill="none" stroke="#ff3b47" stroke-width="4" opacity="${1 - p}"/>`; }
+    $("#rings").innerHTML = r;
+    document.querySelectorAll("#riser .rf").forEach((el) => { if (el.dataset.f !== "4") el.setAttribute("fill", loud ? "#5a1720" : "#1a2133"); });
+    show($("#w1"), lt, 4.2); hide($("#w1"), lt, 6.6); show($("#w2"), lt, 6.9);
+    if (lt < 4.2) $("#w1").style.opacity = 0;
+  },
+  s6(lt) {
+    // hunter climbs from floor 1 to 4 along zigzag
+    const pos = 1 + 3 * prog(lt, 0.5, 11.5); const f = Math.floor(pos), fr = pos - f;
+    const x = lerp(FLOOR_X(f), FLOOR_X(Math.min(9, f + 1)), fr), y = lerp(FLOOR_Y(f), FLOOR_Y(Math.min(9, f + 1)), fr);
+    ["#hunter", "#hunterGlow"].forEach((s) => { $(s).setAttribute("cx", x); $(s).setAttribute("cy", y); });
+    $("#hunterGlow").setAttribute("r", 34 + 10 * Math.sin(lt * 5));
+    const b1 = $("#bub1"), b2 = $("#bub2");
+    b1.setAttribute("opacity", prog(lt, 2.6, 2.9) * (1 - prog(lt, 4.6, 4.9))); b1.setAttribute("transform", `translate(${x + 30},${y - 90})`);
+    b2.setAttribute("opacity", prog(lt, 4.9, 5.2) * (1 - prog(lt, 6.8, 7.1))); b2.setAttribute("transform", `translate(${Math.min(x + 30, 260)},${y - 90})`);
+    $("#nbTag").setAttribute("opacity", prog(lt, 7.0, 7.3) * (1 - prog(lt, 9.4, 9.8)));
+    const gone = prog(lt, 9.4, 9.9);
+    $("#nb").setAttribute("fill", gone > 0 ? "#ff3b47" : "#e8ecf5"); $("#nb").setAttribute("opacity", 1 - gone);
+    $("#nb").setAttribute("r", 16 + gone * 30);
+    show($("#hunt"), lt, 0.6);
+  },
+  s7(lt) {
+    $("#typ").style.display = (lt > 0.9 && lt < 2.4) || (lt > 2.9 && lt < 3.8) ? "flex" : "none";
+    $("#typ").querySelectorAll("u").forEach((u, i) => u.style.opacity = 0.35 + 0.65 * Math.max(0, Math.sin(lt * 8 - i)));
+    const m1 = $("#m1"), m2 = $("#m2");
+    m1.style.display = lt > 2.4 ? "block" : "none"; show(m1, lt, 2.4);
+    m2.style.display = lt > 3.8 ? "block" : "none"; show(m2, lt, 3.8);
+    $("#chat").style.display = "block";
+    $("#cstat").textContent = lt > 0.9 && lt < 3.8 ? "печатает…" : "был в сети в 02:31";
+    $("#cstat").style.color = lt > 0.9 && lt < 3.8 ? "var(--cyan)" : "";
+    show($("#nonet"), lt, 5.6); hide($("#nonet"), lt, 8.6); show($("#dist"), lt, 9.0);
+    if (lt < 5.6) $("#nonet").style.opacity = 0;
+  },
+  s8(lt) {
+    const knocks = [0.4, 0.9, 1.4]; let sh = 0;
+    knocks.forEach((k) => { if (lt > k) sh += Math.exp(-(lt - k) * 14) * Math.sin((lt - k) * 80) * 14; });
+    $("#door").style.transform = `translateX(${sh}px)`;
+    const red = prog(lt, 4.3, 4.8);
+    $("#peep").style.background = red > 0 ? `radial-gradient(#ff6a72,#b00c18)` : "radial-gradient(#666,#333)";
+    $("#peep").style.boxShadow = `0 0 ${60 * red}px ${20 * red}px rgba(255,40,60,${.7 * red})`;
+    // light strip under the door, with two shadows (feet)
+    const flick = 0.75 + 0.25 * hash(Math.floor(lt * 14));
+    const feet = prog(lt, 2.6, 3.2);
+    $("#doorlight").style.background = `linear-gradient(90deg,transparent 0%,rgba(255,200,120,${flick}) 10%,rgba(255,200,120,${flick}) ${36 - feet * 2}%,rgba(0,0,0,${feet}) 38%,rgba(0,0,0,${feet}) 46%,rgba(255,200,120,${flick}) ${48 + feet * 2}%,rgba(255,200,120,${flick}) 54%,rgba(0,0,0,${feet}) 56%,rgba(0,0,0,${feet}) 64%,rgba(255,200,120,${flick}) 66%,rgba(255,200,120,${flick}) 90%,transparent 100%)`;
+    $("#doorlight").style.boxShadow = `0 0 40px rgba(255,190,110,${.5 * flick})`;
+    const talking = (lt > 4.3 && lt < 7.2) || (lt > 9.4 && lt < 11);
+    $("#wave").querySelectorAll("u").forEach((u, i) => {
+      const h = talking ? 8 + 60 * Math.abs(Math.sin(lt * 11 + i * .7)) * hash(i + Math.floor(lt * 16)) : 6;
+      u.style.height = h + "px";
+    });
+    show($("#knock"), lt, 1.5); hide($("#knock"), lt, 8.8); show($("#match"), lt, 9.4);
+    if (lt < 1.5) $("#knock").style.opacity = 0;
+    if (lt < 9.4) $("#match").style.opacity = 0;
+  },
+  s9(lt) {
+    const p = easeOut(prog(lt, 0.3, 0.9));
+    $("#end h1").style.transform = `scale(${1.4 - 0.4 * p})`; $("#end h1").style.opacity = p;
+    show($("#end h3"), lt, 1.0); show($("#end p"), lt, 2.0); show($("#end em"), lt, 2.6);
+  },
+};
+
+let lastCap = -1;
+function render(t) {
+  t = clamp(t, 0, DUR);
+  let gl = 0;
+  SCENES.forEach((sc, i) => {
+    const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
+    const el = document.getElementById(sc.id);
+    el.style.display = on ? "block" : "none";
+    if (on) {
+      const lt = t - sc.s;
+      el.style.opacity = Math.min(prog(lt, 0, .3), 1 - prog(t, sc.e - .25, sc.e));
+      if (i === SCENES.length - 1) el.style.opacity = prog(lt, 0, .3);
+      UPD[sc.id](lt, t);
+    }
+    if (i > 0) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.22);
+  });
+  // glitch transition
+  const st = $("#stage");
+  if (gl > 0) {
+    const dx = (hash(t * 97) - .5) * 30 * gl;
+    st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,0,60,${.7 * gl})) drop-shadow(${-dx}px 0 0 rgba(0,220,255,${.7 * gl})) contrast(${1 + .4 * gl})`;
+  } else st.style.filter = "";
+  $("#flash").style.opacity = t > 71.4 && t < 72.0 ? 0.12 * (1 - prog(t, 71.4, 71.8)) : 0;
+  // clock
+  let ck = null; CLOCK.forEach(([a, v]) => { if (t >= a) ck = v; });
+  const c = $("#clock"); c.style.display = ck ? "block" : "none";
+  if (ck) c.textContent = `ДЕНЬ 1 — ${ck}`;
+  // captions
+  let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
+  const cap = $("#cap");
+  if (ci !== lastCap) {
+    lastCap = ci;
+    cap.innerHTML = ci < 0 ? "" : parseCap(CAPS[ci][1]).map((o) => `<span class="w ${o.cls}">${o.w}</span>`).join(" ");
+  }
+  if (ci >= 0) {
+    const a = CAPS[ci][0], b = capEnd(ci), ws = cap.querySelectorAll(".w"), n = ws.length;
+    const span = Math.min(b - a, 0.28 * n + 0.2) * 0.85;
+    ws.forEach((w, i) => {
+      const on = t >= a + (i / Math.max(1, n)) * span;
+      w.style.opacity = on ? 1 : 0.28;
+      w.style.transform = on ? `scale(${1 + 0.08 * (1 - prog(t, a + (i / n) * span, a + (i / n) * span + .18))})` : "scale(1)";
+    });
+    const pop = easeOut(prog(t, a, a + .2));
+    cap.style.transform = `translateY(${(1 - pop) * 18}px)`;
+    cap.style.opacity = Math.min(pop, 1 - prog(t, b - .08, b));
+  }
+}
+
+/* ---------- audio (Web Audio synth, works live and offline) ---------- */
+function noiseBuf(ctx, sec = 2) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b;
+}
+function scheduleAudio(ctx, out, from) {
+  const NB = noiseBuf(ctx, 3);
+  const T = (t) => ctx.currentTime + 0.05 + (t - from); // absolute time for timeline t
+  const live = (t) => t >= from - 0.01;
+  const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
+  const osc = (type, f, t0, a, peak, d, dest = out) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f; env(g, t0, a, peak, d); o.connect(g).connect(dest); o.start(t0); o.stop(t0 + a + d + .05); return o; };
+  const noise = (t0, dur, type, freq, q, peak, a = .01) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
+  // drone bed
+  const start = T(Math.max(from, 0)), stop = T(DUR);
+  const dg = ctx.createGain(); dg.gain.setValueAtTime(0.0001, start); dg.gain.exponentialRampToValueAtTime(0.16, start + 2); dg.connect(out);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 240; lp.connect(dg);
+  [41.2, 41.6, 61.7].forEach((f) => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(start); o.stop(stop); });
+  const ns = ctx.createBufferSource(); ns.buffer = NB; ns.loop = true; const nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 400; const ng = ctx.createGain(); ng.gain.value = .05; ns.connect(nf).connect(ng).connect(out); ns.start(start); ns.stop(stop);
+  dg.gain.setValueAtTime(0.16, Math.max(start + 2, T(83.6))); dg.gain.exponentialRampToValueAtTime(0.0001, Math.max(start + 2.1, T(84)));
+  const EV = [];
+  // alert siren + vibration
+  for (let k = 0; k < 6; k++) EV.push([0.1 + k * 0.4, (t) => osc("square", k % 2 ? 660 : 880, t, .01, .07, .32)]);
+  for (let k = 0; k < 4; k++) EV.push([0.05 + k * 0.6, (t) => osc("sawtooth", 58, t, .02, .18, .32)]);
+  // badge blips
+  [5.0, 6.0, 7.2, 9.8, 11.6, 13.0, 14.4, 15.0, 19.6, 22.7, 30.0, 32.0, 34.0, 43.2, 45.9, 48.6, 65.6, 69.0, 72.9, 80.4].forEach((t) =>
+    EV.push([t, (a) => { osc("sine", 1320, a, .005, .07, .08); osc("sine", 1980, a + .05, .005, .04, .07); }]));
+  // glitch on scene changes
+  SCENES.slice(1).forEach((s) => EV.push([s.s - .08, (t) => noise(t, .18, "bandpass", 2500, .7, .22)]));
+  // phone ring (error #1)
+  for (let k = 0; k < 3; k++) EV.push([21.0 + k * 0.5, (t) => { osc("sine", 440, t, .01, .09, .35); osc("sine", 480, t, .01, .09, .35); }]);
+  EV.push([22.7, (t) => osc("sawtooth", 110, t, .01, .2, .6)]);
+  // checklist ticks
+  [30.0, 32.0, 34.0].forEach((t) => EV.push([t, (a) => noise(a, .04, "highpass", 3000, 1, .25, .002)]));
+  // water trickle + pipe rumble
+  EV.push([39.6, (t) => noise(t, 8, "bandpass", 1800, 2, .05, .4)]);
+  EV.push([43.1, (t) => { noise(t, 2.6, "lowpass", 120, 1, .35, .3); osc("sawtooth", 48, t, .3, .12, 2.4); }]);
+  // whispers calling names
+  [50.6, 52.9].forEach((t) => EV.push([t, (a) => noise(a, 1.1, "bandpass", 3200, 3, .12, .25)]));
+  EV.push([55.0, (t) => noise(t, .6, "bandpass", 900, 2, .1, .1)]);
+  EV.push([57.4, (t) => { osc("sine", 70, t, .01, .5, 1.2); noise(t, .5, "lowpass", 300, 1, .3); }]);
+  // message notifications
+  [62.4, 63.8].forEach((t) => EV.push([t, (a) => { osc("sine", 988, a, .005, .12, .12); osc("sine", 1319, a + .1, .005, .12, .22); }]));
+  // knocks
+  [71.4, 71.9, 72.4].forEach((t) => EV.push([t, (a) => { osc("sine", 90, a, .002, .9, .25); noise(a, .12, "lowpass", 600, 1, .6, .002); }]));
+  // heartbeat, accelerating
+  for (let t = 73.0, p = 0.95; t < 83.8; t += p, p = Math.max(.5, p * .96)) {
+    EV.push([t, (a) => osc("sine", 52, a, .01, .5, .16)]); EV.push([t + .18, (a) => osc("sine", 48, a, .01, .35, .18)]);
+  }
+  // voice through door: distorted whisper
+  EV.push([75.3, (t) => noise(t, 2.6, "bandpass", 700, 4, .14, .2)]);
+  EV.push([80.4, (t) => { osc("sawtooth", 36, t, .05, .3, 3); noise(t, 1.5, "bandpass", 500, 3, .15, .1); }]);
+  // end hit
+  EV.push([84.3, (t) => { osc("sine", 45, t, .005, .9, 2.4); noise(t, 1.2, "lowpass", 900, 1, .5, .005); }]);
+  EV.forEach(([t, fn]) => { if (live(t)) fn(T(t)); });
+}
+
+let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
+function startAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    if (bus) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); }
+    bus = actx.createGain(); bus.gain.value = 0.9;
+    const comp = actx.createDynamicsCompressor(); bus.connect(comp).connect(actx.destination);
+    scheduleAudio(actx, bus, pos);
+  } catch (e) { console.warn("audio", e); }
+}
+function stopAudio() { if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+const synth = window.speechSynthesis;
+let ruVoice = null;
+function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+function stopVoice() { if (synth) synth.cancel(); }
+function speak(text) {
+  if (!synth || !voiceOn) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
+  u.rate = 1.08; u.pitch = 0.75; u.volume = 1; synth.speak(u);
+}
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => v.t >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function play() {
+  if (pos >= DUR) pos = 0;
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio(); $("#pp").textContent = "❚❚"; loop();
+}
+function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, DUR); render(pos); updUI(pos); if (was) play(); }
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(DUR)}`; }
+function loop() {
+  const t = now();
+  while (vIdx < VOICE.length && VOICE[vIdx].t <= t) { if (t - VOICE[vIdx].t < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  render(t); updUI(t);
+  if (t >= DUR) { pos = DUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
+  raf = requestAnimationFrame(loop);
+}
+
+/* ---------- layout ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- init ---------- */
+buildStars(); buildCity($("#city1"), "#ff8a3d"); buildBuilding(); buildGauge(); buildRiser(); buildStairs(); buildWave();
+fit(); render(0); updUI(0);
+const qs = new URLSearchParams(location.search);
+if (qs.has("capture")) document.body.classList.add("capture");
+if (qs.has("t")) { pos = +qs.get("t"); render(pos); }
+$("#start").onclick = () => { $("#start").style.display = "none"; play(); };
+$("#pp").onclick = () => (playing ? pause() : play());
+$("#seek").oninput = (e) => seek(+e.target.value);
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; if (!voiceOn) stopVoice(); };
+$("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
+addEventListener("keydown", (e) => {
+  if ($("#start").style.display !== "none") return;
+  if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === "ArrowRight") seek(now() + 5);
+  if (e.code === "ArrowLeft") seek(now() - 5);
+});
+
+/* hooks for automated checks / export */
+window.__render = render;
+window.__DUR = DUR;
+window.__renderAudio = async () => {
+  const sr = 44100, oc = new OfflineAudioContext(2, sr * DUR, sr);
+  const g = oc.createGain(); g.gain.value = 0.9; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
+  scheduleAudio(oc, g, 0);
+  const buf = await oc.startRendering();
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
+  const ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
+  const ws = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); ws(8, "WAVE"); ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++, o += 4) { v.setInt16(o, clamp(L[i], -1, 1) * 32767, true); v.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); }
+  let bin = ""; const u8 = new Uint8Array(ab); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+</script>
+</body>
+</html>
