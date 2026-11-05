@@ -34,7 +34,10 @@ RATE = 98            # естественный темп (~5 слогов в с�
 TARGET_F0 = 109.0    # медиана высоты голоса, Гц
 RANGE = 1.15         # 1.0 = исходная выразительность, меньше = ровнее
 CEIL_F0 = 158.0     # мягкий потолок интонации, Гц
-PAUSE = 0.4          # минимальная пауза после фразы, с
+PAUSE = 0.28         # пауза между фразами, с (в живой записи автора почти все паузы < 0.4 с)
+SCENE_PAUSE = 0.5    # пауза при смене сцены, с
+MIN_SCALE = 0.5      # анимация может ускориться под речь, но не больше чем вдвое
+GAP_MAX, GAP_KEEP = 0.25, 0.18  # паузы внутри фразы длиннее GAP_MAX ужимаются до GAP_KEEP
 # Тембр под образец: разница усреднённых спектров (Гц, дБ), снята по образцу двумя проходами
 TIMBRE_EQ = "entry(100,0.0);entry(160,-10.1);entry(250,-12.8);entry(400,-5.2);entry(630,-11.9);entry(1000,0.0);entry(1600,-5.8);entry(2500,-13.0);entry(4000,-13.4);entry(6300,-4.2);entry(10000,1.8)"
 
@@ -181,11 +184,21 @@ def synth_rhvoice():
 print("движок:", ENGINE, *(os.path.basename(r) for r in REFS))
 clips = synth_xtts() if ENGINE == "xtts" else synth_rhvoice()
 
+# 2b. паузы внутри фраз — до живого темпа
+def tighten(path):
+    q = path.replace(".wav", ".tight.wav") if path.startswith(tmp) else os.path.join(tmp, os.path.basename(path).replace(".wav", ".tight.wav"))
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-af",
+                    f"silenceremove=stop_periods=-1:stop_duration={GAP_MAX}:stop_threshold=-38dB:stop_silence={GAP_KEEP}", q], check=True)
+    return q
+clips = [(t, q, dur_of(q)) for t, p, _ in clips for q in [tighten(p)]]
+SCENE_STARTS = [float(x) for x in re.findall(r'\{ id: "s\d", s: (\d+(?:\.\d+)?), e: [\d.]+ \}', src)]
+
 # 3. timeline warp: old (story) time -> new (video) time
 olds = [caps[g[0]][0] for g in groups] + [END_SCENE]
 news = [olds[0]]
 for i, (_, _, d) in enumerate(clips):
-    news.append(news[-1] + max(olds[i + 1] - olds[i], d + PAUSE))
+    scene_change = any(olds[i] < sc <= olds[i + 1] for sc in SCENE_STARTS)
+    news.append(news[-1] + max((olds[i + 1] - olds[i]) * MIN_SCALE, d + (SCENE_PAUSE if scene_change else PAUSE)))
 warp = [(0.0, 0.0)] + list(zip(olds, news)) + [(DUR, news[-1] + (DUR - END_SCENE))]
 VDUR = warp[-1][1]
 for i, (text, _, d) in enumerate(clips):
