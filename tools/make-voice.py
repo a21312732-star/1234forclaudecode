@@ -199,7 +199,7 @@ def from_file():
     def norm(w):
         w = w.lower().replace("ё", "е")
         w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
-        return re.sub(r"[^а-я ]", "", w).split()
+        return re.sub(r"[^а-я ]", "", w.replace("-", " ")).split()  # «Ковчег-четыре» — два слова, как слышит Whisper
     asr = WhisperModel("medium", device="cpu", compute_type="int8")
     # фразы, которые надо вырезать из записи (реклама, лишняя концовка): const DROP = [...] в index.html ролика
     _dr = re.search(r"const DROP = (\[.*?\]);", src, re.S)
