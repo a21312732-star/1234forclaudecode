@@ -13,7 +13,7 @@
   4. Субтитры внутри фраз выставляются по реальной речи.
   5. Всё сводится в одну дорожку voice.mp3: ближе, суше и ярче, как в образце.
 """
-import glob, os, re, subprocess, sys, tempfile
+import glob, hashlib, os, re, shutil, subprocess, sys, tempfile
 import numpy as np
 import parselmouth
 from parselmouth.praat import call
@@ -25,6 +25,9 @@ OUT = os.path.join(ROOT, "voice.mp3")
 REF_DIR = os.environ.get("VOICE_REF", os.path.join(ROOT, "voice-ref"))
 REFS = sorted(glob.glob(os.path.join(REF_DIR, "*.wav")))
 ENGINE = "xtts" if REFS else "rhvoice"
+CACHE = os.path.join(ROOT, "voice-cache")  # проверенные фразы, чтобы не генерировать заново (в git не попадает)
+REF_KEY = "|".join(f"{os.path.basename(r)}:{os.path.getsize(r)}" for r in REFS)
+os.makedirs(CACHE, exist_ok=True)
 
 VOICE = "aleksandr-hq"
 RATE = 98            # естественный темп (~5 слогов в секунду)
@@ -86,7 +89,11 @@ def synth_xtts():
     from faster_whisper import WhisperModel
     import difflib
     asr = WhisperModel("medium", device="cpu", compute_type="int8")
-    norm = lambda w: re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))
+    from num2words import num2words
+    def norm(w):  # Whisper пишет числа цифрами — переводим в слова, чтобы сравнивать с текстом
+        w = w.lower().replace("ё", "е")
+        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
+        return re.sub(r"[^а-я ]", "", w).strip()
 
     def check(path, text):
         """-> (схожесть с текстом 0..1, время конца последнего нужного слова или None)"""
@@ -94,8 +101,8 @@ def synth_xtts():
                              capture_output=True, check=True).stdout
         audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768
         segs, _ = asr.transcribe(audio, language="ru", word_timestamps=True, beam_size=5)  # без подсказки, иначе не слышит лишнее
-        heard = [(norm(w.word), w.end) for sg in segs for w in sg.words if norm(w.word)]
-        want = [norm(w) for w in text.split() if norm(w)]
+        heard = [(x, w.end) for sg in segs for w in sg.words for x in norm(w.word).split()]
+        want = [x for w in text.split() for x in norm(w).split()]
         cut, extra = None, 99  # конец последнего ожидаемого слова и сколько слов после него
         for i in range(len(heard) - 1, -1, -1):
             if difflib.SequenceMatcher(None, heard[i][0], want[-1]).ratio() >= 0.6:
@@ -109,7 +116,11 @@ def synth_xtts():
     out = []
     for k, text in enumerate(texts):
         best = None
-        for attempt in range(5):
+        cache = os.path.join(CACHE, hashlib.sha1((text + "|" + REF_KEY).encode()).hexdigest()[:16] + ".wav")
+        if os.path.exists(cache):  # уже сгенерировано и проверено
+            out.append((text, cache, dur_of(cache))); print(f"  [{k + 1}/{len(texts)}] из кэша  {text}", flush=True)
+            continue
+        for attempt in range(8):
             torch.manual_seed(1000 + 37 * attempt + k)
             wav = np.asarray(model.inference(text, "ru", lat, emb, temperature=0.6, repetition_penalty=5.0,
                                              top_p=0.85, speed=1.0)["wav"], dtype=np.float32)
@@ -123,13 +134,15 @@ def synth_xtts():
             key = (round(sim, 2), -min(extra, 3))
             if best is None or key > best[0]:
                 best = (key, sim, cut, extra, path)
-            if sim >= 0.9 and extra == 0: break
+            if sim >= 0.93 and extra == 0: break
         _, sim, cut, extra, path = best
         if cut is not None:  # обрезаем после последнего слова: бормотание и шум в хвосте
             fixed = path.replace(".wav", ".cut.wav")
-            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-t", f"{cut + 0.12:.2f}",
-                            "-af", "afade=t=out:st=%.2f:d=0.08" % (cut + 0.04), fixed], check=True)
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-t", f"{cut + 0.05:.2f}",
+                            "-af", "afade=t=out:st=%.2f:d=0.06" % max(0, cut - 0.01), fixed], check=True)
             path = fixed
+        if sim >= 0.9:  # в кэш — только прошедшие проверку
+            shutil.copy(path, cache); path = cache
         d = dur_of(path)
         out.append((text, path, d))
         print(f"  [{k + 1}/{len(texts)}] {d:4.2f}s  совпадение {sim:.2f}{'  убрано лишних слов: %d' % extra if cut is not None and extra else ''}  {text}", flush=True)
