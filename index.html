@@ -229,6 +229,16 @@ body:hover #ui,#ui.show{opacity:1}
 <script>
 "use strict";
 const DUR = 92;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.3, 0.30], [5.7, 7.37], [6.6, 8.52], [7.6, 9.99], [9.3, 11.69], [11.6, 14.50], [15, 18.06], [19.3, 22.36], [21.3, 25.14], [23, 26.84], [25.3, 29.14], [29.3, 33.14], [31.3, 35.54], [33.3, 37.72], [35.5, 39.99], [39.3, 43.79], [40.8, 45.58], [43.4, 48.96], [46.2, 52.05], [48.3, 54.96], [53, 59.91], [55, 61.91], [57.4, 64.34], [60.3, 67.24], [62.4, 70.29], [63.8, 71.69], [65.6, 73.49], [68, 75.89], [71.3, 79.19], [74, 81.89], [75.5, 83.39], [78.5, 86.39], [80.5, 88.39], [84, 91.89], [92, 99.89]];
+const VDUR = WARP[WARP.length - 1][1];
+function warp(t, a, b) {
+  for (let i = 1; i < WARP.length; i++) { const p = WARP[i - 1], q = WARP[i];
+    if (t <= q[a] || i === WARP.length - 1) return p[b] + (t - p[a]) * (q[b] - p[b]) / ((q[a] - p[a]) || 1); }
+  return t;
+}
+const toNew = (t) => warp(t, 0, 1), toOld = (t) => warp(t, 1, 0);
+const frame = (t) => render(toOld(t));
 const $ = (s) => document.querySelector(s);
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const prog = (t, a, b) => clamp((t - a) / (b - a));
@@ -245,14 +255,14 @@ const SCENES = [
 ];
 const CLOCK = [[0, null], [9, "02:48"], [19, "02:49"], [29, "02:50"], [39, "02:55"], [48, "03:30"], [60, "03:41"], [71, "03:52"], [84, null]];
 const CAPS = [
-  [0.3, "Если в {y:2:47} ночи"], [1.43, "ваш телефон завибрирует,"], [3.09, "а на экране будет всего три строчки:"],
+  [0.3, "Если в {y:2:47} ночи"], [1.4, "ваш телефон завибрирует,"], [3.01, "а на экране будет всего три строчки:"],
   [5.7, "{r:молчите.}"], [6.6, "{r:не отвечайте.}"], [7.6, "{r:не открывайте.}"],
-  [9.3, "У вас есть всего {y:несколько минут.}"], [11.6, "От них зависит,"], [12.75, "доживёте ли вы до утра."], [15, "Одна {r:ошибка} — и всё."],
-  [19.3, "Первое, что делают почти все, —"], [21.3, "{y:звонят близким.}"], [23, "Это {r:ошибка номер один.}"], [25.3, "Оно {y:слышит} всё, что громче"], [27.54, "{y:40 децибел.}"],
-  [29.3, "Телефон — на {y:беззвучный.}"], [31.3, "Холодильник — {y:из розетки.}"], [33.3, "Часы — {y:батарейку вон.}"], [35.5, "Через минуту в квартире"], [37.43, "{g:31 децибел.}"],
-  [39.3, "Второе — {y:вода.}"], [40.8, "Наберите ванну,"], [41.9, "но {y:тонкой струйкой:}"], [43.4, "{r:гул в трубах} слышно"], [44.72, "по всему стояку."], [46.2, "{y:120 литров} за девять минут."],
-  [48.3, "В {y:3:30} в подъезде"], [49.56, "кто-то начинает звать соседей"], [51.66, "{r:по именам.}"], [53, "Тихо. Ласково."], [55, "Сосед с третьего {r:отвечает.}"], [57.4, "Его квартира {r:гаснет.}"],
-  [60.3, "{y:3:41.} Сообщение от папы."], [62.4, "«Ты дома?"], [63.8, "Я у твоей двери»."], [65.6, "Только сети {r:нет уже час.}"], [68, "А папа живёт"], [68.82, "{r:в другом городе.}"],
+  [9.3, "У вас есть всего {y:несколько минут.}"], [11.6, "От них зависит,"], [12.81, "доживёте ли вы до утра."], [15, "Одна {r:ошибка} — и всё."],
+  [19.3, "Первое, что делают почти все, —"], [21.3, "{y:звонят близким.}"], [23, "Это {r:ошибка номер один.}"], [25.3, "Оно {y:слышит} всё, что громче"], [27.78, "{y:40 децибел.}"],
+  [29.3, "Телефон — на {y:беззвучный.}"], [31.3, "Холодильник — {y:из розетки.}"], [33.3, "Часы — {y:батарейку вон.}"], [35.5, "Через минуту в квартире"], [37.63, "{g:31 децибел.}"],
+  [39.3, "Второе — {y:вода.}"], [40.8, "Наберите ванну,"], [41.82, "но {y:тонкой струйкой:}"], [43.4, "{r:гул в трубах} слышно"], [44.72, "по всему стояку."], [46.2, "{y:120 литров} за девять минут."],
+  [48.3, "В {y:3:30} в подъезде"], [49.62, "кто-то начинает звать соседей"], [51.81, "{r:по именам.}"], [53, "Тихо. Ласково."], [55, "Сосед с третьего {r:отвечает.}"], [57.4, "Его квартира {r:гаснет.}"],
+  [60.3, "{y:3:41.} Сообщение от папы."], [62.4, "«Ты дома?"], [63.8, "Я у твоей двери»."], [65.6, "Только сети {r:нет уже час.}"], [68, "А папа живёт"], [68.91, "{r:в другом городе.}"],
   [71.3, "{y:Три} стука в дверь."], [74, "И голос:"], [75.5, "{r:«Открой. Это я».}"], [78.5, "Голос за дверью —"], [80.5, "{r:ваш собственный.}"],
   [84, ""],
 ];
@@ -529,13 +539,13 @@ function noiseBuf(ctx, sec = 2) {
 }
 function scheduleAudio(ctx, out, from) {
   const NB = noiseBuf(ctx, 3);
-  const T = (t) => ctx.currentTime + 0.05 + (t - from); // absolute time for timeline t
-  const live = (t) => t >= from - 0.01;
+  const T = (t) => ctx.currentTime + 0.05 + (toNew(t) - from); // story time t -> audio clock
+  const live = (t) => toNew(t) >= from - 0.01;
   const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
   const osc = (type, f, t0, a, peak, d, dest = out) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f; env(g, t0, a, peak, d); o.connect(g).connect(dest); o.start(t0); o.stop(t0 + a + d + .05); return o; };
   const noise = (t0, dur, type, freq, q, peak, a = .01) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
   // drone bed
-  const start = T(Math.max(from, 0)), stop = T(DUR);
+  const start = ctx.currentTime + 0.05, stop = T(DUR);
   const dg = ctx.createGain(); dg.gain.setValueAtTime(0.0001, start); dg.gain.exponentialRampToValueAtTime(0.16, start + 2); dg.connect(out);
   const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 240; lp.connect(dg);
   [41.2, 41.6, 61.7].forEach((f) => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(start); o.stop(stop); });
@@ -603,22 +613,22 @@ function speak(text) {
   const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
   u.rate = 1.08; u.pitch = 0.75; u.volume = 1; synth.speak(u);
 }
-function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => v.t >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => toNew(v.t) >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
 function play() {
-  if (pos >= DUR) pos = 0;
+  if (pos >= VDUR) pos = 0;
   playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
   if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
 }
 function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
-function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, DUR); render(pos); updUI(pos); if (was) play(); }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, VDUR); frame(pos); updUI(pos); if (was) play(); }
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(DUR)}`; }
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(VDUR)}`; }
 function loop() {
   const t = now();
-  while (vIdx < VOICE.length && VOICE[vIdx].t <= t) { if (t - VOICE[vIdx].t < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  while (vIdx < VOICE.length && toNew(VOICE[vIdx].t) <= t) { if (t - toNew(VOICE[vIdx].t) < 0.6) speak(VOICE[vIdx].text); vIdx++; }
   if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
-  render(t); updUI(t);
-  if (t >= DUR) { pos = DUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
+  frame(t); updUI(t);
+  if (t >= VDUR) { pos = VDUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
   raf = requestAnimationFrame(loop);
 }
 
@@ -634,7 +644,8 @@ buildStars(); buildCity($("#city1"), "#ff8a3d"); buildBuilding(); buildGauge(); 
 fit(); render(0); updUI(0);
 const qs = new URLSearchParams(location.search);
 if (qs.has("capture")) document.body.classList.add("capture");
-if (qs.has("t")) { pos = +qs.get("t"); render(pos); }
+$("#seek").max = VDUR; updUI(0);
+if (qs.has("t")) { pos = +qs.get("t"); frame(pos); }
 $("#start").onclick = () => { $("#start").style.display = "none"; play(); };
 $("#pp").onclick = () => (playing ? pause() : play());
 $("#seek").oninput = (e) => seek(+e.target.value);
@@ -648,10 +659,10 @@ addEventListener("keydown", (e) => {
 });
 
 /* hooks for automated checks / export */
-window.__render = render;
-window.__DUR = DUR;
+window.__render = frame;
+window.__DUR = VDUR;
 window.__renderAudio = async () => {
-  const sr = 44100, oc = new OfflineAudioContext(2, sr * DUR, sr);
+  const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
   const g = oc.createGain(); g.gain.value = 0.9; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
   scheduleAudio(oc, g, 0);
   const buf = await oc.startRendering();
