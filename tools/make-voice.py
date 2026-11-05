@@ -93,16 +93,18 @@ def synth_xtts():
         pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "s16le", "-ac", "1", "-ar", "16000", "-"],
                              capture_output=True, check=True).stdout
         audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768
-        segs, _ = asr.transcribe(audio, language="ru", word_timestamps=True, beam_size=5, initial_prompt=text)
+        segs, _ = asr.transcribe(audio, language="ru", word_timestamps=True, beam_size=5)  # без подсказки, иначе не слышит лишнее
         heard = [(norm(w.word), w.end) for sg in segs for w in sg.words if norm(w.word)]
         want = [norm(w) for w in text.split() if norm(w)]
-        sim = difflib.SequenceMatcher(None, want, [h for h, _ in heard]).ratio()
-        cut = None  # конец последнего ожидаемого слова, если после него что-то лишнее
+        cut, extra = None, 99  # конец последнего ожидаемого слова и сколько слов после него
         for i in range(len(heard) - 1, -1, -1):
             if difflib.SequenceMatcher(None, heard[i][0], want[-1]).ratio() >= 0.6:
-                if i < len(heard) - 1: cut = heard[i][1]
+                cut, extra = heard[i][1], len(heard) - 1 - i
                 break
-        return sim, cut
+        upto = [h for h, _ in heard][:len(heard) - extra] if cut is not None else [h for h, _ in heard]
+        # посимвольно: «стаёку» вместо «стояку» — почти совпадение, а пропущенное или лишнее слово — нет
+        sim = difflib.SequenceMatcher(None, " ".join(want), " ".join(upto)).ratio()
+        return sim, cut, extra
 
     out = []
     for k, text in enumerate(texts):
@@ -117,19 +119,20 @@ def synth_xtts():
                 w.writeframes((np.clip(wav, -1, 1) * 32767).astype(np.int16).tobytes())
             path = os.path.join(tmp, f"{k:02d}.a{attempt}.wav")
             trim_to(raw, path)
-            sim, cut = check(path, text)
-            if best is None or (sim, cut is None) > (best[0], best[1] is None):
-                best = (sim, cut, path)
-            if sim >= 0.999 and cut is None: break
-        sim, cut, path = best
-        if cut is not None:  # отрезаем бормотание после последнего слова
+            sim, cut, extra = check(path, text)
+            key = (round(sim, 2), -min(extra, 3))
+            if best is None or key > best[0]:
+                best = (key, sim, cut, extra, path)
+            if sim >= 0.9 and extra == 0: break
+        _, sim, cut, extra, path = best
+        if cut is not None:  # обрезаем после последнего слова: бормотание и шум в хвосте
             fixed = path.replace(".wav", ".cut.wav")
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-t", f"{cut + 0.12:.2f}",
                             "-af", "afade=t=out:st=%.2f:d=0.08" % (cut + 0.04), fixed], check=True)
             path = fixed
         d = dur_of(path)
         out.append((text, path, d))
-        print(f"  [{k + 1}/{len(texts)}] {d:4.2f}s  совпадение {sim:.2f}{'  хвост обрезан' if cut is not None else ''}  {text}", flush=True)
+        print(f"  [{k + 1}/{len(texts)}] {d:4.2f}s  совпадение {sim:.2f}{'  убрано лишних слов: %d' % extra if cut is not None and extra else ''}  {text}", flush=True)
     return out
 
 def synth_rhvoice():
