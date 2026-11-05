@@ -88,3 +88,13 @@ PROJECT=station-part1 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/ma
 ```bash
 node tools/export-mp4.js station-part1/station-part1.mp4 station-part1
 ```
+
+## Рекламный баннер
+
+`tools/add-banner.py` вставляет баннер (`ads/banner.mp4`) в середину каждой минуты — 0:30, 1:30, … (с подстройкой
+до ±1,5 с к паузе в речи). Пока идёт баннер, ролик стоит на паузе и звучит только баннер; баннер — по центру кадра
+на размытом стоп-кадре. Готовые версии лежат рядом с роликами как `*-banner.mp4`.
+
+```bash
+python3 tools/add-banner.py ads/banner.mp4 1812-part1/1812-part1.mp4
+```
