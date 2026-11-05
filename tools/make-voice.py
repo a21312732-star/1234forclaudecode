@@ -82,11 +82,32 @@ def synth_xtts():
     torch.set_num_threads(os.cpu_count() or 4)
     model = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to("cpu").synthesizer.tts_model
     lat, emb = model.get_conditioning_latents(audio_path=REFS)
+    # Проверка распознаванием речи (Whisper): лишние слоги в конце фразы — известная слабость XTTS
+    from faster_whisper import WhisperModel
+    import difflib
+    asr = WhisperModel("medium", device="cpu", compute_type="int8")
+    norm = lambda w: re.sub(r"[^а-я0-9]", "", w.lower().replace("ё", "е"))
+
+    def check(path, text):
+        """-> (схожесть с текстом 0..1, время конца последнего нужного слова или None)"""
+        pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "s16le", "-ac", "1", "-ar", "16000", "-"],
+                             capture_output=True, check=True).stdout
+        audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768
+        segs, _ = asr.transcribe(audio, language="ru", word_timestamps=True, beam_size=5, initial_prompt=text)
+        heard = [(norm(w.word), w.end) for sg in segs for w in sg.words if norm(w.word)]
+        want = [norm(w) for w in text.split() if norm(w)]
+        sim = difflib.SequenceMatcher(None, want, [h for h, _ in heard]).ratio()
+        cut = None  # конец последнего ожидаемого слова, если после него что-то лишнее
+        for i in range(len(heard) - 1, -1, -1):
+            if difflib.SequenceMatcher(None, heard[i][0], want[-1]).ratio() >= 0.6:
+                if i < len(heard) - 1: cut = heard[i][1]
+                break
+        return sim, cut
+
     out = []
     for k, text in enumerate(texts):
-        syl = sum(ch in "аеёиоуыэюяАЕЁИОУЫЭЮЯ" for ch in text)
         best = None
-        for attempt in range(4):  # нейросеть иногда глотает или тянет слова — проверяем темп и при сбое пересинтезируем
+        for attempt in range(5):
             torch.manual_seed(1000 + 37 * attempt + k)
             wav = np.asarray(model.inference(text, "ru", lat, emb, temperature=0.6, repetition_penalty=5.0,
                                              top_p=0.85, speed=1.0)["wav"], dtype=np.float32)
@@ -94,15 +115,21 @@ def synth_xtts():
             with wave.open(raw, "wb") as w:
                 w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000)
                 w.writeframes((np.clip(wav, -1, 1) * 32767).astype(np.int16).tobytes())
-            path = os.path.join(tmp, f"{k:02d}.wav")
-            d = trim_to(raw, path)
-            rate = syl / max(d, 0.1)
-            score = abs(rate - 5.0)
-            if best is None or score < best[0]:
-                best = (score, d, path + f".{attempt}.keep.wav"); os.replace(path, best[2])
-            if 3.2 <= rate <= 6.8: break
-        out.append((text, best[2], best[1]))
-        print(f"  [{k + 1}/{len(texts)}] {best[1]:4.2f}s  {text}", flush=True)
+            path = os.path.join(tmp, f"{k:02d}.a{attempt}.wav")
+            trim_to(raw, path)
+            sim, cut = check(path, text)
+            if best is None or (sim, cut is None) > (best[0], best[1] is None):
+                best = (sim, cut, path)
+            if sim >= 0.999 and cut is None: break
+        sim, cut, path = best
+        if cut is not None:  # отрезаем бормотание после последнего слова
+            fixed = path.replace(".wav", ".cut.wav")
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-t", f"{cut + 0.12:.2f}",
+                            "-af", "afade=t=out:st=%.2f:d=0.08" % (cut + 0.04), fixed], check=True)
+            path = fixed
+        d = dur_of(path)
+        out.append((text, path, d))
+        print(f"  [{k + 1}/{len(texts)}] {d:4.2f}s  совпадение {sim:.2f}{'  хвост обрезан' if cut is not None else ''}  {text}", flush=True)
     return out
 
 def synth_rhvoice():

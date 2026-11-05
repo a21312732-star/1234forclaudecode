@@ -26,7 +26,7 @@ node tools/export-mp4.js tishina.mp4
 ## Озвучка своим голосом
 
 1. Положите 2–3 фрагмента своего голоса по 10–15 секунд (`*.wav`, без музыки) в папку `voice-ref/` (она не попадает в git).
-2. Установите `pip install coqui-tts torch praat-parselmouth numpy`.
+2. Установите `pip install coqui-tts torch faster-whisper praat-parselmouth numpy`.
 3. Запустите (согласие с лицензией XTTS-v2 — только некоммерческое использование):
 
 ```bash
