@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ковчег-4 — Часть 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=JetBrains+Mono:wght@500;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0807; --ink:#f2efe8; --yellow:#ffc94a; --red:#e8323c; --green:#3ee08f; --cyan:#4fc3ff;
+  --amber:#ffb347; --paper:#e9e1cc; --soviet:#b3121b;
+  --head:"Montserrat","Inter","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+  --hand:"Caveat","DejaVu Sans",cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:var(--bg);overflow:hidden;transform-origin:50% 50%}
+.scene{position:absolute;inset:0;display:none}
+.abs{position:absolute}
+.wall{position:absolute;inset:0}
+/* date pill */
+#clock{position:absolute;top:64px;left:50%;transform:translateX(-50%);font:700 30px var(--mono);color:var(--yellow);
+  border:2px solid rgba(255,201,74,.45);padding:8px 22px;border-radius:8px;background:rgba(24,16,4,.65);letter-spacing:2px;z-index:20;white-space:nowrap}
+/* captions */
+#cap{position:absolute;left:60px;right:60px;top:1240px;min-height:260px;text-align:center;z-index:30;
+  font:900 82px/1.12 var(--head);text-transform:uppercase;letter-spacing:-1px;text-shadow:0 6px 30px rgba(0,0,0,.95)}
+#cap .w{display:inline-block;margin:0 .14em}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)}
+/* badges */
+.badge{position:absolute;display:flex;align-items:center;gap:14px;padding:12px 20px;border:2px solid;border-radius:10px;
+  font:800 30px var(--mono);white-space:nowrap}
+.badge small{display:block;font:500 16px var(--mono);opacity:.75;letter-spacing:1px;margin-top:2px}
+.badge i{font-style:normal;width:30px;height:30px;border:2px solid;border-radius:6px;display:grid;place-items:center;font-size:18px;flex:none}
+.b-red{color:#fff;border-color:var(--red);background:rgba(60,6,10,.85);box-shadow:0 0 30px rgba(232,50,60,.45)} .b-red i{color:var(--red)}
+.b-yellow{color:#fff;border-color:var(--yellow);background:rgba(40,28,4,.88);box-shadow:0 0 30px rgba(255,201,74,.35)} .b-yellow i{color:var(--yellow)}
+.b-green{color:#fff;border-color:var(--green);background:rgba(4,36,20,.85);box-shadow:0 0 30px rgba(62,224,143,.35)} .b-green i{color:var(--green)}
+/* tear-off calendar */
+.cal{position:absolute;background:#efe8d6;border-radius:8px;box-shadow:0 18px 40px rgba(0,0,0,.6);overflow:hidden;text-align:center;color:#1a1410}
+.cal .top{background:var(--soviet);color:#fff;font:800 26px var(--mono);letter-spacing:4px;padding:10px 0}
+.cal .big{font:900 92px/1 var(--head);margin-top:22px}
+.cal .mon{font:800 34px var(--head);letter-spacing:2px;margin-top:10px}
+.cal .rings{position:absolute;top:-2px;left:0;right:0;display:flex;justify-content:space-around}
+.cal .rings u{display:block;width:14px;height:22px;border-radius:7px;background:#111}
+/* S1 */
+#title1{position:absolute;left:60px;right:60px;top:150px;text-align:center;font:900 64px/1.08 var(--head);color:#fff;
+  text-transform:uppercase;text-shadow:0 0 30px rgba(232,50,60,.55),0 6px 20px rgba(0,0,0,.9);z-index:5}
+#title1 b{color:var(--red)}
+.portrait{position:absolute;border:14px solid #5b3d1e;box-shadow:inset 0 0 0 4px #8a6532,0 18px 40px rgba(0,0,0,.6);background:#17120e}
+.desk{position:absolute;background:linear-gradient(180deg,#4a3020 0,#2c1c12 14px,#1c120c 100%);box-shadow:0 -2px 0 #6b4a30}
+/* S2 */
+#paper{position:absolute;left:250px;top:300px;width:580px;height:760px;background:var(--paper);border-radius:4px;
+  box-shadow:0 30px 60px rgba(0,0,0,.7);padding:70px 50px 0 70px;transform-origin:50% 50%;
+  background-image:repeating-linear-gradient(180deg,transparent 0 58px,rgba(60,90,160,.25) 58px 60px),linear-gradient(90deg,transparent 46px,rgba(200,40,40,.35) 46px 48px,transparent 48px)}
+#paper .hl{font:700 46px/60px var(--hand);color:#1d2a5a;white-space:nowrap;overflow:hidden}
+#paper .scr{height:60px;position:relative}
+#paper .scr u{position:absolute;left:0;top:30px;height:4px;border-radius:2px;background:#2b3a72;opacity:.55}
+#stamp{position:absolute;left:310px;top:640px;font:900 64px var(--head);color:rgba(200,20,30,.85);border:8px solid rgba(200,20,30,.85);
+  padding:6px 20px;transform:rotate(-14deg);letter-spacing:4px}
+.bars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 120px,#15181c 120px 146px,#2b3036 146px 150px,transparent 150px 150px)}
+/* S5 */
+#door{position:absolute;left:300px;top:240px;width:480px;height:880px;border-radius:8px;
+  background:linear-gradient(90deg,#2a3138,#3b4550 50%,#2a3138);box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 0 0 16px #15181b}
+#slot{position:absolute;left:120px;top:250px;width:240px;height:80px;background:#030303;border:6px solid #1c2126;border-radius:4px;overflow:hidden}
+.rivet{position:absolute;width:14px;height:14px;border-radius:50%;background:#57626d;box-shadow:inset -2px -2px 3px rgba(0,0,0,.5)}
+/* end */
+#end{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 60px}
+#end h1{font:900 150px/0.95 var(--head);letter-spacing:-4px}
+#end h3{font:900 64px var(--head);color:var(--red);margin-top:14px}
+#end p{font:800 40px/1.3 var(--head);margin-top:70px;color:#e6e1d6;text-transform:uppercase}
+
+/* part 1 */
+.street-sky{position:absolute;inset:0;background:linear-gradient(180deg,#1b2238 0%,#3a3044 45%,#7a4a3a 70%,#2a1c18 100%)}
+.ico-row{position:absolute;left:0;right:0;display:flex;justify-content:center;gap:56px}
+.ico{position:relative;width:200px;height:200px;border-radius:24px;background:rgba(20,16,14,.82);border:2px solid rgba(255,255,255,.14);display:grid;place-items:center}
+.ico svg{width:130px;height:130px}
+.ico .x{position:absolute;inset:-6px}
+.ico em{position:absolute;bottom:-44px;left:0;right:0;text-align:center;font:800 24px var(--mono);font-style:normal;color:#cfc8bc;letter-spacing:2px}
+.bigcal{position:absolute;left:150px;top:170px;width:780px;background:#efe8d6;border-radius:12px;color:#1a1410;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.bigcal .top{background:var(--soviet);color:#fff;font:900 40px var(--head);padding:14px 0;text-align:center;letter-spacing:3px}
+.bigcal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:18px}
+.bigcal .grid div{position:relative;height:62px;display:grid;place-items:center;font:800 30px var(--mono)}
+.bigcal .grid div.x::after{content:"";position:absolute;left:14%;right:14%;top:50%;height:6px;background:#c8102e;transform:rotate(-30deg) scaleX(var(--k,0));transform-origin:left}
+.bigcal .grid div.d19{color:#c8102e}
+.bigcal .grid div.d19::before{content:"";position:absolute;inset:4px 18px;border:5px solid #c8102e;border-radius:50%;opacity:var(--k,0)}
+#dclock{position:absolute;right:150px;top:640px;font:800 92px var(--mono);color:var(--red);text-shadow:0 0 30px rgba(232,50,60,.6);background:#140707;padding:6px 26px;border-radius:12px;border:3px solid #3a1010}
+.kgb{position:absolute;left:90px;top:300px;width:900px;height:860px;background:linear-gradient(180deg,#3d3f44,#26282c);box-shadow:inset 0 0 80px rgba(0,0,0,.6)}
+.kgb .plate{position:absolute;left:180px;top:330px;width:540px;background:#7a5a1e;border:6px solid #a8822c;color:#f4e3b0;text-align:center;font:900 26px/1.25 var(--head);padding:14px 10px;letter-spacing:1px}
+.kgb .col{position:absolute;top:120px;width:60px;height:740px;background:linear-gradient(90deg,#4a4c52,#5d6066 50%,#3a3c41)}
+.kgb .door{position:absolute;left:330px;top:470px;width:240px;height:390px;background:#1a120c;border:8px solid #5a3a20}
+.kgb .win{position:absolute;width:110px;height:150px;background:#1a2230;border:6px solid #55585e}
+#ad{position:absolute;inset:0;background:linear-gradient(180deg,#0b0420,#1a0638 55%,#05010d);overflow:hidden}
+#ad .grid{position:absolute;left:-400px;right:-400px;bottom:0;height:820px;transform:perspective(500px) rotateX(62deg);transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(255,40,200,.75) 3px,transparent 3px),linear-gradient(90deg,rgba(0,230,255,.7) 3px,transparent 3px);background-size:100% 80px,90px 100%}
+#ad .logo{position:absolute;left:0;right:0;top:470px;text-align:center;font:900 132px var(--head);letter-spacing:4px;color:#fff;
+  text-shadow:0 0 18px #00e6ff,0 0 40px #00e6ff,4px 0 0 #ff2bd6,-4px 0 0 #00e6ff}
+#ad .tag{position:absolute;left:60px;right:60px;top:660px;text-align:center;font:800 36px/1.3 var(--mono);color:#ffd6f6;text-shadow:0 0 14px #ff2bd6}
+#ad .btn{position:absolute;left:290px;top:820px;width:500px;text-align:center;font:900 38px var(--head);color:#0b0420;background:#00e6ff;border-radius:16px;padding:22px 0;box-shadow:0 0 40px #00e6ff}
+#ad .lbl{position:absolute;left:40px;top:150px;font:700 22px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:6px;letter-spacing:2px}
+#ad .vhs{position:absolute;left:0;right:0;height:26px;background:rgba(255,255,255,.12);mix-blend-mode:screen}
+#hcl{position:absolute;left:0;right:0;top:560px;text-align:center;font:900 96px/1 var(--head);color:#fff;text-shadow:0 0 30px rgba(232,50,60,.6)}
+#hcl b{color:var(--red)}
+#black8{position:absolute;inset:0;background:#000;opacity:0;z-index:6}
+
+
+/* station */
+#tint{background:rgba(20,60,90,.12)!important}
+.hull{position:absolute;inset:0;background:linear-gradient(180deg,#0e1820 0%,#16232d 50%,#0a1016 100%)}
+.panelgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(120,160,190,.08) 2px,transparent 2px),linear-gradient(90deg,rgba(120,160,190,.08) 2px,transparent 2px);background-size:180px 140px}
+#alarm{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,30,40,.55),transparent 70%);mix-blend-mode:screen;pointer-events:none;z-index:4}
+.screen{position:absolute;background:#04110a;border:10px solid #2a3540;border-radius:14px;box-shadow:inset 0 0 40px rgba(60,255,140,.15),0 0 40px rgba(0,0,0,.6);overflow:hidden}
+.screen .ln{font:800 38px/1.45 var(--mono);color:#58ff9a;white-space:nowrap;overflow:hidden;text-shadow:0 0 12px rgba(88,255,154,.6)}
+.screen .ln.red{color:#ff5a5a;text-shadow:0 0 12px rgba(255,90,90,.6)}
+.bar{position:absolute;height:70px;border:4px solid #8fb3c8;border-radius:12px;overflow:hidden;background:#0a141a}
+.bar .f{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#c8102e,#ff5a5a)}
+.bar .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 40px var(--mono);color:#fff}
+#big31{position:absolute;left:0;right:0;top:620px;text-align:center;font:900 120px/1 var(--head);color:#fff;text-shadow:0 0 30px rgba(255,59,71,.6)}
+#big31 small{display:block;font:800 34px var(--mono);color:#ff8a8a;letter-spacing:4px;margin-top:14px}
+#notalone{position:absolute;left:0;right:0;top:560px;text-align:center;font:900 120px/1 var(--head);color:#fff;text-shadow:0 0 40px rgba(80,170,255,.8);z-index:5}
+#black8{position:absolute;inset:0;background:#000;opacity:0;z-index:6}
+/* fx */
+#grain{position:absolute;inset:0;pointer-events:none;z-index:39;opacity:.07;mix-blend-mode:screen}
+#scan{position:absolute;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 2px,transparent 2px 4px)}
+#vign{position:absolute;inset:0;pointer-events:none;z-index:38;background:radial-gradient(ellipse at 50% 42%,transparent 45%,rgba(0,0,0,.82) 100%)}
+#tint{position:absolute;inset:0;pointer-events:none;z-index:37;background:rgba(120,70,20,.08);mix-blend-mode:multiply}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--red);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#fff;border:3px solid var(--red);padding:18px 40px;border-radius:14px;box-shadow:0 0 40px rgba(232,50,60,.5)}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+  <!-- S1: пробуждение на станции -->
+  <div class="scene" id="s1">
+    <div class="hull"></div><div class="panelgrid"></div>
+    <svg class="abs" style="left:640px;top:330px" width="360" height="360" viewBox="0 0 360 360"><circle cx="180" cy="180" r="170" fill="#1d2a34"/><circle cx="180" cy="180" r="150" fill="#020509"/>
+      <g fill="#fff"><circle cx="90" cy="90" r="2"/><circle cx="250" cy="70" r="2"/><circle cx="130" cy="250" r="1.5"/><circle cx="270" cy="200" r="1.5"/></g>
+      <path d="M40 300 A220 220 0 0 1 320 260 L320 330 L40 330Z" fill="#2a6fb8"/><path d="M40 300 A220 220 0 0 1 320 260" stroke="#8fd0ff" stroke-width="6" fill="none" opacity=".8"/></svg>
+    <div class="badge b-red" id="lbl1" style="left:60px;top:1110px"><i>◉</i><div>СТАНЦИЯ «КОВЧЕГ-4»<small>ОРБИТА 412 КМ</small></div></div>
+    <svg class="abs" id="fl1" style="left:120px;top:760px" width="90" height="30" viewBox="0 0 90 30"><rect width="90" height="14" rx="7" fill="#d6c24a"/></svg>
+    <svg class="abs" id="fl2" style="left:760px;top:820px" width="80" height="90" viewBox="0 0 80 90"><rect x="8" y="10" width="50" height="70" rx="8" fill="#d8d8d8"/><path d="M58 30 q20 0 20 18 q0 18 -20 18" stroke="#d8d8d8" stroke-width="8" fill="none"/></svg>
+    <svg class="abs" id="fl3" style="left:220px;top:470px" width="110" height="80" viewBox="0 0 110 80"><path d="M0 10 L100 0 L110 70 L8 80Z" fill="#e8e2d0"/><path d="M15 25 h70 M15 40 h60 M15 55 h70" stroke="#888" stroke-width="4"/></svg>
+    <svg class="abs" style="left:0;top:690px" width="1080" height="40"><rect y="14" width="1080" height="14" rx="7" fill="#4a5a68"/></svg>
+    <svg class="abs" id="astro1" style="left:330px;top:620px" width="420" height="520" viewBox="0 0 420 520">
+      <circle cx="210" cy="120" r="80" fill="#0a0d10"/><path d="M110 520 Q100 250 210 215 Q320 250 310 520Z" fill="#0a0d10"/>
+      <path id="arm1" d="M300 270 L360 90" stroke="#0a0d10" stroke-width="44" stroke-linecap="round"/><path d="M120 270 L60 380" stroke="#0a0d10" stroke-width="44" stroke-linecap="round"/>
+      <path d="M262 62 A80 80 0 0 1 286 150" stroke="#ff5a5a" stroke-width="6" fill="none" opacity=".7"/></svg>
+    <div class="ico-row" style="top:160px">
+      <div class="ico" id="c1"><svg viewBox="0 0 100 100"><rect x="22" y="46" width="56" height="40" fill="#7a8a9a"/><polygon points="14,48 50,16 86,48" fill="#5a6a7a"/></svg>
+        <svg class="x" viewBox="0 0 212 212"><path class="xl" d="M30 30 L182 182 M182 30 L30 182" stroke="#e8323c" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg><em>ДОМ</em></div>
+      <div class="ico" id="c2"><svg viewBox="0 0 100 100"><rect x="28" y="8" width="44" height="84" rx="8" fill="#111"/><rect x="33" y="16" width="34" height="64" rx="4" fill="#4fc3ff" opacity=".6"/></svg>
+        <svg class="x" viewBox="0 0 212 212"><path class="xl" d="M30 30 L182 182 M182 30 L30 182" stroke="#e8323c" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg><em>СВЯЗЬ</em></div>
+      <div class="ico" id="c3"><svg viewBox="0 0 100 100"><circle cx="50" cy="32" r="18" fill="#9aa8b6"/><path d="M18 90 Q20 56 50 54 Q80 56 82 90Z" fill="#9aa8b6"/></svg>
+        <svg class="x" viewBox="0 0 212 212"><path class="xl" d="M30 30 L182 182 M182 30 L30 182" stroke="#e8323c" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg><em>ЛЮДИ</em></div>
+    </div>
+  </div>
+
+  <!-- S2: кислород -->
+  <div class="scene" id="s2">
+    <div class="hull"></div><div class="panelgrid"></div>
+    <div class="abs" style="left:100px;top:180px;width:880px;height:420px;background:#121c24;border:8px solid #2a3540;border-radius:18px"></div>
+    <div class="abs" style="left:150px;top:220px;font:800 30px var(--mono);color:#8fb3c8;letter-spacing:4px">КИСЛОРОД</div>
+    <div class="bar" style="left:150px;top:280px;width:780px"><div class="f" id="o2f"></div><div class="t" id="o2t">18%</div></div>
+    <svg class="abs" id="lungs" style="left:150px;top:400px" width="160" height="160" viewBox="0 0 100 100"><path d="M48 10 V40 Q30 30 20 50 Q10 80 22 88 Q40 92 46 70Z M52 10 V40 Q70 30 80 50 Q90 80 78 88 Q60 92 54 70Z" fill="#ff8a8a"/></svg>
+    <div class="badge b-red" id="co2" style="left:360px;top:420px"><i>!</i><div>ДАТЧИК CO₂<small>НЕИСПРАВЕН</small></div></div>
+    <div class="badge b-red" id="link" style="left:360px;top:510px"><i>×</i><div>СВЯЗЬ С ЗЕМЛЁЙ: НЕТ</div></div>
+    <div id="big31">31 ЧАС<small>ДО КОНЦА ВОЗДУХА</small></div>
+    <svg class="abs" style="left:0;top:880px" width="1080" height="340" viewBox="0 0 1080 340"><g fill="#0a0d10"><circle cx="540" cy="110" r="80"/><path d="M420 340 Q430 230 540 205 Q650 230 660 340Z"/></g></svg>
+  </div>
+
+  <!-- S3: бортовой журнал -->
+  <div class="scene" id="s3">
+    <div class="hull"></div><div class="panelgrid"></div>
+    <div class="abs" id="tab3" style="left:160px;top:220px;width:760px;height:900px;background:#0b0f13;border:16px solid #2a3036;border-radius:40px;box-shadow:0 30px 60px rgba(0,0,0,.6)">
+      <div class="abs" style="left:-30px;top:120px;width:140px;height:44px;background:rgba(200,190,150,.7);transform:rotate(-20deg)"></div>
+      <div class="abs" style="left:40px;top:40px;font:800 30px var(--mono);color:#8fb3c8;letter-spacing:3px">БОРТОВОЙ ЖУРНАЛ</div>
+      <div class="abs" id="logs" style="left:40px;top:110px;right:40px"></div>
+      <div class="abs" id="wave3" style="left:40px;right:40px;top:600px;height:120px;display:flex;align-items:center;gap:8px"></div>
+      <div class="abs" id="quote3" style="left:40px;right:40px;top:740px;font:900 38px/1.25 var(--head);color:#ff6a6a;text-transform:uppercase">«НЕ ОТКРЫВАЙТЕ ТРЕТИЙ МОДУЛЬ»</div>
+    </div>
+  </div>
+
+  <!-- S4: люк №3 -->
+  <div class="scene" id="s4">
+    <div class="hull"></div>
+    <svg class="abs" style="left:0;top:150px" width="1080" height="1070" viewBox="0 0 1080 1070"><g fill="none" stroke="#2a3a48" stroke-width="10">
+      <rect x="40" y="40" width="1000" height="990"/><rect x="190" y="200" width="700" height="670"/><rect x="300" y="320" width="480" height="430"/></g>
+      <path d="M40 40 L300 320 M1040 40 L780 320 M40 1030 L300 750 M1040 1030 L780 750" stroke="#2a3a48" stroke-width="8"/>
+      <circle cx="540" cy="535" r="170" fill="#24303a" stroke="#4a5a68" stroke-width="16"/><text x="540" y="590" font-size="170" font-weight="900" text-anchor="middle" fill="#c8102e" font-family="Montserrat,Inter">3</text>
+      <circle id="lamp4" cx="540" cy="330" r="22" fill="#ff2a2a"/></svg>
+    <svg class="abs" id="hero4" style="left:340px;top:880px" width="400" height="340" viewBox="0 0 400 340"><circle cx="200" cy="110" r="74" fill="#050608"/><path d="M60 340 Q70 210 200 190 Q330 210 340 340Z" fill="#050608"/>
+      <g id="bang4"><circle cx="320" cy="40" r="38" fill="#fff"/><text x="320" y="62" font-size="60" font-weight="900" text-anchor="middle" fill="#e8323c" font-family="Montserrat,Inter">!</text></g></svg>
+    <div class="ico-row" style="top:200px;gap:40px">
+      <div class="ico" id="k1"><svg viewBox="0 0 100 100"><rect x="22" y="44" width="56" height="44" rx="6" fill="#c8102e"/><path d="M34 44 V30 a16 16 0 0 1 32 0 V44" stroke="#c8102e" stroke-width="8" fill="none"/></svg><em>НЕ ОТКРЫВАТЬ</em></div>
+      <div class="ico" id="k2"><svg viewBox="0 0 100 100"><rect x="32" y="18" width="36" height="72" rx="16" fill="#4fc3ff"/><rect x="42" y="8" width="16" height="14" fill="#8fb3c8"/><text x="50" y="62" font-size="20" font-weight="900" text-anchor="middle" fill="#0a141a" font-family="Montserrat,Inter">O₂</text></svg><em>ЗАПАСЫ</em></div>
+      <div class="ico" id="k3"><svg viewBox="0 0 100 100"><path d="M50 90 V50" stroke="#ffc94a" stroke-width="8"/><path d="M26 30 a34 34 0 0 1 48 0 M34 40 a20 20 0 0 1 32 0" stroke="#ffc94a" stroke-width="7" fill="none"/><circle cx="50" cy="50" r="7" fill="#ffc94a"/></svg><em>АНТЕННА · ЗА ЛЮКОМ</em></div>
+    </div>
+  </div>
+
+  <!-- S6: люк открывается -->
+  <div class="scene" id="s6">
+    <div class="hull"></div>
+    <div class="abs" id="glow6" style="left:280px;top:260px;width:520px;height:900px;background:radial-gradient(ellipse at 50% 50%,rgba(120,200,255,.9),rgba(40,120,200,.4) 40%,transparent 70%)"></div>
+    <div class="abs" id="hatchL" style="left:200px;top:260px;width:340px;height:900px;background:linear-gradient(90deg,#2a3640,#3a4854);border:8px solid #4a5a68;border-right:none;border-radius:40px 0 0 40px"></div>
+    <div class="abs" id="hatchR" style="left:540px;top:260px;width:340px;height:900px;background:linear-gradient(90deg,#3a4854,#2a3640);border:8px solid #4a5a68;border-left:none;border-radius:0 40px 40px 0"></div>
+    <svg class="abs" id="wheel6" style="left:420px;top:560px" width="240" height="240" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="none" stroke="#8fa0ae" stroke-width="18"/><path d="M120 20 V220 M20 120 H220 M50 50 L190 190 M190 50 L50 190" stroke="#8fa0ae" stroke-width="12"/></svg>
+    <div class="badge b-red" id="o2b" style="left:60px;top:150px"><i>O₂</i><div>КИСЛОРОД: <span id="o2v">18</span>%</div></div>
+    <div class="badge b-yellow" id="panic6" style="left:640px;top:150px"><i>!</i><div>ПАНИКА</div></div>
+    <svg class="abs" id="radar6" style="left:700px;top:880px" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="#04110a" stroke="#58ff9a" stroke-width="5"/><circle cx="150" cy="150" r="90" fill="none" stroke="#58ff9a" stroke-width="2" opacity=".5"/><circle cx="150" cy="150" r="40" fill="none" stroke="#58ff9a" stroke-width="2" opacity=".5"/>
+      <path id="sweep" d="M150 150 L150 10 A140 140 0 0 1 270 80Z" fill="#58ff9a" opacity=".35"/><circle id="blip" cx="210" cy="90" r="10" fill="#58ff9a"/></svg>
+  </div>
+
+  <!-- S7: ответ с Земли -->
+  <div class="scene" id="s7">
+    <div class="hull"></div><div class="panelgrid"></div>
+    <div class="screen" style="left:80px;top:220px;width:920px;height:760px;padding:50px 50px">
+      <div class="ln" id="r1">&gt; КОВЧЕГ-4, ВАС СЛЫШИМ</div>
+      <div class="ln red" id="r2">&gt; НАЗОВИТЕ СЕБЯ.</div>
+      <div class="ln red" id="r3">&gt; ЭКИПАЖ ЭВАКУИРОВАН</div>
+      <div class="ln red" id="r4">&gt; 14 ДНЕЙ НАЗАД.</div>
+      <div class="ln red" id="r5">&gt; НА БОРТУ НИКОГО</div>
+      <div class="ln red" id="r6">&gt; НЕ ДОЛЖНО БЫТЬ.</div>
+    </div>
+    <svg class="abs" id="ok7" style="left:820px;top:1000px" width="160" height="160" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#2bb36b"/><path d="M28 52 l14 14 l30 -32" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- S8: клиффхэнгер -->
+  <div class="scene" id="s8">
+    <div class="hull" style="filter:brightness(.6)"></div>
+    <div class="abs" id="gap8" style="left:520px;top:200px;width:40px;height:1000px;background:linear-gradient(180deg,rgba(120,200,255,.2),rgba(150,220,255,1),rgba(120,200,255,.2));box-shadow:0 0 80px 30px rgba(80,170,255,.5)"></div>
+    <div class="abs" style="left:160px;top:200px;width:360px;height:1000px;background:#2a3640;border:8px solid #4a5a68"></div>
+    <div class="abs" style="left:560px;top:200px;width:360px;height:1000px;background:#2a3640;border:8px solid #4a5a68"></div>
+    <svg class="abs" id="shadow8" style="left:470px;top:300px" width="140" height="700" viewBox="0 0 140 700"><ellipse cx="70" cy="80" rx="44" ry="56" fill="#000"/><path d="M10 700 Q14 220 70 170 Q126 220 130 700Z" fill="#000"/></svg>
+    <svg class="abs" id="hero8" style="left:40px;top:780px" width="420" height="440" viewBox="0 0 420 440"><circle cx="210" cy="140" r="90" fill="#050608"/><path d="M50 440 Q60 270 210 240 Q360 270 370 440Z" fill="#050608"/>
+      <path d="M290 90 A90 90 0 0 1 300 180" stroke="#8fd0ff" stroke-width="7" fill="none" opacity=".8"/>
+      <g id="q8"><circle cx="340" cy="40" r="40" fill="#fff"/><text id="q8t" x="340" y="64" font-size="62" font-weight="900" text-anchor="middle" fill="#3a8dff" font-family="Montserrat,Inter">?</text></g></svg>
+    <div id="notalone">ТЫ<br>НЕ ОДИН</div>
+    <div id="black8"></div>
+  </div>
+
+  <!-- S9: финал -->
+  <div class="scene" id="s9"><div class="abs" id="end" style="inset:0">
+    <h1>КОНЕЦ<br>1 ЧАСТИ</h1><h3>КТО ЗА ДВЕРЬЮ?</h3><p>Подпишись, чтобы узнать</p>
+  </div></div>
+  <div class="scene" id="s10"></div>
+
+  <div id="clock"></div>
+  <div id="cap"></div>
+  <canvas id="grain" width="270" height="480"></canvas>
+  <div id="alarm"></div><div id="tint"></div><div id="vign"></div><div id="scan"></div><div id="flash"></div>
+</div></div>
+
+<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
+<div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
+<div id="ui">
+  <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="85" step="0.01" value="0">
+  <span id="time">0:00 / 1:25</span><button id="vo">🔊 Голос: вкл</button><button id="fs">⛶</button>
+</div>
+
+<script>
+"use strict";
+const DUR = 85;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [85, 85]];
+const VDUR = WARP[WARP.length - 1][1];
+function warp(t, a, b) {
+  for (let i = 1; i < WARP.length; i++) { const p = WARP[i - 1], q = WARP[i];
+    if (t <= q[a] || i === WARP.length - 1) return p[b] + (t - p[a]) * (q[b] - p[b]) / ((q[a] - p[a]) || 1); }
+  return t;
+}
+const toNew = (t) => warp(t, 0, 1), toOld = (t) => warp(t, 1, 0);
+const frame = (t) => render(toOld(t));
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+/* ---------- timeline data ---------- */
+const SCENES = [
+  { id: "s1", s: 0, e: 11 }, { id: "s2", s: 11, e: 22 }, { id: "s3", s: 22, e: 32 }, { id: "s4", s: 32, e: 40 },
+  { id: "s6", s: 40, e: 52 }, { id: "s7", s: 52, e: 65 }, { id: "s8", s: 65, e: 77 },
+  { id: "s9", s: 77, e: 83 }, { id: "s10", s: 83, e: 85 },
+];
+const CLOCK = [[0, "«КОВЧЕГ-4» · ОРБИТА 412 КМ"], [11, "КИСЛОРОД: 31 ЧАС"], [40, "КИСЛОРОД: 30 ЧАСОВ"], [77, null]];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [["31 час", "тридцать один час"], ["Ковчег-4", "Ковчег-четыре"], ["14 дней", "четырнадцать дней"]];
+// вырезать из записи, если туда попала реклама
+const DROP = ["по ссылке", "спонсор"];
+const CAPS = [
+  [0.3, "{y:Прикинь:} ты открываешь глаза"], [1.8, "и не можешь понять, {r:где пол.}"], [3.4, "Ты {y:на орбите.}"], [4.4, "{r:Один.}"],
+  [5.2, "Как ты сюда попал —"], [6.2, "{y:не помнишь.}"], [7, "Зато знаешь главное:"], [8.2, "здесь {r:давно никого нет.}"],
+  [11.3, "Кислорода — {r:на 31 час.}"], [13, "Фильтр углекислого газа {r:сломан.}"], [15, "Связи с Землёй {r:нет.}"], [16.4, "А это значит,"],
+  [17.2, "что воздух закончится раньше,"], [18.8, "чем тебя {y:кто-то хватится.}"],
+  [22.3, "На стене — {y:бортовой журнал.}"], [24, "Последняя запись —"], [24.9, "{y:две недели назад.}"], [26.2, "Командир говорит всего одну фразу:"],
+  [28, "«Если кто-то это слышит —"], [29.4, "{r:не открывайте третий модуль».}"],
+  [32.3, "Проблема в том, что"], [33.2, "{y:единственная рабочая антенна}"], [34.6, "именно там."], [35.6, "За дверью,"], [36.4, "которую тебе {r:велели не открывать.}"],
+  [40.3, "Он {r:открывает люк.}"], [41.6, "Совсем чуть-чуть."], [42.8, "Внутри — {y:холод и тишина.}"], [44.4, "И {y:сигнал.}"], [45.3, "Слабый, но живой."],
+  [46.6, "Кто-то на Земле"], [47.6, "{y:всё ещё слушает} эту частоту."],
+  [52.3, "{g:«Ковчег-4, вас слышим».}"], [54, "Он почти смеётся от облегчения."], [55.8, "А потом приходит {r:вторая строка.}"], [57.4, "«Назовите себя."],
+  [58.4, "Экипаж эвакуирован"], [59.4, "{r:14 дней назад.}"], [60.6, "На борту {r:никого не должно быть».}"],
+  [65.3, "Он смотрит {y:на люк.}"], [66.6, "Если экипаж эвакуировали..."], [68.2, "то кто сейчас {r:стучит}"], [69.3, "изнутри третьего модуля —"], [70.6, "{r:в ответ?}"],
+  [77.5, "Конец первой части."], [78.9, "Подпишись, чтобы узнать, кто за дверью."], [83, ""],
+];
+const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
+function parseCap(str) {
+  const out = []; const re = /\{(\w):([^}]*)\}|([^{]+)/g; let m;
+  while ((m = re.exec(str))) {
+    const cls = m[1] || "", txt = m[2] !== undefined ? m[2] : m[3];
+    txt.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, cls }));
+  }
+  return out;
+}
+/* voice lines: group caption chunks into sentences (fallback browser voice) */
+const VOICE = [];
+(() => {
+  let cur = null;
+  CAPS.forEach(([t, s]) => {
+    let plain = s.replace(/\{\w:([^}]*)\}/g, "$1").trim();
+    if (!plain) return;
+    SPEAK.forEach(([a, b]) => { plain = plain.split(a).join(b); });
+    if (!cur) cur = { t, text: "" };
+    cur.text += (cur.text ? " " : "") + plain;
+    if (/[.!?:»—]$/.test(plain)) { VOICE.push(cur); cur = null; }
+  });
+  if (cur) VOICE.push(cur);
+})();
+
+/* ---------- static builders ---------- */
+function buildLogs() { const rows = [["128 ДН.", "ПЛАНОВАЯ ПРОВЕРКА"], ["97 ДН.", "СТЫКОВКА «ПРОГРЕСС»"], ["41 ДН.", "СБОЙ ДАТЧИКА CO₂"], ["19 ДН.", "МОДУЛЬ 3: ЗВУКИ?"], ["14 ДН.", "▶ КОМАНДИР · 0:07"]];
+  $("#logs").innerHTML = rows.map(([a, b], i) => `<div class="lg" style="display:flex;gap:24px;font:800 30px/2.1 var(--mono);color:${i === 4 ? "#ff6a6a" : "#8fb3c8"};border-bottom:2px solid #1a2630"><span style="width:150px">${a}</span><span>${b}</span></div>`).join(""); }
+function buildWave3() { let s = ""; for (let i = 0; i < 40; i++) s += '<u style="display:block;width:10px;border-radius:5px;background:#ff6a6a;height:6px"></u>'; $("#wave3").innerHTML = s; }
+
+/* ---------- per-frame updates ---------- */
+const show = (el, t, at, dur = 0.35, dy = 20) => {
+  const p = easeOut(prog(t, at, at + dur));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${0.96 + 0.04 * p})`;
+};
+const pop = (el, t, at) => { const p = prog(t, at, at + .35); const s = p < 1 ? easeOut(p) * (1 + .15 * Math.sin(p * Math.PI)) : 1; el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${s})`; };
+const cross = (el, t, at) => el.querySelector(".xl") && el.querySelector(".xl").setAttribute("stroke-dashoffset", 1 - easeOut(prog(t, at, at + .35)));
+const type = (el, t, a, b) => { el.style.width = (100 * prog(t, a, b)) + "%"; };
+const alarm = (t) => Math.max(0, Math.sin(t * Math.PI)) ** 6;
+
+const UPD = {
+  s1(lt, t) {
+    const ast = $("#astro1"), grab = easeInOut(prog(lt, 1.6, 2.6));
+    ast.style.transform = `translate(${Math.sin(lt * .6) * 30 * (1 - grab)}px,${Math.sin(lt * .8) * 24 * (1 - grab)}px) rotate(${lerp(-24, 0, grab) + Math.sin(lt) * 3}deg)`;
+    [["#fl1", 1, 40], ["#fl2", 1.3, 30], ["#fl3", .8, 50]].forEach(([id, k, a], i) => $(id).style.transform = `translate(${Math.sin(lt * .5 * k + i) * a}px,${Math.cos(lt * .4 * k + i) * a}px) rotate(${lt * 20 * k}deg)`);
+    pop($("#c1"), lt, 3.0); pop($("#c2"), lt, 3.2); pop($("#c3"), lt, 3.4);
+    cross($("#c1"), lt, 3.6); cross($("#c2"), lt, 4.2); cross($("#c3"), lt, 4.6);
+    show($("#lbl1"), lt, 3.4);
+  },
+  s2(lt) {
+    const v = 18 - .4 * prog(lt, 0, 11); $("#o2f").style.width = (v / 100 * 100 * 4) + "%"; $("#o2t").textContent = v.toFixed(1) + "%";
+    $("#lungs").style.opacity = .35 + .65 * Math.abs(Math.sin(lt * 1.2)) * (1 - prog(lt, 1, 8) * .6);
+    show($("#co2"), lt, 2.0); $("#co2").style.opacity = lt > 2.4 ? (Math.floor(lt * 3) % 2 ? 1 : .55) : +$("#co2").style.opacity;
+    show($("#link"), lt, 4.0);
+    const b = $("#big31"); show(b, lt, 0.4); b.style.transform += ` scale(${1 + .03 * Math.sin(lt * 4)})`;
+  },
+  s3(lt) {
+    pop($("#tab3"), lt, 0.1);
+    document.querySelectorAll("#logs .lg").forEach((e, i) => e.style.opacity = prog(lt, 0.6 + i * .3, 0.9 + i * .3));
+    const talk = lt > 5.6 && lt < 9.6;
+    document.querySelectorAll("#wave3 u").forEach((u, i) => u.style.height = (talk ? 8 + 90 * Math.abs(Math.sin(lt * 12 + i * .8)) * hash(i + Math.floor(lt * 14)) : 6) + "px");
+    const q = $("#quote3"); show(q, lt, 7.2); if (lt < 7.2) q.style.opacity = 0;
+  },
+  s4(lt) {
+    $("#lamp4").setAttribute("opacity", .4 + .6 * alarm(lt * 1.2));
+    $("#hero4").style.transform = `translateY(${-easeOut(prog(lt, 0, 2)) * 40}px) scale(${1 - .15 * easeOut(prog(lt, 0, 6))})`;
+    $("#bang4").setAttribute("opacity", prog(lt, 0.4, 0.7));
+    pop($("#k1"), lt, 0.8); pop($("#k2"), lt, 1.1); pop($("#k3"), lt, 1.4);
+    const g = prog(lt, 2.4, 2.8); $("#k3").style.boxShadow = g ? `0 0 ${40 + 20 * Math.sin(lt * 6)}px rgba(255,201,74,${.8 * g})` : ""; $("#k3").style.borderColor = g ? "#ffc94a" : "";
+  },
+  s6(lt) {
+    $("#wheel6").style.transform = `rotate(${easeInOut(prog(lt, 0.2, 1.4)) * 300}deg)`;
+    const open = easeOut(prog(lt, 1.4, 2.6)) * 70;
+    $("#hatchL").style.transform = `translateX(${-open}px)`; $("#hatchR").style.transform = `translateX(${open}px)`; $("#wheel6").style.left = (420 + open) + "px";
+    $("#glow6").style.opacity = prog(lt, 1.4, 2.6) * (.75 + .25 * Math.sin(lt * 3));
+    show($("#o2b"), lt, 0.3); $("#o2v").textContent = Math.round(lerp(18, 15, prog(lt, 0.5, 2.5)));
+    show($("#panic6"), lt, 1.6);
+    const r = $("#radar6"); show(r, lt, 4.1); $("#sweep").setAttribute("transform", `rotate(${lt * 140} 150 150)`);
+    $("#blip").setAttribute("opacity", lt > 4.4 ? Math.max(0, Math.sin(lt * 5)) : 0);
+  },
+  s7(lt) {
+    type($("#r1"), lt, 0.2, 1.4);
+    pop($("#ok7"), lt, 1.8); if (lt > 3.5) $("#ok7").style.opacity = 1 - prog(lt, 3.5, 4.0);
+    type($("#r2"), lt, 5.4, 6.2); type($("#r3"), lt, 6.4, 7.2); type($("#r4"), lt, 7.4, 8.0); type($("#r5"), lt, 8.6, 9.3); type($("#r6"), lt, 9.4, 10.1);
+  },
+  s8(lt) {
+    $("#gap8").style.opacity = .7 + .3 * Math.sin(lt * 11) * hash(Math.floor(lt * 8));
+    const turn = easeInOut(prog(lt, 0.3, 1.0)); $("#hero8").style.transform = `scaleX(${lerp(-1, 1, turn)})`;
+    const sh = prog(lt, 3.0, 4.2); $("#shadow8").style.opacity = sh;
+    const knock = [5.3, 5.7, 6.1]; let dx = 0; knock.forEach((k) => { if (lt > k) dx += Math.exp(-(lt - k) * 14) * Math.sin((lt - k) * 80) * 12; });
+    $("#s8").style.transform = `translateX(${dx}px)`;
+    $("#q8t").textContent = lt > 5.3 ? "!" : "?"; $("#q8t").setAttribute("fill", lt > 5.3 ? "#e8323c" : "#3a8dff");
+    const na = $("#notalone"); show(na, lt, 5.8); if (lt < 5.8) na.style.opacity = 0;
+    $("#black8").style.opacity = prog(lt, 10.6, 11.6);
+  },
+  s9(lt) {
+    const p = easeOut(prog(lt, 0.2, 0.8));
+    $("#end h1").style.transform = `scale(${1.3 - 0.3 * p})`; $("#end h1").style.opacity = p;
+    show($("#end h3"), lt, 0.9); show($("#end p"), lt, 1.8);
+  },
+  s10() {},
+};
+
+let lastCap = -1;
+function render(t) {
+  t = clamp(t, 0, DUR);
+  let gl = 0;
+  SCENES.forEach((sc, i) => {
+    const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
+    const el = document.getElementById(sc.id);
+    el.style.display = on ? "block" : "none";
+    if (on) {
+      const lt = t - sc.s;
+      el.style.opacity = Math.min(prog(lt, 0, .3), 1 - prog(t, sc.e - .25, sc.e));
+      if (i === SCENES.length - 1) el.style.opacity = 1;
+      UPD[sc.id](lt, t);
+    }
+    if (i > 0 && i < SCENES.length - 1) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.22);
+  });
+  const st = $("#stage");
+  if (gl > 0) {
+    const dx = (hash(t * 97) - .5) * 26 * gl;
+    st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,40,40,${.6 * gl})) drop-shadow(${-dx}px 0 0 rgba(255,200,120,${.5 * gl})) contrast(${1 + .4 * gl})`;
+  } else st.style.filter = "";
+  $("#flash").style.opacity = t > 70.3 && t < 70.9 ? 0.12 * (1 - prog(t, 70.3, 70.7)) : 0;
+  // плёночное зерно
+  const g = $("#grain"), gc = g.getContext("2d"), id = gc.createImageData(270, 480), sd = Math.floor(t * 24);
+  for (let i = 0; i < id.data.length; i += 4) { const v = hash(i * .013 + sd * 1.7) * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gc.putImageData(id, 0, 0);
+  $("#alarm").style.opacity = t < 22 ? .8 * alarm(t * .5) : (t > 32 && t < 40 ? .4 * alarm(t * .6) : 0);
+  let ck = null; CLOCK.forEach(([a, v]) => { if (t >= a) ck = v; });
+  const c = $("#clock"); c.style.display = ck ? "block" : "none";
+  if (ck) c.textContent = ck;
+  let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
+  const cap = $("#cap");
+  if (ci !== lastCap) {
+    lastCap = ci;
+    cap.innerHTML = ci < 0 ? "" : parseCap(CAPS[ci][1]).map((o) => `<span class="w ${o.cls}">${o.w}</span>`).join(" ");
+  }
+  if (ci >= 0) {
+    const a = CAPS[ci][0], b = capEnd(ci), ws = cap.querySelectorAll(".w"), n = ws.length;
+    const span = Math.min(b - a, 0.28 * n + 0.2) * 0.85;
+    ws.forEach((w, i) => {
+      const on = t >= a + (i / Math.max(1, n)) * span;
+      w.style.opacity = on ? 1 : 0.28;
+      w.style.transform = on ? `scale(${1 + 0.08 * (1 - prog(t, a + (i / n) * span, a + (i / n) * span + .18))})` : "scale(1)";
+    });
+    const pp = easeOut(prog(t, a, a + .2));
+    cap.style.transform = `translateY(${(1 - pp) * 18}px)`;
+    cap.style.opacity = Math.min(pp, 1 - prog(t, b - .08, b));
+  }
+  if (t >= SCENES[SCENES.length - 2].s) cap.style.opacity = 0; // на финальной заставке текст уже крупно
+}
+
+/* ---------- audio (Web Audio synth, works live and offline) ---------- */
+function noiseBuf(ctx, sec = 2) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b;
+}
+function scheduleAudio(ctx, out, from) {
+  const NB = noiseBuf(ctx, 3);
+  const T = (t) => ctx.currentTime + 0.05 + (toNew(t) - from); // story time t -> audio clock
+  const live = (t) => toNew(t) >= from - 0.01;
+  const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
+  const osc = (type, f, t0, a, peak, d, dest = out) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f; env(g, t0, a, peak, d); o.connect(g).connect(dest); o.start(t0); o.stop(t0 + a + d + .05); return o; };
+  const noise = (t0, dur, type, freq, q, peak, a = .01) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
+  // мрачный гул
+  const start = ctx.currentTime + 0.05, stop = T(DUR);
+  const dg = ctx.createGain(); dg.gain.setValueAtTime(0.0001, start); dg.gain.exponentialRampToValueAtTime(0.15, start + 2); dg.connect(out);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 220; lp.connect(dg);
+  [36.7, 37.0, 55.0, 43.6].forEach((f) => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(start); o.stop(stop); });
+  const ns = ctx.createBufferSource(); ns.buffer = NB; ns.loop = true; const nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 350; const ng = ctx.createGain(); ng.gain.value = .04; ns.connect(nf).connect(ng).connect(out); ns.start(start); ns.stop(stop);
+  dg.gain.setValueAtTime(0.15, Math.max(start + 2, T(76.8))); dg.gain.exponentialRampToValueAtTime(0.0001, Math.max(start + 2.1, T(77.2)));
+  const EV = [];
+  // гул вентиляции
+  EV.push([0.0, (t) => noise(t, 76, "bandpass", 180, .7, .06, 1.5)]);
+  // тиканье до финального обрыва
+  for (let t = 0.5; t < 70.6; t += 1.0) EV.push([t, (a) => { noise(a, .015, "highpass", 3500, 1, .18, .001); osc("sine", 2600, a, .001, .025, .02); }]);
+  // аварийный писк каждые 2 секунды (станция, кислород)
+  for (let t = 0.3; t < 22; t += 2.0) EV.push([t, (a) => { osc("square", 1250, a, .005, .05, .12); osc("square", 1250, a + .18, .005, .05, .12); }]);
+  EV.push([1.6, (t) => noise(t, .5, "bandpass", 1200, 1, .2, .05)]); // резкий вдох
+  [3.6, 4.2, 4.6].forEach((t) => EV.push([t, (a) => { osc("square", 160, a, .005, .08, .18); }]));
+  // кислород: треск электрики, сердце
+  [13.2, 13.9, 15.1].forEach((t) => EV.push([t, (a) => noise(a, .15, "highpass", 3000, 1, .2, .002)]));
+  for (let t = 16.0; t < 21.5; t += .85) { EV.push([t, (a) => osc("sine", 52, a, .01, .45, .16)]); EV.push([t + .18, (a) => osc("sine", 48, a, .01, .3, .18)]); }
+  // журнал: щелчок, помехи записи
+  EV.push([22.6, (t) => noise(t, .03, "highpass", 4000, 1, .4, .001)]);
+  EV.push([27.6, (t) => noise(t, 4.0, "bandpass", 1800, .8, .08, .05)]);
+  // коридор: скрип корпуса, гул, тишина
+  EV.push([32.4, (t) => { osc("sawtooth", 70, t, .3, .1, 2.2); noise(t, 1.6, "bandpass", 300, 4, .2, .3); }]);
+  EV.push([36.4, (t) => { osc("sine", 45, t, .01, .6, 1.4); }]);
+  // люк: металл, шипение, радар
+  EV.push([40.3, (t) => { [220, 331, 467].forEach((f, i) => osc("triangle", f, t, .002, .15 / (i + 1), 1.0)); }]);
+  EV.push([41.5, (t) => noise(t, 2.2, "highpass", 2500, 1, .25, .05)]);
+  for (let t = 44.4; t < 52; t += 1.3 - (t - 44.4) * .06) EV.push([t, (a) => osc("sine", 1600, a, .005, .1, .25)]);
+  // ответ: морзянка, удар
+  const morse = [.1, .1, .3, .1, .3, .3, .1, .1, .1, .3];
+  let mt = 52.2; morse.forEach((d) => { const at = mt; EV.push([at, (a) => osc("sine", 750, a, .005, .08, d)]); mt += d + .12; });
+  EV.push([55.8, (t) => { osc("sine", 45, t, .005, .8, 1.6); noise(t, .6, "lowpass", 700, 1, .4, .005); }]);
+  for (let k = 0; k < 24; k++) EV.push([57.4 + k * .12, (t) => noise(t, .02, "bandpass", 2400, 2, .1, .001)]);
+  // клиффхэнгер: сердце, три удара изнутри, тишина
+  for (let t = 65.2, p = .9; t < 70.4; t += p, p = Math.max(.45, p * .93)) { EV.push([t, (a) => osc("sine", 52, a, .01, .5, .16)]); EV.push([t + .18, (a) => osc("sine", 48, a, .01, .35, .18)]); }
+  [70.3, 70.7, 71.1].forEach((t) => EV.push([t, (a) => { [110, 166, 233].forEach((f, i) => osc("triangle", f, a, .002, .5 / (i + 1), .7)); noise(a, .1, "lowpass", 700, 1, .5, .002); }]));
+  EV.push([77.1, (t) => { osc("sine", 45, t, .005, .9, 2.4); noise(t, 1.2, "lowpass", 900, 1, .5, .005); }]);
+  SCENES.slice(1, -1).forEach((s) => EV.push([s.s - .08, (t) => noise(t, .18, "bandpass", 2000, .7, .2)]));
+  EV.forEach(([t, fn]) => { if (live(t)) fn(T(t)); });
+}
+
+let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+const vtrack = $("#vtrack"); let voiceFile = true; // записанная озвучка; если не загрузилась — голос браузера
+vtrack.addEventListener("error", () => { voiceFile = false; });
+function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
+function startAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    if (bus) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); }
+    bus = actx.createGain(); bus.gain.value = 0.9;
+    const comp = actx.createDynamicsCompressor(); bus.connect(comp).connect(actx.destination);
+    scheduleAudio(actx, bus, pos);
+  } catch (e) { console.warn("audio", e); }
+}
+function stopAudio() { vtrack.pause(); if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+const synth = window.speechSynthesis;
+let ruVoice = null;
+function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+function stopVoice() { if (synth) synth.cancel(); }
+function speak(text) {
+  if (!synth || !voiceOn || voiceFile) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
+  u.rate = 1.05; u.pitch = 0.8; u.volume = 1; synth.speak(u);
+}
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => toNew(v.t) >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function play() {
+  if (pos >= VDUR) pos = 0;
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
+  if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
+}
+function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, VDUR); frame(pos); updUI(pos); if (was) play(); }
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(VDUR)}`; }
+function loop() {
+  const t = now();
+  while (vIdx < VOICE.length && toNew(VOICE[vIdx].t) <= t) { if (t - toNew(VOICE[vIdx].t) < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
+  frame(t); updUI(t);
+  if (t >= VDUR) { pos = VDUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
+  raf = requestAnimationFrame(loop);
+}
+
+/* ---------- layout ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- init ---------- */
+buildLogs(); buildWave3();
+fit(); render(0);
+const qs = new URLSearchParams(location.search);
+if (qs.has("capture")) document.body.classList.add("capture");
+$("#seek").max = VDUR; updUI(0);
+if (qs.has("t")) { pos = +qs.get("t"); frame(pos); }
+$("#start").onclick = () => { $("#start").style.display = "none"; play(); };
+$("#pp").onclick = () => (playing ? pause() : play());
+$("#seek").oninput = (e) => seek(+e.target.value);
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; vtrack.muted = !voiceOn; if (!voiceOn) stopVoice(); };
+$("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
+addEventListener("keydown", (e) => {
+  if ($("#start").style.display !== "none") return;
+  if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === "ArrowRight") seek(now() + 5);
+  if (e.code === "ArrowLeft") seek(now() - 5);
+});
+
+/* hooks for automated checks / export */
+window.__render = frame;
+window.__DUR = VDUR;
+window.__renderAudio = async () => {
+  const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
+  const g = oc.createGain(); g.gain.value = 0.9; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
+  scheduleAudio(oc, g, 0);
+  const buf = await oc.startRendering();
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
+  const ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
+  const ws = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); ws(8, "WAVE"); ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++, o += 4) { v.setInt16(o, clamp(L[i], -1, 1) * 32767, true); v.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); }
+  let bin = ""; const u8 = new Uint8Array(ab); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+</script>
+</body>
+</html>
