@@ -24,7 +24,9 @@ OUT = os.path.join(ROOT, "voice.mp3")
 # Образец голоса для клонирования: *.wav в папке voice-ref/ (в git не попадает). Нет образца — RHVoice.
 REF_DIR = os.environ.get("VOICE_REF", os.path.join(ROOT, "voice-ref"))
 REFS = sorted(glob.glob(os.path.join(REF_DIR, "*.wav")))
-ENGINE = "xtts" if REFS else "rhvoice"
+# Готовая озвучка с сайта (одним файлом): VOICE_FILE=путь python3 tools/make-voice.py
+VOICE_FILE = os.environ.get("VOICE_FILE")
+ENGINE = "file" if VOICE_FILE else "xtts" if REFS else "rhvoice"
 CACHE = os.path.join(ROOT, "voice-cache")  # проверенные фразы, чтобы не генерировать заново (в git не попадает)
 REF_KEY = "|".join(f"{os.path.basename(r)}:{os.path.getsize(r)}" for r in REFS)
 os.makedirs(CACHE, exist_ok=True)
@@ -151,6 +153,105 @@ def synth_xtts():
         print(f"  [{k + 1}/{len(texts)}] {d:4.2f}s  совпадение {sim:.2f}{'  убрано лишних слов: %d' % extra if cut is not None and extra else ''}  {text}", flush=True)
     return out
 
+def from_file():
+    """Озвучка с сайта: чистим стыки, распознаём слова, режем на фразы сценария."""
+    import wave, difflib
+    from faster_whisper import WhisperModel
+    from num2words import num2words
+    SR = 24000
+    def load(f):
+        w = wave.open(f); return np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
+    def save(f, x):
+        with wave.open(f, "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
+            w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
+    def frames_db(x):
+        fr = SR // 100
+        return np.array([20 * np.log10(np.sqrt(np.mean(x[i:i + fr] ** 2)) + 1e-9) for i in range(0, len(x) - fr, fr)])
+    def fade(x, a, b):
+        x = x.copy(); na, nb = int(a * SR), int(b * SR)
+        if na: x[:na] *= np.linspace(0, 1, na)
+        if nb: x[-nb:] *= np.linspace(1, 0, nb)
+        return x
+
+    # 1. сайты склеивают mp3 по предложениям: на каждом стыке хвост «воздуха» и щелчок
+    data = open(VOICE_FILE, "rb").read()
+    starts = [m.start() for m in re.finditer(b"ID3", data)] or [0]
+    if starts[0] != 0: starts = [0] + starts
+    pieces = []
+    for i, (a, b) in enumerate(zip(starts, starts[1:] + [len(data)])):
+        part = os.path.join(tmp, f"src{i:02d}"); open(part, "wb").write(data[a:b])
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", part, "-ac", "1", "-ar", str(SR), part + ".wav"], check=True)
+        x = load(part + ".wav"); e = frames_db(x)
+        thr = np.percentile(e, 80) - 18                  # речь — не тише голоса на 18 дБ
+        idx = np.where(e[:-6] > thr)[0]                   # последние 60 мс — щелчок склейки
+        if not len(idx): continue
+        s0 = max(0, idx[0] * .01 - 0.03); s1 = min(len(x) / SR, (idx[-1] + 1) * .01 + 0.07)
+        pieces.append(fade(x[int(s0 * SR):int(s1 * SR)], 0.01, 0.04))
+    print(f"  кусочков: {len(pieces)}, стыки очищены")
+
+    # 2. слова в каждом кусочке
+    def norm(w):
+        w = w.lower().replace("ё", "е")
+        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
+        return re.sub(r"[^а-я ]", "", w).split()
+    asr = WhisperModel("medium", device="cpu", compute_type="int8")
+    heard = []  # (слово, кусочек, начало, конец)
+    for pi, x in enumerate(pieces):
+        x16 = np.interp(np.arange(int(len(x) * 16000 / SR)) * SR / 16000, np.arange(len(x)), x).astype(np.float32)
+        segs, _ = asr.transcribe(x16, language="ru", word_timestamps=True, beam_size=5)  # Whisper ждёт 16 кГц
+        heard += [(t, pi, w.start, w.end) for sg in segs for w in sg.words for t in norm(w.word)]
+    want, owner = [], []
+    for li, t in enumerate(texts):
+        for x in norm(t): want.append(x); owner.append(li)
+
+    # 3. каждому услышанному слову — фраза сценария (с допуском на ошибки распознавания)
+    sm = difflib.SequenceMatcher(None, want, [h[0] for h in heard], autojunk=False)
+    line_of = [None] * len(heard)
+    for op, a0, a1, b0, b1 in sm.get_opcodes():
+        if op in ("equal", "replace"):
+            for k in range(b0, b1):
+                line_of[k] = owner[min(a1 - 1, a0 + (k - b0) * (a1 - a0) // max(1, b1 - b0))]
+    for k in range(len(heard)):  # лишние слова — к соседней фразе
+        if line_of[k] is None: line_of[k] = line_of[k - 1] if k else 0
+    for k in range(1, len(heard)):  # порядок фраз не может идти назад
+        line_of[k] = max(line_of[k], line_of[k - 1])
+
+    # 4. если в одном кусочке две фразы — режем по самой длинной реальной паузе между ними
+    def split_point(x, lo, hi):
+        e = frames_db(x); thr = np.percentile(e, 80) - 25
+        lo_f, hi_f = max(0, int(lo * 100)), min(len(e), int(hi * 100) + 1)
+        best, run = None, None
+        for f in range(lo_f, hi_f):
+            if e[f] < thr:
+                run = (run[0], f) if run else (f, f)
+                if best is None or run[1] - run[0] > best[1] - best[0]: best = run
+            else: run = None
+        return ((best[0] + best[1] + 1) / 2 * .01) if best else (lo + hi) / 2
+    parts = {li: [] for li in range(len(texts))}
+    for pi, x in enumerate(pieces):
+        ws = [(k, h) for k, h in enumerate(heard) if h[1] == pi]
+        if not ws: continue
+        cut_at, cur = 0.0, line_of[ws[0][0]]
+        for (k0, h0), (k1, h1) in zip(ws, ws[1:]):
+            if line_of[k1] != cur:
+                c = split_point(x, h0[3] - 0.25, h1[2] + 0.15)
+                parts[cur].append(x[int(cut_at * SR):int(c * SR)]); cut_at, cur = c, line_of[k1]
+        parts[cur].append(x[int(cut_at * SR):])
+    missing = [texts[i] for i in parts if not parts[i]]
+    if missing: sys.exit("не нашёл в файле фразы: " + " | ".join(missing))
+
+    out = []
+    for li, text in enumerate(texts):
+        x = np.concatenate([np.concatenate([p, np.zeros(int(0.2 * SR), np.float32)]) for p in parts[li]])
+        e = frames_db(x); idx = np.where(e > np.percentile(e, 80) - 22)[0]
+        if len(idx): x = x[max(0, int((idx[0] * .01 - 0.02) * SR)):int(((idx[-1] + 1) * .01 + 0.06) * SR)]
+        path = os.path.join(tmp, f"{li:02d}.file.wav"); save(path, fade(x, 0.008, 0.03))
+        got = " ".join(h[0] for k, h in enumerate(heard) if line_of[k] == li)
+        print(f"  [{li + 1}/{len(texts)}] {len(x) / SR:4.2f}s  {text}   ← слышно: {got}", flush=True)
+        out.append((text, path, len(x) / SR))
+    return out
+
 def synth_rhvoice():
     raw = []
     for gi, text in enumerate(texts):
@@ -182,7 +283,7 @@ def synth_rhvoice():
     return out
 
 print("движок:", ENGINE, *(os.path.basename(r) for r in REFS))
-clips = synth_xtts() if ENGINE == "xtts" else synth_rhvoice()
+clips = from_file() if ENGINE == "file" else synth_xtts() if ENGINE == "xtts" else synth_rhvoice()
 
 # 2b. паузы внутри фраз — до живого темпа
 def tighten(path):
@@ -225,6 +326,7 @@ open(HTML, "w", encoding="utf-8").write(src)
 FX = {
     # клон уже звучит как образец — только лёгкая компрессия
     "xtts": "highpass=f=70,acompressor=threshold=0.12:ratio=2.5:attack=5:release=150,",
+    "file": "highpass=f=70,acompressor=threshold=0.12:ratio=2:attack=5:release=150,",
     # синтезатор: эквалайзер и тембр под образец
     "rhvoice": "highpass=f=75,equalizer=f=160:t=q:w=1:g=2,equalizer=f=1200:t=q:w=1:g=1.5,equalizer=f=3500:t=q:w=1.2:g=4,"
                "equalizer=f=8000:t=q:w=1:g=2,acompressor=threshold=0.1:ratio=3:attack=5:release=120,aecho=0.8:0.5:28:0.07,"
