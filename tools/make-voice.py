@@ -203,14 +203,16 @@ def from_file():
     asr = WhisperModel("medium", device="cpu", compute_type="int8")
     # фразы, которые надо вырезать из записи (реклама, лишняя концовка): const DROP = [...] в index.html ролика
     _dr = re.search(r"const DROP = (\[.*?\]);", src, re.S)
-    drop = [" ".join(norm(d)) for d in (__import__("json").loads(_dr.group(1)) if _dr else [])]
+    drop_raw = __import__("json").loads(_dr.group(1)) if _dr else []
+    drop = [" ".join(norm(d)) for d in drop_raw]
     heard = []  # (слово, кусочек, начало, конец)
     for pi, x in enumerate(pieces):
         x16 = np.interp(np.arange(int(len(x) * 16000 / SR)) * SR / 16000, np.arange(len(x)), x).astype(np.float32)
         segs, _ = asr.transcribe(x16, language="ru", word_timestamps=True, beam_size=5)  # Whisper ждёт 16 кГц
         ws = [(t, pi, w.start, w.end) for sg in segs for w in sg.words for t in norm(w.word)]
         said = " ".join(w[0] for w in ws)
-        if any(d and d in said for d in drop):
+        raw = " ".join(w.word.lower() for sg in segs for w in sg.words)  # латиница («VPN») в norm() пропадает
+        if any(d and d in said for d in drop) or any(d.lower() in raw for d in drop_raw):
             print(f"  вырезано: {said}"); continue
         heard += ws
     want, owner = [], []
