@@ -47,15 +47,15 @@ VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
 
 Нужно: `pip install faster-whisper num2words praat-parselmouth numpy`.
 
-## Второй ролик: «Я знаю, что будет в декабре» (1991)
+## «Попал в 1991 год» — часть 2: «Я знаю, что будет в декабре»
 
-Лежит в папке `kgb-1991/` (`index.html`, `SCENARIO.md` с текстом для озвучки, `kgb-1991.mp4`).
+Лежит в папке `1991-part2/` (`index.html`, `SCENARIO.md` с текстом для озвучки, `1991-part2.mp4`).
 Те же инструменты, с указанием папки:
 
 ```bash
-PROJECT=kgb-1991 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
+PROJECT=1991-part2 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
 ```
 
 ```bash
-node tools/export-mp4.js kgb-1991/kgb-1991.mp4 kgb-1991
+node tools/export-mp4.js 1991-part2/1991-part2.mp4 1991-part2
 ```

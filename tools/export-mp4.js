@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const OUT = process.argv[2], FPS = 30;
-// папка ролика: node tools/export-mp4.js out.mp4 kgb-1991 (по умолчанию — корень, «Тишина»)
+// папка ролика: node tools/export-mp4.js out.mp4 1991-part2 (по умолчанию — корень, «Тишина»)
 const PROJ = require('path').resolve(__dirname, '..', process.argv[3] || '.');
 (async () => {
   const b = await chromium.launch();

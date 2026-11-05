@@ -19,7 +19,7 @@ import parselmouth
 from parselmouth.praat import call
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Папка ролика: PROJECT=kgb-1991 python3 tools/make-voice.py (по умолчанию — «Тишина» в корне)
+# Папка ролика: PROJECT=1991-part2 python3 tools/make-voice.py (по умолчанию — «Тишина» в корне)
 PROJ = os.path.join(ROOT, os.environ.get("PROJECT", "."))
 HTML = os.path.join(PROJ, "index.html")
 OUT = os.path.join(PROJ, "voice.mp3")
@@ -201,11 +201,18 @@ def from_file():
         w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
         return re.sub(r"[^а-я ]", "", w).split()
     asr = WhisperModel("medium", device="cpu", compute_type="int8")
+    # фразы, которые надо вырезать из записи (реклама, лишняя концовка): const DROP = [...] в index.html ролика
+    _dr = re.search(r"const DROP = (\[.*?\]);", src, re.S)
+    drop = [" ".join(norm(d)) for d in (__import__("json").loads(_dr.group(1)) if _dr else [])]
     heard = []  # (слово, кусочек, начало, конец)
     for pi, x in enumerate(pieces):
         x16 = np.interp(np.arange(int(len(x) * 16000 / SR)) * SR / 16000, np.arange(len(x)), x).astype(np.float32)
         segs, _ = asr.transcribe(x16, language="ru", word_timestamps=True, beam_size=5)  # Whisper ждёт 16 кГц
-        heard += [(t, pi, w.start, w.end) for sg in segs for w in sg.words for t in norm(w.word)]
+        ws = [(t, pi, w.start, w.end) for sg in segs for w in sg.words for t in norm(w.word)]
+        said = " ".join(w[0] for w in ws)
+        if any(d and d in said for d in drop):
+            print(f"  вырезано: {said}"); continue
+        heard += ws
     want, owner = [], []
     for li, t in enumerate(texts):
         for x in norm(t): want.append(x); owner.append(li)
