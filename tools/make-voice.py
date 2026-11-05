@@ -19,8 +19,10 @@ import parselmouth
 from parselmouth.praat import call
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-HTML = os.path.join(ROOT, "index.html")
-OUT = os.path.join(ROOT, "voice.mp3")
+# Папка ролика: PROJECT=kgb-1991 python3 tools/make-voice.py (по умолчанию — «Тишина» в корне)
+PROJ = os.path.join(ROOT, os.environ.get("PROJECT", "."))
+HTML = os.path.join(PROJ, "index.html")
+OUT = os.path.join(PROJ, "voice.mp3")
 # Образец голоса для клонирования: *.wav в папке voice-ref/ (в git не попадает). Нет образца — RHVoice.
 REF_DIR = os.environ.get("VOICE_REF", os.path.join(ROOT, "voice-ref"))
 REFS = sorted(glob.glob(os.path.join(REF_DIR, "*.wav")))
@@ -43,11 +45,14 @@ GAP_MAX, GAP_KEEP = 0.25, 0.18  # паузы внутри фразы длинн�
 # Тембр под образец: разница усреднённых спектров (Гц, дБ), снята по образцу двумя проходами
 TIMBRE_EQ = "entry(100,0.0);entry(160,-10.1);entry(250,-12.8);entry(400,-5.2);entry(630,-11.9);entry(1000,0.0);entry(1600,-5.8);entry(2500,-13.0);entry(4000,-13.4);entry(6300,-4.2);entry(10000,1.8)"
 
-REPL = [("2:47", "два сорок семь"), ("40 децибел", "сорок децибел"), ("31 децибел", "тридцать один децибел"),
+REPL_TISHINA = [("2:47", "два сорок семь"), ("40 децибел", "сорок децибел"), ("31 децибел", "тридцать один децибел"),
         ("120 литров", "сто двадцать литров"), ("3:30", "три тридцать"), ("3:41", "Три сорок одна"),
         ("«", ""), ("»", ""), (" —", ",")]
 
 src = open(HTML, encoding="utf-8").read()
+# как читать текст субтитров вслух: const SPEAK = [["ГКЧП", "гэ-кэ-чэ-пэ"], ...] в index.html ролика
+_sp = re.search(r"const SPEAK = (\[.*?\]);", src, re.S)
+REPL = (__import__("json").loads(_sp.group(1)) + [["«", ""], ["»", ""], [" —", ","]]) if _sp else REPL_TISHINA
 body = re.search(r"const CAPS = \[\n(.*?)\n\];", src, re.S).group(1)
 ENTRY = re.compile(r'\[(\d+(?:\.\d+)?), "((?:[^"\\]|\\.)*)"\]')
 caps = [[float(t), txt] for t, txt in ENTRY.findall(body)]
