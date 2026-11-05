@@ -64,3 +64,15 @@ PROJECT=1991-part2 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-
 ```bash
 node tools/export-mp4.js 1991-part2/1991-part2.mp4 1991-part2
 ```
+
+## «Попал в 1812 год»
+
+- `1812-part1/` — часть 1 (`index.html`, `SCENARIO.md` с текстом для озвучки). Видео собирается после озвучки:
+
+```bash
+PROJECT=1812-part1 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
+```
+
+```bash
+node tools/export-mp4.js 1812-part1/1812-part1.mp4 1812-part1
+```
