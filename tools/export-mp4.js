@@ -2,13 +2,13 @@ const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const OUT = process.argv[2], FPS = 30;
-// папка ролика: node tools/export-mp4.js out.mp4 1991-part2 (по умолчанию — корень, «Тишина»)
+// папка ролика: node tools/export-mp4.js out.mp4 1991-part2 [страница.html] (по умолчанию — корень, «Тишина», index.html)
 const PROJ = require('path').resolve(__dirname, '..', process.argv[3] || '.');
 (async () => {
   const b = await chromium.launch();
   const p = await b.newPage({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2 });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto('file://' + require('path').join(PROJ, 'index.html') + '?capture', { waitUntil: 'load' });
+  await p.goto('file://' + require('path').join(PROJ, process.argv[4] || 'index.html') + '?capture', { waitUntil: 'load' });
   await p.waitForTimeout(1000);
   const DUR = await p.evaluate(() => window.__DUR);
   const wav = await p.evaluate(() => window.__renderAudio());

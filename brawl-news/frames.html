@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Новости: сезон 56 (рамки под скриншоты)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=JetBrains+Mono:wght@500;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0807; --ink:#f2efe8; --yellow:#ffc94a; --red:#e8323c; --green:#3ee08f; --cyan:#4fc3ff;
+  --amber:#ffb347; --paper:#e9e1cc; --soviet:#b3121b;
+  --head:"Montserrat","Inter","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+  --hand:"Caveat","DejaVu Sans",cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:var(--bg);overflow:hidden;transform-origin:50% 50%}
+.scene{position:absolute;inset:0;display:none}
+.abs{position:absolute}
+.wall{position:absolute;inset:0}
+/* date pill */
+#clock{position:absolute;top:64px;left:50%;transform:translateX(-50%);font:700 30px var(--mono);color:var(--yellow);
+  border:2px solid rgba(255,201,74,.45);padding:8px 22px;border-radius:8px;background:rgba(24,16,4,.65);letter-spacing:2px;z-index:20;white-space:nowrap}
+/* captions */
+#cap{position:absolute;left:60px;right:60px;top:1240px;min-height:260px;text-align:center;z-index:30;
+  font:900 82px/1.12 var(--head);text-transform:uppercase;letter-spacing:-1px;text-shadow:0 6px 30px rgba(0,0,0,.95)}
+#cap .w{display:inline-block;margin:0 .14em}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)}
+/* badges */
+.badge{position:absolute;display:flex;align-items:center;gap:14px;padding:12px 20px;border:2px solid;border-radius:10px;
+  font:800 30px var(--mono);white-space:nowrap}
+.badge small{display:block;font:500 16px var(--mono);opacity:.75;letter-spacing:1px;margin-top:2px}
+.badge i{font-style:normal;width:30px;height:30px;border:2px solid;border-radius:6px;display:grid;place-items:center;font-size:18px;flex:none}
+.b-red{color:#fff;border-color:var(--red);background:rgba(60,6,10,.85);box-shadow:0 0 30px rgba(232,50,60,.45)} .b-red i{color:var(--red)}
+.b-yellow{color:#fff;border-color:var(--yellow);background:rgba(40,28,4,.88);box-shadow:0 0 30px rgba(255,201,74,.35)} .b-yellow i{color:var(--yellow)}
+.b-green{color:#fff;border-color:var(--green);background:rgba(4,36,20,.85);box-shadow:0 0 30px rgba(62,224,143,.35)} .b-green i{color:var(--green)}
+/* tear-off calendar */
+.cal{position:absolute;background:#efe8d6;border-radius:8px;box-shadow:0 18px 40px rgba(0,0,0,.6);overflow:hidden;text-align:center;color:#1a1410}
+.cal .top{background:var(--soviet);color:#fff;font:800 26px var(--mono);letter-spacing:4px;padding:10px 0}
+.cal .big{font:900 92px/1 var(--head);margin-top:22px}
+.cal .mon{font:800 34px var(--head);letter-spacing:2px;margin-top:10px}
+.cal .rings{position:absolute;top:-2px;left:0;right:0;display:flex;justify-content:space-around}
+.cal .rings u{display:block;width:14px;height:22px;border-radius:7px;background:#111}
+/* S1 */
+#title1{position:absolute;left:60px;right:60px;top:150px;text-align:center;font:900 64px/1.08 var(--head);color:#fff;
+  text-transform:uppercase;text-shadow:0 0 30px rgba(232,50,60,.55),0 6px 20px rgba(0,0,0,.9);z-index:5}
+#title1 b{color:var(--red)}
+.portrait{position:absolute;border:14px solid #5b3d1e;box-shadow:inset 0 0 0 4px #8a6532,0 18px 40px rgba(0,0,0,.6);background:#17120e}
+.desk{position:absolute;background:linear-gradient(180deg,#4a3020 0,#2c1c12 14px,#1c120c 100%);box-shadow:0 -2px 0 #6b4a30}
+/* S2 */
+#paper{position:absolute;left:250px;top:300px;width:580px;height:760px;background:var(--paper);border-radius:4px;
+  box-shadow:0 30px 60px rgba(0,0,0,.7);padding:70px 50px 0 70px;transform-origin:50% 50%;
+  background-image:repeating-linear-gradient(180deg,transparent 0 58px,rgba(60,90,160,.25) 58px 60px),linear-gradient(90deg,transparent 46px,rgba(200,40,40,.35) 46px 48px,transparent 48px)}
+#paper .hl{font:700 46px/60px var(--hand);color:#1d2a5a;white-space:nowrap;overflow:hidden}
+#paper .scr{height:60px;position:relative}
+#paper .scr u{position:absolute;left:0;top:30px;height:4px;border-radius:2px;background:#2b3a72;opacity:.55}
+#stamp{position:absolute;left:310px;top:640px;font:900 64px var(--head);color:rgba(200,20,30,.85);border:8px solid rgba(200,20,30,.85);
+  padding:6px 20px;transform:rotate(-14deg);letter-spacing:4px}
+.bars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 120px,#15181c 120px 146px,#2b3036 146px 150px,transparent 150px 150px)}
+/* S5 */
+#door{position:absolute;left:300px;top:240px;width:480px;height:880px;border-radius:8px;
+  background:linear-gradient(90deg,#2a3138,#3b4550 50%,#2a3138);box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 0 0 16px #15181b}
+#slot{position:absolute;left:120px;top:250px;width:240px;height:80px;background:#030303;border:6px solid #1c2126;border-radius:4px;overflow:hidden}
+.rivet{position:absolute;width:14px;height:14px;border-radius:50%;background:#57626d;box-shadow:inset -2px -2px 3px rgba(0,0,0,.5)}
+/* end */
+#end{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 60px}
+#end h1{font:900 150px/0.95 var(--head);letter-spacing:-4px}
+#end h3{font:900 64px var(--head);color:var(--red);margin-top:14px}
+#end p{font:800 40px/1.3 var(--head);margin-top:70px;color:#e6e1d6;text-transform:uppercase}
+
+/* part 1 */
+.street-sky{position:absolute;inset:0;background:linear-gradient(180deg,#1b2238 0%,#3a3044 45%,#7a4a3a 70%,#2a1c18 100%)}
+.ico-row{position:absolute;left:0;right:0;display:flex;justify-content:center;gap:56px}
+.ico{position:relative;width:200px;height:200px;border-radius:24px;background:rgba(20,16,14,.82);border:2px solid rgba(255,255,255,.14);display:grid;place-items:center}
+.ico svg{width:130px;height:130px}
+.ico .x{position:absolute;inset:-6px}
+.ico em{position:absolute;bottom:-44px;left:0;right:0;text-align:center;font:800 24px var(--mono);font-style:normal;color:#cfc8bc;letter-spacing:2px}
+.bigcal{position:absolute;left:150px;top:170px;width:780px;background:#efe8d6;border-radius:12px;color:#1a1410;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.bigcal .top{background:var(--soviet);color:#fff;font:900 40px var(--head);padding:14px 0;text-align:center;letter-spacing:3px}
+.bigcal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:18px}
+.bigcal .grid div{position:relative;height:62px;display:grid;place-items:center;font:800 30px var(--mono)}
+.bigcal .grid div.x::after{content:"";position:absolute;left:14%;right:14%;top:50%;height:6px;background:#c8102e;transform:rotate(-30deg) scaleX(var(--k,0));transform-origin:left}
+.bigcal .grid div.d19{color:#c8102e}
+.bigcal .grid div.d19::before{content:"";position:absolute;inset:4px 18px;border:5px solid #c8102e;border-radius:50%;opacity:var(--k,0)}
+#dclock{position:absolute;right:150px;top:640px;font:800 92px var(--mono);color:var(--red);text-shadow:0 0 30px rgba(232,50,60,.6);background:#140707;padding:6px 26px;border-radius:12px;border:3px solid #3a1010}
+.kgb{position:absolute;left:90px;top:300px;width:900px;height:860px;background:linear-gradient(180deg,#3d3f44,#26282c);box-shadow:inset 0 0 80px rgba(0,0,0,.6)}
+.kgb .plate{position:absolute;left:180px;top:330px;width:540px;background:#7a5a1e;border:6px solid #a8822c;color:#f4e3b0;text-align:center;font:900 26px/1.25 var(--head);padding:14px 10px;letter-spacing:1px}
+.kgb .col{position:absolute;top:120px;width:60px;height:740px;background:linear-gradient(90deg,#4a4c52,#5d6066 50%,#3a3c41)}
+.kgb .door{position:absolute;left:330px;top:470px;width:240px;height:390px;background:#1a120c;border:8px solid #5a3a20}
+.kgb .win{position:absolute;width:110px;height:150px;background:#1a2230;border:6px solid #55585e}
+#ad{position:absolute;inset:0;background:linear-gradient(180deg,#0b0420,#1a0638 55%,#05010d);overflow:hidden}
+#ad .grid{position:absolute;left:-400px;right:-400px;bottom:0;height:820px;transform:perspective(500px) rotateX(62deg);transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(255,40,200,.75) 3px,transparent 3px),linear-gradient(90deg,rgba(0,230,255,.7) 3px,transparent 3px);background-size:100% 80px,90px 100%}
+#ad .logo{position:absolute;left:0;right:0;top:470px;text-align:center;font:900 132px var(--head);letter-spacing:4px;color:#fff;
+  text-shadow:0 0 18px #00e6ff,0 0 40px #00e6ff,4px 0 0 #ff2bd6,-4px 0 0 #00e6ff}
+#ad .tag{position:absolute;left:60px;right:60px;top:660px;text-align:center;font:800 36px/1.3 var(--mono);color:#ffd6f6;text-shadow:0 0 14px #ff2bd6}
+#ad .btn{position:absolute;left:290px;top:820px;width:500px;text-align:center;font:900 38px var(--head);color:#0b0420;background:#00e6ff;border-radius:16px;padding:22px 0;box-shadow:0 0 40px #00e6ff}
+#ad .lbl{position:absolute;left:40px;top:150px;font:700 22px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:6px;letter-spacing:2px}
+#ad .vhs{position:absolute;left:0;right:0;height:26px;background:rgba(255,255,255,.12);mix-blend-mode:screen}
+#hcl{position:absolute;left:0;right:0;top:560px;text-align:center;font:900 96px/1 var(--head);color:#fff;text-shadow:0 0 30px rgba(232,50,60,.6)}
+#hcl b{color:var(--red)}
+#black8{position:absolute;inset:0;background:#000;opacity:0;z-index:6}
+
+
+
+/* brawl news */
+#grain,#scan,#tint{display:none!important}
+#vign{background:radial-gradient(ellipse at 50% 45%,transparent 60%,rgba(0,0,0,.45) 100%)!important}
+#cap{top:1180px;font:900 86px/1.08 var(--head);-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 rgba(0,0,0,.35)}
+#cap .y{color:#ffd23f} #cap .r{color:#ff4d5e} #cap .g{color:#5dff8a}
+#clock{color:#111;background:#ffd23f;border:4px solid #111;font:900 30px var(--head);box-shadow:0 6px 0 #111}
+.rays{position:absolute;left:-600px;top:-180px;width:2280px;height:2280px}
+.hl{position:absolute;left:0;right:0;text-align:center;font:900 150px/0.95 var(--head);color:#fff;-webkit-text-stroke:14px #111;paint-order:stroke fill;text-shadow:0 12px 0 rgba(0,0,0,.35);text-transform:uppercase}
+.hl.y{color:#ffd23f} .hl.r{color:#ff4d5e} .hl.g{color:#5dff8a} .hl.s{font-size:96px}
+.card{position:absolute;border-radius:36px;border:8px solid #111;box-shadow:0 14px 0 rgba(0,0,0,.35);overflow:hidden}
+.card .nm{position:absolute;left:0;right:0;bottom:0;padding:14px 0;text-align:center;font:900 44px var(--head);color:#fff;background:#111;letter-spacing:1px}
+.tag{position:absolute;font:900 44px var(--head);color:#111;background:#5dff8a;border:6px solid #111;border-radius:20px;padding:10px 26px;box-shadow:0 8px 0 #111}
+#host{position:absolute;left:0;top:1490px;z-index:31;transform-origin:50% 100%}
+#host svg{display:block;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
+#subbtn{position:absolute;left:190px;top:820px;width:700px;text-align:center;font:900 70px var(--head);color:#fff;background:#ff2b2b;border:10px solid #111;border-radius:40px;padding:30px 0;box-shadow:0 16px 0 #111}
+/* рамки под скриншоты */
+.slot{border:10px solid #fff;border-radius:28px;background:rgba(0,0,0,.28);box-shadow:0 0 0 6px #111,0 14px 0 rgba(0,0,0,.35);display:grid;place-items:center}
+.slot b{font:900 34px var(--mono);color:rgba(255,255,255,.55);letter-spacing:3px}
+/* fx */
+#grain{position:absolute;inset:0;pointer-events:none;z-index:39;opacity:.07;mix-blend-mode:screen}
+#scan{position:absolute;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 2px,transparent 2px 4px)}
+#vign{position:absolute;inset:0;pointer-events:none;z-index:38;background:radial-gradient(ellipse at 50% 42%,transparent 45%,rgba(0,0,0,.82) 100%)}
+#tint{position:absolute;inset:0;pointer-events:none;z-index:37;background:rgba(120,70,20,.08);mix-blend-mode:multiply}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--red);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#fff;border:3px solid var(--red);padding:18px 40px;border-radius:14px;box-shadow:0 0 40px rgba(232,50,60,.5)}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+  <!-- S1: новый сезон -->
+  <div class="scene" id="s1"><div class="rays" id="r1" style="background:repeating-conic-gradient(#ffb300 0 10deg,#ff7a00 10deg 20deg)"></div>
+    <div class="hl y" id="h1a" style="top:420px">НОВЫЙ<br>СЕЗОН</div><div class="hl" id="h1b" style="top:760px">УЖЕ ЗДЕСЬ!</div>
+    <svg class="abs" id="conf1" style="left:0;top:0" width="1080" height="1200"></svg></div>
+
+  <!-- S2: сезон 56, «Мафия Brawl» -->
+  <div class="scene" id="s2"><div class="wall" style="background:repeating-linear-gradient(90deg,#1c1230 0 60px,#22173a 60px 64px)"></div>
+    <div class="rays" id="r2" style="background:repeating-conic-gradient(rgba(255,200,60,.16) 0 8deg,transparent 8deg 22deg)"></div>
+    <div class="tag" id="bp2" style="left:330px;top:200px;background:#ffd23f">⭐ BRAWL PASS</div>
+    <div class="hl" id="h2a" style="top:330px;font-size:190px">СЕЗОН<br><span style="color:#ffd23f">56</span></div>
+    <div class="abs slot" id="hat2" style="left:190px;top:715px;width:700px;height:215px"><b>BRAWL PASS</b></div>
+    <div class="hl s y" id="h2b" style="top:950px">«МАФИЯ BRAWL»</div></div>
+
+  <!-- S3: скины -->
+  <div class="scene" id="s3"><div class="rays" id="r3" style="background:repeating-conic-gradient(#ff4fa3 0 10deg,#ff7ac0 10deg 20deg)"></div>
+    <div class="hl s" id="h3" style="top:150px">НОВЫЕ СКИНЫ</div>
+    <div id="cd1" style="display:none"></div><div class="abs slot" id="cd2" style="left:140px;top:300px;width:800px;height:680px"><b>СКИНЫ</b></div><div id="cd3" style="display:none"></div>
+    <div class="tag" id="st3" style="left:300px;top:1020px">✓ В КОЛЛЕКЦИЮ</div></div>
+
+  <!-- S4: режим «Мега» -->
+  <div class="scene" id="s4"><div class="wall" style="background:radial-gradient(circle at 50% 45%,#5ccf4a,#2b8a2b 70%)"></div>
+    <svg class="abs" style="left:0;top:0" width="1080" height="1200" id="bush4"></svg>
+    <div class="hl s" id="h4a" style="top:300px">НОВЫЙ РЕЖИМ</div>
+    <svg class="abs" id="sk4" style="left:390px;top:440px" width="300" height="300" viewBox="0 0 100 100"><path d="M50 8 Q86 8 86 44 Q86 62 72 70 V86 H28 V70 Q14 62 14 44 Q14 8 50 8Z" fill="#fff" stroke="#111" stroke-width="5"/><circle cx="36" cy="46" r="10" fill="#111"/><circle cx="64" cy="46" r="10" fill="#111"/><path d="M40 74 v10 M50 74 v10 M60 74 v10" stroke="#111" stroke-width="4"/></svg>
+    <div class="hl g" id="h4b" style="top:770px;font-size:200px">«МЕГА»</div></div>
+
+  <!-- S5: шоудаун на 100 -->
+  <div class="scene" id="s5"><div class="rays" id="r5" style="background:repeating-conic-gradient(#3aa0ff 0 10deg,#5cb8ff 10deg 20deg)"></div>
+    <div class="hl" id="h5" style="top:170px"><span id="n5">20</span></div><div class="hl s" style="top:330px">ИГРОКОВ</div>
+    <div class="abs" id="grid5" style="left:140px;top:470px;width:800px;display:grid;grid-template-columns:repeat(10,1fr);gap:12px"></div>
+    <div class="tag" id="fn5" style="left:250px;top:1030px;background:#ffd23f">КАК В ФОРТНАЙТЕ?</div></div>
+
+  <!-- S6: что дальше -->
+  <div class="scene" id="s6"><div class="wall" style="background:linear-gradient(160deg,#ffb300,#ff6a00)"></div>
+    <div class="hl" id="h6" style="top:250px">ЧТО<br>ДАЛЬШЕ?</div>
+    <svg class="abs" style="left:90px;top:760px" width="900" height="200" viewBox="0 0 900 200"><path id="road6" d="M40 100 H860" stroke="#111" stroke-width="18" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <g id="dots6"><circle cx="150" cy="100" r="40" fill="#fff" stroke="#111" stroke-width="10"/><circle cx="450" cy="100" r="40" fill="#fff" stroke="#111" stroke-width="10"/><circle cx="750" cy="100" r="40" fill="#5dff8a" stroke="#111" stroke-width="10"/></g></svg></div>
+
+  <!-- S7: две награды -->
+  <div class="scene" id="s7"><div class="rays" id="r7" style="background:repeating-conic-gradient(#8a4dff 0 10deg,#a774ff 10deg 20deg)"></div>
+    <div class="hl s" id="h7" style="top:150px">2 НАГРАДЫ</div>
+    <svg class="abs" id="gift1" style="left:90px;top:420px" width="420" height="420" viewBox="0 0 100 100"><rect x="14" y="40" width="72" height="54" fill="#ff4d5e" stroke="#111" stroke-width="4"/><rect x="45" y="40" width="10" height="54" fill="#ffd23f"/>
+      <g id="lid1"><rect x="8" y="26" width="84" height="16" fill="#ff4d5e" stroke="#111" stroke-width="4"/><rect x="45" y="26" width="10" height="16" fill="#ffd23f"/></g></svg>
+    <svg class="abs" id="gift2" style="left:570px;top:420px" width="420" height="420" viewBox="0 0 100 100"><rect x="14" y="40" width="72" height="54" fill="#3aa0ff" stroke="#111" stroke-width="4"/><rect x="45" y="40" width="10" height="54" fill="#ffd23f"/>
+      <g id="lid2"><rect x="8" y="26" width="84" height="16" fill="#3aa0ff" stroke="#111" stroke-width="4"/><rect x="45" y="26" width="10" height="16" fill="#ffd23f"/></g></svg>
+    <div class="abs slot" id="pin7" style="left:110px;top:250px;width:380px;height:380px"><b>ПИН</b></div>
+    <div class="abs slot" id="skin7" style="left:590px;top:250px;width:380px;height:380px"><b>СКИН</b></div>
+    <div class="tag" id="t71" style="left:180px;top:900px">ПИН</div><div class="tag" id="t72" style="left:600px;top:900px;background:#ffd23f">СКИН НА ЭМЗ</div></div>
+
+  <!-- S8: ранний доступ -->
+  <div class="scene" id="s8"><div class="wall" style="background:radial-gradient(circle at 50% 45%,#1f3b8a,#0b1640 75%)"></div>
+    <div class="rays" id="r8" style="background:repeating-conic-gradient(rgba(120,200,255,.18) 0 6deg,transparent 6deg 18deg)"></div>
+    <div class="hl s y" id="h8" style="top:160px">РАННИЙ ДОСТУП</div>
+    <div class="abs slot" id="frog8" style="left:190px;top:330px;width:700px;height:480px"><b>ГРОМОЖАБ</b></div><svg id="bolt8" style="display:none"></svg>
+    <div class="hl g" id="h8b" style="top:830px;font-size:130px">ГРОМОЖАБ</div></div>
+
+  <!-- S9: секрет -->
+  <div class="scene" id="s9"><div class="wall" style="background:radial-gradient(circle at 50% 45%,#3a2a5a,#120a24 75%)"></div>
+    <svg class="abs" id="chest9" style="left:290px;top:380px" width="500" height="420" viewBox="0 0 120 100"><rect x="10" y="40" width="100" height="54" rx="6" fill="#8a5a2a" stroke="#111" stroke-width="5"/><path d="M10 40 Q60 0 110 40Z" fill="#a8723a" stroke="#111" stroke-width="5"/>
+      <rect x="50" y="46" width="20" height="22" rx="4" fill="#ffd23f" stroke="#111" stroke-width="4"/><path d="M60 54 v8" stroke="#111" stroke-width="4"/></svg>
+    <div class="hl r" id="h9" style="top:820px;font-size:200px">???</div></div>
+
+  <!-- S10: подписка -->
+  <div class="scene" id="s10"><div class="rays" id="r10" style="background:repeating-conic-gradient(#ff2b2b 0 10deg,#ff5050 10deg 20deg)"></div>
+    <div class="hl" id="h10" style="top:300px;font-size:96px">ПОДПИСЫВАЙТЕСЬ<br>НА КАНАЛ!</div>
+    <div id="subbtn">ПОДПИСАТЬСЯ</div>
+    <svg class="abs" id="bell10" style="left:800px;top:1000px" width="180" height="180" viewBox="0 0 100 100"><path d="M50 12 Q76 12 76 44 V64 L86 76 H14 L24 64 V44 Q24 12 50 12Z" fill="#ffd23f" stroke="#111" stroke-width="5"/><circle cx="50" cy="84" r="8" fill="#ffd23f" stroke="#111" stroke-width="5"/></svg>
+    <svg class="abs" id="cur10" style="left:640px;top:980px" width="110" height="140" viewBox="0 0 50 64"><path d="M4 2 L4 50 L16 40 L24 60 L32 56 L24 36 L40 36Z" fill="#fff" stroke="#111" stroke-width="4"/></svg></div>
+  <div class="scene" id="s11"><div class="rays" style="background:repeating-conic-gradient(#ff2b2b 0 10deg,#ff5050 10deg 20deg)"></div></div>
+
+  <!-- ведущий: оригинальный персонаж в стиле «пина» (эмоции переключаются по таймлайну) -->
+  <div id="host"><svg id="hostSvg" width="460" height="460" viewBox="0 0 240 240">
+    <g stroke="#111" stroke-width="8" stroke-linejoin="round">
+      <path d="M40 120 L28 70 L60 84 L66 40 L96 66 L120 24 L144 66 L174 40 L180 84 L212 70 L200 120 Z" fill="#1f8a96"/>
+      <ellipse cx="120" cy="140" rx="74" ry="80" fill="#f3c7a0"/>
+      <path id="redface" d="M52 120 Q120 100 188 120 L188 160 Q120 230 52 160Z" fill="#ff3b3b" stroke="none" opacity="0"/>
+      <path d="M46 116 Q60 70 92 88 L104 70 L120 90 L136 70 L148 88 Q180 70 194 116 Q160 96 120 100 Q80 96 46 116Z" fill="#1f8a96"/>
+      <path d="M48 112 Q120 84 192 112 L190 126 Q120 100 50 126Z" fill="#ff7a00"/>
+    </g>
+    <circle cx="74" cy="170" r="11" fill="#ff8aa0" opacity=".7"/><circle cx="166" cy="170" r="11" fill="#ff8aa0" opacity=".7"/>
+    <g class="ey" id="e_norm" fill="#111"><ellipse cx="92" cy="146" rx="9" ry="13"/><ellipse cx="148" cy="146" rx="9" ry="13"/></g>
+    <g class="ey" id="e_happy" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"><path d="M78 150 q14 -16 28 0"/><path d="M134 150 q14 -16 28 0"/></g>
+    <g class="ey" id="e_wink"><ellipse cx="92" cy="146" rx="9" ry="13" fill="#111"/><path d="M134 150 q14 -16 28 0" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/></g>
+    <g class="ey" id="e_shock" stroke="#111" stroke-width="5"><circle cx="92" cy="146" r="18" fill="#fff"/><circle cx="148" cy="146" r="18" fill="#fff"/><circle cx="92" cy="148" r="7" fill="#111"/><circle cx="148" cy="148" r="7" fill="#111"/></g>
+    <g class="ey" id="e_angry" stroke="#111" stroke-width="7" stroke-linecap="round"><path d="M74 128 L106 142"/><path d="M166 128 L134 142"/><circle cx="92" cy="154" r="6" fill="#fff"/><circle cx="148" cy="154" r="6" fill="#fff"/></g>
+    <g class="ey" id="e_cry"><path d="M78 146 q14 10 28 0 M134 146 q14 10 28 0" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/><path d="M86 150 v60 M154 150 v60" stroke="#4fd0ff" stroke-width="14" stroke-linecap="round"/></g>
+    <g class="mo" id="m_smile"><path d="M100 186 q20 18 40 0" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/></g>
+    <g class="mo" id="m_open"><ellipse cx="120" cy="190" rx="18" ry="16" fill="#7a1a1a" stroke="#111" stroke-width="6"/><ellipse cx="120" cy="198" rx="10" ry="5" fill="#ff6a7a"/></g>
+    <g class="mo" id="m_grin"><path d="M86 180 Q120 176 154 180 Q150 214 120 216 Q90 214 86 180Z" fill="#fff" stroke="#111" stroke-width="6"/><path d="M102 180 v32 M120 178 v38 M138 180 v32 M88 194 h64" stroke="#111" stroke-width="4"/></g>
+    <g class="mo" id="m_o"><circle cx="120" cy="194" r="8" fill="#111"/></g>
+    <g class="mo" id="m_angry"><rect x="92" y="182" width="56" height="24" rx="6" fill="#fff" stroke="#111" stroke-width="6"/><path d="M106 182 v24 M120 182 v24 M134 182 v24" stroke="#111" stroke-width="4"/></g>
+    <g class="mo" id="m_frown"><path d="M102 200 q18 -16 36 0" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/></g>
+    <g class="fx" id="x_heart"><path d="M196 34 C196 18 218 14 224 30 C230 14 252 18 252 34 C252 52 224 66 224 66 C224 66 196 52 196 34Z" fill="#ff4f8a" stroke="#111" stroke-width="6" transform="translate(-30 -10)"/></g>
+    <g class="fx" id="x_sweat"><path d="M206 20 Q226 50 216 64 Q200 72 194 58 Q190 46 206 20Z" fill="#4fd0ff" stroke="#111" stroke-width="6"/></g>
+    <g class="fx" id="x_steam"><path d="M180 30 q10 -18 26 -8 q16 -12 28 6 q14 8 0 22 h-50 q-16 -6 -4 -20z" fill="#bfe4ff" stroke="#111" stroke-width="6"/></g>
+    <g class="fx" id="x_thumb"><path d="M10 236 L10 176 Q10 168 18 168 L34 168 L40 140 Q44 128 56 132 Q62 136 60 148 L56 168 L74 168 Q84 170 82 182 L76 228 Q74 236 64 236Z" fill="#fff" stroke="#111" stroke-width="6"/></g>
+  </svg></div>
+
+  <div id="clock"></div>
+  <div id="cap"></div>
+  <canvas id="grain" width="270" height="480"></canvas>
+  <div id="tint"></div><div id="vign"></div><div id="scan"></div><div id="flash"></div>
+</div></div>
+
+<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
+<div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
+<div id="ui">
+  <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="43.6" step="0.01" value="0">
+  <span id="time">0:00 / 0:43</span><button id="vo">🔊 Голос: вкл</button><button id="fs">⛶</button>
+</div>
+
+<script>
+"use strict";
+const DUR = 43.6;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.7, 2.18], [4.2, 5.89], [6.7, 8.24], [8.7, 10.61], [10.5, 12.98], [12.4, 15.20], [15.5, 18.76], [19, 23.42], [20.6, 25.00], [24.3, 28.07], [26.8, 30.92], [28.7, 32.98], [31.3, 34.67], [34.5, 37.83], [36.2, 39.91], [38.8, 42.42], [42.6, 45.90], [43.6, 46.90]];
+const VDUR = WARP[WARP.length - 1][1];
+function warp(t, a, b) {
+  for (let i = 1; i < WARP.length; i++) { const p = WARP[i - 1], q = WARP[i];
+    if (t <= q[a] || i === WARP.length - 1) return p[b] + (t - p[a]) * (q[b] - p[b]) / ((q[a] - p[a]) || 1); }
+  return t;
+}
+const toNew = (t) => warp(t, 0, 1), toOld = (t) => warp(t, 1, 0);
+const frame = (t) => render(toOld(t));
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+/* ---------- timeline data ---------- */
+const SCENES = [
+  { id: "s1", s: 0, e: 1.6 }, { id: "s2", s: 1.6, e: 6.6 }, { id: "s3", s: 6.6, e: 12.3 }, { id: "s4", s: 12.3, e: 15.4 },
+  { id: "s5", s: 15.4, e: 20.5 }, { id: "s6", s: 20.5, e: 24.2 }, { id: "s7", s: 24.2, e: 31.2 }, { id: "s8", s: 31.2, e: 34.4 },
+  { id: "s9", s: 34.4, e: 38.6 }, { id: "s10", s: 38.6, e: 42.6 }, { id: "s11", s: 42.6, e: 43.6 },
+];
+const CLOCK = [[0, "НОВОСТИ · СЕЗОН 56"], [38.6, null]];
+// как читать субтитры вслух (для сверки с озвучкой)
+const SPEAK = [["56-й", "пятьдесят шестой"], ["Brawl Pass", "Бравл Пасс"], ["Brawl", "Бравл"], ["100 игроков", "сто игроков"]];
+const DROP = [];
+// эмоция ведущего по времени: smile, laugh, love, shock, wink, thumbs, angry, cry
+const HOST = [[0, "shock"], [1.6, "laugh"], [6.6, "love"], [12.3, "thumbs"], [15.4, "smile"], [18.5, "wink"], [20.5, "smile"], [24.2, "laugh"], [31.2, "thumbs"], [34.4, "shock"], [36.2, "wink"], [38.6, "love"]];
+const CAPS = [
+  [0.1, "{y:Новый сезон} уже здесь!"],
+  [1.7, "Сегодня стартовал"], [2.69, "{y:56-й сезон} Brawl Pass —"], [4.2, "он называется"], [5.15, "{r:«Мафия Brawl».}"],
+  [6.7, "Скины получились"], [7.67, "{y:очень сочные.}"], [8.7, "Мне больше всего зашёл"], [9.88, "{y:Барли} —"], [10.5, "забираю его в коллекцию."],
+  [12.4, "А ещё наконец вышел"], [13.53, "долгожданный режим {g:«Мега».}"],
+  [15.5, "Спорим, через пару лет"], [16.76, "дождёмся и шоудауна"], [17.86, "{y:на 100 игроков} —"], [19, "как в Фортнайте?"],
+  [20.6, "Теперь — {y:что нас ждёт}"], [22.26, "в ближайшее время."],
+  [24.3, "В новой анимации"], [25.28, "спрятали {y:две награды:}"], [26.8, "первая — {g:пин,}"], [27.8, "вторая —"], [28.7, "{g:новый скин на Эмз.}"],
+  [31.3, "Скоро стартует {y:ранний доступ}"], [33.16, "к {g:Громожабу.}"],
+  [34.5, "И ещё кое-что {r:секретное} —"], [36.2, "разработчики не дают нам скучать."],
+  [38.8, "{y:Подписывайтесь на канал,}"], [40.33, "чтобы ничего не пропустить!"], [42.6, ""],
+];
+const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
+function parseCap(str) {
+  const out = []; const re = /\{(\w):([^}]*)\}|([^{]+)/g; let m;
+  while ((m = re.exec(str))) {
+    const cls = m[1] || "", txt = m[2] !== undefined ? m[2] : m[3];
+    txt.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, cls }));
+  }
+  return out;
+}
+/* voice lines: group caption chunks into sentences (fallback browser voice) */
+const VOICE = [];
+(() => {
+  let cur = null;
+  CAPS.forEach(([t, s]) => {
+    let plain = s.replace(/\{\w:([^}]*)\}/g, "$1").trim();
+    if (!plain) return;
+    SPEAK.forEach(([a, b]) => { plain = plain.split(a).join(b); });
+    if (!cur) cur = { t, text: "" };
+    cur.text += (cur.text ? " " : "") + plain;
+    if (/[.!?:»—]$/.test(plain)) { VOICE.push(cur); cur = null; }
+  });
+  if (cur) VOICE.push(cur);
+})();
+
+/* ---------- static builders ---------- */
+function buildConfetti() { let s = ""; for (let i = 0; i < 40; i++) s += `<rect class="cf" x="${hash(i) * 1080}" y="0" width="18" height="30" fill="${["#ff4d5e", "#5dff8a", "#3aa0ff", "#fff", "#8a4dff"][i % 5]}"/>`; $("#conf1").innerHTML = s; }
+function buildBush() { let s = ""; for (let i = 0; i < 14; i++) s += `<circle cx="${hash(i + 3) * 1080}" cy="${hash(i + 30) * 1100}" r="${50 + hash(i + 7) * 40}" fill="#1f7a24" opacity=".7"/>`; $("#bush4").innerHTML = s; }
+function buildGrid5() { let s = ""; for (let i = 0; i < 100; i++) s += `<div style="aspect-ratio:1;border-radius:50%;background:#fff;border:5px solid #111;opacity:0"></div>`; $("#grid5").innerHTML = s; }
+
+/* ---------- per-frame updates ---------- */
+const show = (el, t, at, dur = 0.3, dy = 30) => {
+  const p = easeOut(prog(t, at, at + dur));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${0.9 + 0.1 * p})`;
+};
+const pop = (el, t, at, rot = 0) => { const p = prog(t, at, at + .3); const s = p < 1 ? easeOut(p) * (1 + .25 * Math.sin(p * Math.PI)) : 1; el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${s}) rotate(${rot}deg)`; };
+const spin = (el, lt, k = 6) => { el.style.transform = `rotate(${lt * k}deg)`; };
+const punch = (sc, lt) => { sc.style.transform = `scale(${1 + .12 * (1 - easeOut(prog(lt, 0, .35)))})`; };
+
+const UPD = {
+  s1(lt) { punch($("#s1"), lt); spin($("#r1"), lt, 20); pop($("#h1a"), lt, 0.0, -4); pop($("#h1b"), lt, 0.35, 3);
+    document.querySelectorAll("#conf1 .cf").forEach((c, i) => c.setAttribute("transform", `translate(0 ${((lt * (500 + hash(i) * 400) + hash(i + 9) * 1200) % 1300) - 100}) rotate(${lt * 300 + i * 20} ${+c.getAttribute("x") + 9} 15)`)); },
+  s2(lt) { punch($("#s2"), lt); spin($("#r2"), lt, 8); pop($("#bp2"), lt, 0.1); pop($("#h2a"), lt, 0.9, -3); pop($("#hat2"), lt, 2.6); pop($("#h2b"), lt, 3.3, 2);
+    $("#hat2").style.transform += ` translateY(${Math.sin(lt * 4) * 6}px)`; },
+  s3(lt) { punch($("#s3"), lt); spin($("#r3"), lt, 12); pop($("#h3"), lt, 0.05);
+    [["#cd1", .3, -6], ["#cd2", .5, 0], ["#cd3", .7, 6]].forEach(([id, a, r]) => pop($(id), lt, a, r));
+    const fx = prog(lt, 3.3, 3.7); $("#cd2").style.transform = `scale(${1 + .12 * fx + .03 * fx * Math.sin(lt * 6)})`; $("#cd2").style.boxShadow = fx ? `0 0 ${60 + 20 * Math.sin(lt * 6)}px #ffd23f, 0 14px 0 rgba(0,0,0,.35)` : "";
+    pop($("#st3"), lt, 4.0, -4); },
+  s4(lt) { punch($("#s4"), lt); pop($("#h4a"), lt, 0.05); pop($("#sk4"), lt, 0.6); pop($("#h4b"), lt, 1.1, -3);
+    $("#sk4").style.transform += ` rotate(${Math.sin(lt * 8) * 6}deg)`; },
+  s5(lt) { punch($("#s5"), lt); spin($("#r5"), lt, 12);
+    const n = Math.round(lerp(20, 100, easeInOut(prog(lt, 1.2, 2.6)))); $("#n5").textContent = n;
+    document.querySelectorAll("#grid5 div").forEach((d, i) => d.style.opacity = i < n ? 1 : 0.15);
+    pop($("#fn5"), lt, 3.6, -3); },
+  s6(lt) { punch($("#s6"), lt); pop($("#h6"), lt, 0.05, -3); $("#road6").setAttribute("stroke-dashoffset", 1 - easeInOut(prog(lt, 0.6, 1.8)));
+    document.querySelectorAll("#dots6 circle").forEach((c, i) => c.setAttribute("opacity", prog(lt, 0.8 + i * .4, 1.0 + i * .4))); },
+  s7(lt) { punch($("#s7"), lt); spin($("#r7"), lt, 12); pop($("#h7"), lt, 0.05);
+    pop($("#gift1"), lt, 0.3); pop($("#gift2"), lt, 0.5);
+    const o1 = easeOut(prog(lt, 2.5, 2.9)), o2 = easeOut(prog(lt, 4.4, 4.8));
+    $("#lid1").setAttribute("transform", `translate(${-30 * o1} ${-40 * o1}) rotate(${-30 * o1} 50 34)`); $("#lid2").setAttribute("transform", `translate(${30 * o2} ${-40 * o2}) rotate(${30 * o2} 50 34)`);
+    pop($("#pin7"), lt, 2.6); pop($("#skin7"), lt, 4.5); pop($("#t71"), lt, 2.8, -4); pop($("#t72"), lt, 4.7, 3);
+    if (lt < 2.6) $("#pin7").style.opacity = 0; if (lt < 4.5) $("#skin7").style.opacity = 0; },
+  s8(lt) { punch($("#s8"), lt); spin($("#r8"), lt, 10); pop($("#h8"), lt, 0.05); pop($("#frog8"), lt, 0.6); pop($("#h8b"), lt, 1.6, -3);
+    $("#bolt8").setAttribute("opacity", Math.sin(lt * 14) > 0 ? 1 : .3); $("#frog8").style.transform += ` translateY(${-Math.abs(Math.sin(lt * 5)) * 20}px)`; },
+  s9(lt) { punch($("#s9"), lt); pop($("#chest9"), lt, 0.1); pop($("#h9"), lt, 0.9);
+    $("#chest9").style.transform += ` rotate(${lt > 1.2 ? Math.sin(lt * 30) * 4 * (Math.sin(lt * 2) > 0 ? 1 : 0) : 0}deg)`; },
+  s10(lt) { punch($("#s10"), lt); spin($("#r10"), lt, 12); pop($("#h10"), lt, 0.05, -2); pop($("#subbtn"), lt, 0.6); pop($("#bell10"), lt, 1.2);
+    $("#bell10").style.transform += ` rotate(${Math.sin(lt * 18) * 14 * (lt > 1.5 ? 1 : 0)}deg)`;
+    const c = easeInOut(prog(lt, 1.0, 1.8)); $("#cur10").style.transform = `translate(${-c * 160}px,${-c * 80}px) scale(${lt > 1.9 && lt < 2.1 ? .85 : 1})`;
+    if (lt > 2.0) { $("#subbtn").textContent = "ВЫ ПОДПИСАНЫ ✓"; $("#subbtn").style.background = "#555"; } else { $("#subbtn").textContent = "ПОДПИСАТЬСЯ"; $("#subbtn").style.background = "#ff2b2b"; } },
+  s11() {},
+};
+// ведущий: живёт поверх всех сцен
+const FACES = { smile: ["norm", "smile"], laugh: ["happy", "grin"], love: ["happy", "smile", "heart"], shock: ["shock", "o", "sweat"],
+  wink: ["wink", "grin"], thumbs: ["happy", "grin", "thumb"], angry: ["angry", "angry", "steam", "red"], cry: ["cry", "frown"] };
+function updHost(t) {
+  const h = $("#host"); if (!h) return;
+  const end = SCENES[SCENES.length - 1].s;
+  h.style.display = t < end ? "block" : "none";
+  const intro = easeOut(prog(t, 0.2, 0.7));
+  const talk = CAPS.some(([a], i) => t >= a && t < a + 1.2 && CAPS[i][1]);
+  let ex = "smile"; HOST.forEach(([a, e]) => { if (t >= a) ex = e; });
+  const [eye, mouth, fx, red] = [...FACES[ex], null, null];
+  const m = talk && Math.sin(t * 16) > 0 ? "open" : mouth;
+  document.querySelectorAll("#hostSvg .ey").forEach((g) => g.style.display = g.id === "e_" + eye ? "" : "none");
+  document.querySelectorAll("#hostSvg .mo").forEach((g) => g.style.display = g.id === "m_" + m ? "" : "none");
+  document.querySelectorAll("#hostSvg .fx").forEach((g) => g.style.display = g.id === "x_" + fx || (red && g.id === "x_steam") ? "" : "none");
+  $("#redface").setAttribute("opacity", ex === "angry" ? .55 : 0);
+  const pulse = 1 + .06 * Math.max(0, Math.sin(t * 8));
+  ["#x_heart", "#x_sweat", "#x_thumb"].forEach((id) => $(id).setAttribute("transform", `translate(${id === "#x_thumb" ? 46 : 220} ${id === "#x_thumb" ? 200 : 40}) scale(${pulse}) translate(${id === "#x_thumb" ? -46 : -220} ${id === "#x_thumb" ? -200 : -40})`));
+  const wave = t > 38.6 ? Math.sin(t * 9) * 8 : Math.sin(t * 2) * 3;
+  h.style.transform = `translateY(${(1 - intro) * 300 + Math.abs(Math.sin(t * 6)) * -10}px) rotate(${wave}deg)`;
+}
+
+let lastCap = -1;
+function render(t) {
+  t = clamp(t, 0, DUR);
+  let gl = 0;
+  SCENES.forEach((sc, i) => {
+    const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
+    const el = document.getElementById(sc.id);
+    el.style.display = on ? "block" : "none";
+    if (on) {
+      const lt = t - sc.s;
+      el.style.opacity = Math.min(prog(lt, 0, .3), 1 - prog(t, sc.e - .25, sc.e));
+      if (i === SCENES.length - 1) el.style.opacity = 1;
+      UPD[sc.id](lt, t);
+    }
+    if (i > 0 && i < SCENES.length - 1) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.22);
+  });
+  const st = $("#stage");
+  if (gl > 0) {
+    const dx = (hash(t * 97) - .5) * 26 * gl;
+    st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,40,40,${.6 * gl})) drop-shadow(${-dx}px 0 0 rgba(255,200,120,${.5 * gl})) contrast(${1 + .4 * gl})`;
+  } else st.style.filter = "";
+  $("#flash").style.opacity = t > 0 && t < 0.25 ? 0.5 * (1 - prog(t, 0, 0.25)) : 0;
+  // плёночное зерно
+  const g = $("#grain"), gc = g.getContext("2d"), id = gc.createImageData(270, 480), sd = Math.floor(t * 24);
+  for (let i = 0; i < id.data.length; i += 4) { const v = hash(i * .013 + sd * 1.7) * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gc.putImageData(id, 0, 0);
+  updHost(t);
+  let ck = null; CLOCK.forEach(([a, v]) => { if (t >= a) ck = v; });
+  const c = $("#clock"); c.style.display = ck ? "block" : "none";
+  if (ck) c.textContent = ck;
+  let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
+  const cap = $("#cap");
+  if (ci !== lastCap) {
+    lastCap = ci;
+    cap.innerHTML = ci < 0 ? "" : parseCap(CAPS[ci][1]).map((o) => `<span class="w ${o.cls}">${o.w}</span>`).join(" ");
+  }
+  if (ci >= 0) {
+    const a = CAPS[ci][0], b = capEnd(ci), ws = cap.querySelectorAll(".w"), n = ws.length;
+    const span = Math.min(b - a, 0.28 * n + 0.2) * 0.85;
+    ws.forEach((w, i) => {
+      const on = t >= a + (i / Math.max(1, n)) * span;
+      w.style.opacity = on ? 1 : 0.28;
+      w.style.transform = on ? `scale(${1 + 0.08 * (1 - prog(t, a + (i / n) * span, a + (i / n) * span + .18))})` : "scale(1)";
+    });
+    const pp = easeOut(prog(t, a, a + .2));
+    cap.style.transform = `translateY(${(1 - pp) * 18}px)`;
+    cap.style.opacity = Math.min(pp, 1 - prog(t, b - .08, b));
+  }
+  if (t >= SCENES[SCENES.length - 2].s) cap.style.opacity = 0; // на финальной заставке текст уже крупно
+}
+
+/* ---------- audio (Web Audio synth, works live and offline) ---------- */
+function noiseBuf(ctx, sec = 2) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b;
+}
+function scheduleAudio(ctx, out, from) {
+  const NB = noiseBuf(ctx, 3);
+  const T = (t) => ctx.currentTime + 0.05 + (toNew(t) - from); // story time t -> audio clock
+  const live = (t) => toNew(t) >= from - 0.01;
+  const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
+  const osc = (type, f, t0, a, peak, d, dest = out) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f; env(g, t0, a, peak, d); o.connect(g).connect(dest); o.start(t0); o.stop(t0 + a + d + .05); return o; };
+  const noise = (t0, dur, type, freq, q, peak, a = .01) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
+  // мрачный гул
+  const start = ctx.currentTime + 0.05, stop = T(DUR);
+  const dg = ctx.createGain(); dg.gain.setValueAtTime(0.0001, start); dg.gain.exponentialRampToValueAtTime(0.15, start + 2); dg.connect(out);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 220; lp.connect(dg);
+  [].forEach((f) => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(start); o.stop(stop); });
+  const ns = ctx.createBufferSource(); ns.buffer = NB; ns.loop = true; const nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 350; const ng = ctx.createGain(); ng.gain.value = 0; ns.connect(nf).connect(ng).connect(out); ns.start(start); ns.stop(stop);
+  dg.gain.setValueAtTime(0.15, Math.max(start + 2, T(42.4))); dg.gain.exponentialRampToValueAtTime(0.0001, Math.max(start + 2.1, T(42.8)));
+  const EV = [];
+  // бодрый бит 128 BPM: бочка, хэт, бас — тихо, под голосом приглушается при экспорте
+  const B = 60 / 128, kick = (a) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(150, a); o.frequency.exponentialRampToValueAtTime(48, a + .12); env(g, a, .002, .55, .2); o.connect(g).connect(out); o.start(a); o.stop(a + .25); };
+  const bass = [55, 55, 65.4, 49];
+  for (let i = 0, t = 0.05; t < 42.4; i++, t += B) {
+    EV.push([t, (a) => kick(a)]);
+    EV.push([t + B / 2, (a) => noise(a, .03, "highpass", 7000, 1, .12, .001)]);
+    if (i % 2 === 0) EV.push([t, (a) => osc("square", bass[Math.floor(i / 8) % 4], a, .005, .05, B * 1.6)]);
+    if (i % 4 === 2) EV.push([t, (a) => noise(a, .1, "bandpass", 1800, 1, .12, .002)]);
+  }
+  // свуши на каждую смену сцены и «поп» на заголовки
+  SCENES.slice(1, -1).forEach((s) => EV.push([s.s - .12, (t) => { const f = noise(t, .25, "bandpass", 900, 1.2, .25, .05); f.frequency.exponentialRampToValueAtTime(5000, t + .25); }]));
+  [0.0, 0.35, 2.5, 6.6, 12.3, 13.4, 15.4, 20.5, 24.5, 31.2, 34.4, 38.6].forEach((t) => EV.push([t, (a) => { osc("sine", 660, a, .003, .12, .08); osc("sine", 990, a + .05, .003, .08, .08); }]));
+  // счётчик игроков, подарки, ранний доступ, сундук, подписка
+  for (let k = 0; k < 16; k++) EV.push([16.6 + k * .09, (t) => osc("square", 600 + k * 40, t, .002, .04, .05)]);
+  [26.7, 28.6].forEach((t) => EV.push([t, (a) => { [784, 988, 1175, 1568].forEach((f, i) => osc("triangle", f, a + i * .06, .003, .1, .25)); }]));
+  EV.push([31.8, (t) => { noise(t, .6, "highpass", 3000, 1, .2, .005); osc("sawtooth", 80, t, .005, .2, .4); }]);
+  for (let k = 0; k < 6; k++) EV.push([35.6 + k * .5, (t) => noise(t, .06, "lowpass", 500, 1, .3, .002)]);
+  EV.push([40.6, (t) => { osc("sine", 1200, t, .003, .15, .2); osc("sine", 1600, t + .1, .003, .12, .3); }]);
+  EV.push([40.0, (t) => { for (let k = 0; k < 6; k++) osc("triangle", 1568, t + k * .12, .002, .06, .1); }]);
+  EV.forEach(([t, fn]) => { if (live(t)) fn(T(t)); });
+}
+
+let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+const vtrack = $("#vtrack"); let voiceFile = true; // записанная озвучка; если не загрузилась — голос браузера
+vtrack.addEventListener("error", () => { voiceFile = false; });
+function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
+function startAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    if (bus) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); }
+    bus = actx.createGain(); bus.gain.value = 0.9;
+    const comp = actx.createDynamicsCompressor(); bus.connect(comp).connect(actx.destination);
+    scheduleAudio(actx, bus, pos);
+  } catch (e) { console.warn("audio", e); }
+}
+function stopAudio() { vtrack.pause(); if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+const synth = window.speechSynthesis;
+let ruVoice = null;
+function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+function stopVoice() { if (synth) synth.cancel(); }
+function speak(text) {
+  if (!synth || !voiceOn || voiceFile) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
+  u.rate = 1.05; u.pitch = 0.8; u.volume = 1; synth.speak(u);
+}
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => toNew(v.t) >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function play() {
+  if (pos >= VDUR) pos = 0;
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
+  if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
+}
+function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, VDUR); frame(pos); updUI(pos); if (was) play(); }
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(VDUR)}`; }
+function loop() {
+  const t = now();
+  while (vIdx < VOICE.length && toNew(VOICE[vIdx].t) <= t) { if (t - toNew(VOICE[vIdx].t) < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
+  frame(t); updUI(t);
+  if (t >= VDUR) { pos = VDUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
+  raf = requestAnimationFrame(loop);
+}
+
+/* ---------- layout ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- init ---------- */
+buildConfetti(); buildBush(); buildGrid5();
+fit(); render(0);
+const qs = new URLSearchParams(location.search);
+if (qs.has("capture")) document.body.classList.add("capture");
+$("#seek").max = VDUR; updUI(0);
+if (qs.has("t")) { pos = +qs.get("t"); frame(pos); }
+$("#start").onclick = () => { $("#start").style.display = "none"; play(); };
+$("#pp").onclick = () => (playing ? pause() : play());
+$("#seek").oninput = (e) => seek(+e.target.value);
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; vtrack.muted = !voiceOn; if (!voiceOn) stopVoice(); };
+$("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
+addEventListener("keydown", (e) => {
+  if ($("#start").style.display !== "none") return;
+  if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === "ArrowRight") seek(now() + 5);
+  if (e.code === "ArrowLeft") seek(now() - 5);
+});
+
+/* hooks for automated checks / export */
+window.__render = frame;
+window.__DUR = VDUR;
+window.__renderAudio = async () => {
+  const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
+  const g = oc.createGain(); g.gain.value = 0.9; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
+  scheduleAudio(oc, g, 0);
+  const buf = await oc.startRendering();
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
+  const ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
+  const ws = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); ws(8, "WAVE"); ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++, o += 4) { v.setInt16(o, clamp(L[i], -1, 1) * 32767, true); v.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); }
+  let bin = ""; const u8 = new Uint8Array(ab); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+</script>
+</body>
+</html>
