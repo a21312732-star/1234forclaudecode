@@ -98,3 +98,15 @@ node tools/export-mp4.js station-part1/station-part1.mp4 station-part1
 ```bash
 python3 tools/add-banner.py ads/banner.mp4 1812-part1/1812-part1.mp4
 ```
+
+## Новости: сезон 56
+
+- `brawl-news/` — яркий новостной монтаж со своим ведущим (`index.html`, `SCENARIO.md` с текстом для озвучки):
+
+```bash
+PROJECT=brawl-news VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
+```
+
+```bash
+node tools/export-mp4.js brawl-news/brawl-news.mp4 brawl-news
+```
