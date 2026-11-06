@@ -11,6 +11,9 @@ const PROJ = require('path').resolve(__dirname, '..', process.argv[3] || '.');
   await p.goto('file://' + require('path').join(PROJ, process.argv[4] || 'index.html') + '?capture', { waitUntil: 'load' });
   await p.waitForTimeout(1000);
   const DUR = await p.evaluate(() => window.__DUR);
+  // горизонтальный ролик (window.__SIZE = [1920, 1080]) — кадр 1920×1080
+  const SIZE = await p.evaluate(() => window.__SIZE || null);
+  if (SIZE && SIZE[0] > SIZE[1]) { await p.setViewportSize({ width: SIZE[0] / 2, height: SIZE[1] / 2 }); await p.waitForTimeout(300); }
   const wav = await p.evaluate(() => window.__renderAudio());
   fs.writeFileSync(require('os').tmpdir() + '/tishina-audio.wav', Buffer.from(wav, 'base64'));
   // озвучка voice.mp3 (если есть) подмешивается к звуковым эффектам; эффекты приглушаются под голосом

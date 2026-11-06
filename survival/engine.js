@@ -107,10 +107,11 @@ function render(t) {
   if (gl > 0) { const dx = (hash(t * 97) - .5) * 26 * gl;
     st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,40,80,${.55 * gl})) drop-shadow(${-dx}px 0 0 rgba(40,200,255,${.5 * gl})) contrast(${1 + .25 * gl})`;
   } else st.style.filter = "";
-  let sx = 0, sy = 0; (window.SHAKES || []).forEach((k) => { if (t > k && t < k + .5) { const a = Math.exp(-(t - k) * 9) * 24; sx += a * Math.sin((t - k) * 70); sy += a * Math.cos((t - k) * 55); } });
+  let sx = 0, sy = 0; (typeof SHAKES !== "undefined" ? SHAKES : []).forEach((k) => { if (t > k && t < k + .5) { const a = Math.exp(-(t - k) * 9) * 24; sx += a * Math.sin((t - k) * 70); sy += a * Math.cos((t - k) * 55); } });
   $("#cam").style.transform = sx || sy ? `translate(${sx}px,${sy}px)` : "";
-  let fl = 0; (window.FLASHES || []).forEach((k) => { if (t > k && t < k + .3) fl = Math.max(fl, .5 * (1 - prog(t, k, k + .3))); });
+  let fl = 0; (typeof FLASHES !== "undefined" ? FLASHES : []).forEach((k) => { if (t > k && t < k + .3) fl = Math.max(fl, .5 * (1 - prog(t, k, k + .3))); });
   $("#flash").style.opacity = fl;
+  if (typeof OVERLAY === "function") OVERLAY(t); // поверх сцен (плашки глав и т.п.)
   const ck = clockText(t), c = $("#clock"); c.style.display = ck ? "block" : "none"; if (ck) c.textContent = ck;
   let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
   const cap = $("#cap");
@@ -167,7 +168,7 @@ function scheduleAudio(ctx, out, from) {
     riser: (a, d = 1) => noise(a, d, "bandpass", 300, 3, .3, d * .9, 5000),
   };
   // музыка: напряжённый гул + пульс; MUSIC = { bpm, root, parts: [[начало, конец, "pad"|"pulse"|"drive", громкость], ...] } в времени сценария
-  const M = window.MUSIC || { bpm: 90, root: 55, parts: [] }, BEAT = 60 / M.bpm, endV = toNew(DUR);
+  const M = typeof MUSIC !== "undefined" ? MUSIC : { bpm: 90, root: 55, parts: [] }, BEAT = 60 / M.bpm, endV = toNew(DUR);
   M.parts.forEach(([s, e, kind, lv]) => {
     const a = T(s), b = T(e); if (toNew(e) < from) return;
     const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, Math.max(a, ctx.currentTime)); g.gain.exponentialRampToValueAtTime(.09 * lv, Math.max(a, ctx.currentTime) + .6);
@@ -223,11 +224,14 @@ function loop() {
   if (t >= VDUR) { pos = 0; stopAudio(); play(); return; } // закольцовано, как в ленте
   raf = requestAnimationFrame(loop);
 }
-function fit() { const s = Math.min(innerWidth / 1080, innerHeight / 1920); $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`; }
+// формат: вертикальный 1080×1920 (Shorts/TikTok) или горизонтальный 1920×1080 (window.FORMAT = "landscape")
+let SW = 1080, SH = 1920;
+function fit() { const s = Math.min(innerWidth / SW, innerHeight / SH); $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`; }
 
 const ENGINE = {
   start() {
     VDUR = WARP[WARP.length - 1][1];
+    if (typeof FORMAT !== "undefined" && FORMAT === "landscape") { SW = 1920; SH = 1080; document.body.classList.add("land"); }
     // оверлеи и плеер — общие для всех роликов
     $("#stage").insertAdjacentHTML("beforeend", '<div id="clock"></div><div id="cap"></div><div id="vign"></div><div id="flash"></div>');
     document.body.insertAdjacentHTML("beforeend", `<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
@@ -254,7 +258,7 @@ const ENGINE = {
       if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
       if (e.code === "ArrowRight") seek(now() + 5); if (e.code === "ArrowLeft") seek(now() - 5); });
     // хуки для экспорта (tools/export-mp4.js)
-    window.__render = frame; window.__DUR = VDUR;
+    window.__render = frame; window.__DUR = VDUR; window.__SIZE = [SW, SH];
     window.__renderAudio = async () => {
       const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
       const g = oc.createGain(); g.gain.value = 0.7; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
