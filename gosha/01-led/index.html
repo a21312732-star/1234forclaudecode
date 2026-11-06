@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Гоша и лёд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+#stage{background:#bfe3f5}
+#world{position:absolute;left:0;top:0}
+#cap{top:1330px;font-size:70px;text-transform:none;letter-spacing:0}
+#vhs{position:absolute;inset:0;z-index:36;pointer-events:none;opacity:0;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 3px,transparent 3px 7px)}
+#vhs b{position:absolute;left:60px;top:90px;font:900 84px var(--mono);color:#fff;text-shadow:4px 0 0 #ff2a6a,-4px 0 0 #22e0ff}
+#vhs i{position:absolute;right:60px;top:104px;font:800 46px var(--mono);color:#fff;font-style:normal;text-shadow:3px 0 0 #ff2a6a,-3px 0 0 #22e0ff}
+#vhs u{position:absolute;left:0;right:0;height:60px;background:rgba(255,255,255,.18);text-decoration:none}
+#vign{background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(20,30,50,.45) 100%)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <svg id="world" width="1080" height="1920" viewBox="0 0 1080 1920"><g id="w"></g></svg>
+  <div class="scene" id="s1"></div><div class="scene" id="s2"></div><div class="scene" id="s3"></div><div class="scene" id="s4"></div>
+  <div class="scene" id="s5"></div><div class="scene" id="s6"></div><div class="scene" id="s7"></div><div class="scene" id="s8"></div><div class="scene" id="s9"></div>
+</div><div id="vhs"><b>◀◀</b><i>REC 00:00</i><u id="vb"></u></div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../hero.js"></script>
+<script>
+"use strict";
+const NOGLITCH = true;
+const DUR = 43.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [43.9, 43.90]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.8 }, { id: "s2", s: 4.8, e: 11.5 }, { id: "s3", s: 11.5, e: 18.3 }, { id: "s4", s: 18.3, e: 23.5 },
+  { id: "s5", s: 23.5, e: 32.2 }, { id: "s6", s: 32.2, e: 35.6 }, { id: "s7", s: 35.6, e: 41 }, { id: "s8", s: 41, e: 43.6 }, { id: "s9", s: 43.6, e: 43.9 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [3.2, 4.1, 20.4];
+const FLASHES = [];
+const clockText = () => null;
+const CAPS = [
+  [0.1, "Это Гоша."], [1.2, "Гоша уверен, что {y:лёд выдержит.}"], [3.3, "Лёд так {r:не думал.}"],
+  [5, "Вода — {b:ноль градусов,}"], [6.4, "и первое, что делает Гоша, —"], [7.8, "{r:орёт и молотит руками.}"],
+  [9.2, "Через минуту у него {r:не останется сил.}"],
+  [11.5, "Стоп. {y:Отматываем.}"],
+  [13, "Первая минута — {g:просто дыши.}"], [15, "Тело в шоке, это пройдёт."], [16.7, "Держи {g:голову над водой.}"],
+  [18.4, "Теперь Гоша лезет {y:на ближний край...}"], [20.4, "и {r:ломает его.}"], [21.4, "{r:Тонкий лёд.}"],
+  [22.4, "Ещё раз."],
+  [23.6, "Разворачивайся туда, {g:откуда пришёл:}"], [25.5, "там лёд тебя {g:уже держал.}"],
+  [27, "{y:Локти на край,}"], [28, "ногами работай, чтобы {y:лечь горизонтально,}"], [30.1, "и выползай животом, {y:как тюлень.}"],
+  [32.3, "Вылез — {r:не вставай.}"], [33.6, "{g:Катись.}"], [34.4, "До самого берега."],
+  [35.8, "Гоша {g:выжил.}"], [37, "Но в следующий раз он снова {y:куда-нибудь полезет.}"], [39.4, "Куда — {y:пиши в комменты.}"],
+  [41.2, "А пока Гоша уже идёт {y:на рыбалку...}"],
+  [43.6, ""],
+];
+const MUSIC = { bpm: 104, root: 55, parts: [[0, 3.2, "pulse", .6], [4.8, 11.4, "drive", .5], [13, 18.3, "pad", .5], [18.3, 20.4, "pulse", .5],
+  [23.5, 35.6, "drive", .5], [35.6, 41, "pulse", .6], [41, 43.9, "pulse", .6]] };
+const REW = [[11.5, 12.9, 4.6], [22.4, 23.5, 18.3]];   // перемотки: [начало, конец, к какому моменту]
+
+/* ---------- мир (разрез озера); камера смотрит в точку (cx, cy) с зумом z ---------- */
+const ICE = 1000, WL = 1024, HOLE = [1300, 1560], S = 1.6;
+const hipStand = ICE - 86 * S, hipWater = 1215;
+function tree(x, y, h, c = "#2f6b4f") { const w = h * .55;
+  return `<g transform="translate(${x} ${y})"><rect x="-8" y="-20" width="16" height="30" fill="#6b4a2f" ${ow(4)}/>
+    ${[0, 1, 2].map((i) => `<path d="M${-w / 2 + i * w * .12} ${-i * h * .28} L0 ${-h * .45 - i * h * .28} L${w / 2 - i * w * .12} ${-i * h * .28}Z" fill="${c}" ${ow(4)}/>
+      <path d="M${-w * .18 + i * w * .05} ${-h * .3 - i * h * .28} L0 ${-h * .45 - i * h * .28} L${w * .18 - i * w * .05} ${-h * .3 - i * h * .28}Z" fill="#f4fbff"/>`).join("")}</g>`; }
+function buildWorld() {
+  let far = ""; for (let i = 0; i < 18; i++) far += tree(500 + i * 120 + 40 * hash(i), 930 + 10 * hash(i + 2), 120 + 60 * hash(i + 5), "#5b8f8a");
+  let shore = ""; [[-40, 980, 300], [90, 960, 240], [-160, 990, 340]].forEach(([x, y, h]) => shore += tree(x, y, h));
+  let rays = ""; for (let i = 0; i < 6; i++) rays += `<path d="M${1100 + i * 140} ${WL + 20} l${-120} 900 h80 z" fill="#ffffff" opacity=".05"/>`;
+  let flakes = ""; for (let i = 0; i < 70; i++) flakes += `<circle class="fl" r="${2 + 4 * hash(i + 1)}" fill="#fff" opacity=".85"/>`;
+  $("#w").innerHTML = `
+    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd0f2"/><stop offset="1" stop-color="#eaf8ff"/></linearGradient>
+      <linearGradient id="wat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b86ad"/><stop offset=".5" stop-color="#155a7c"/><stop offset="1" stop-color="#0a2d44"/></linearGradient>
+      <linearGradient id="icg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6fcff"/><stop offset=".5" stop-color="#cdeaf7"/><stop offset="1" stop-color="#9fd3ea"/></linearGradient></defs>
+    <rect x="-600" y="-400" width="3800" height="${ICE + 400}" fill="url(#sky)"/>
+    <circle cx="1700" cy="470" r="90" fill="#fff4c2" ${ow(5)}/>
+    <path d="M300 ${ICE - 40} Q700 760 1200 ${ICE - 60} Q1700 700 2300 ${ICE - 50} Q2700 820 3200 ${ICE - 40} V${ICE} H300Z" fill="#d7ecf5" ${ow(5)}/>
+    ${far}
+    <rect x="-600" y="${WL}" width="3800" height="1400" fill="url(#wat)"/>${rays}
+    <g id="fish"><path d="M0 0 q40 -30 80 0 q-40 30 -80 0z M80 0 l30 -20 v40z" fill="#ffb347" ${ow(4)}/><circle cx="20" cy="-4" r="4" fill="${OL}"/></g>
+    <g id="rod"><path d="M0 0 L150 -170" stroke="#8a5a2b" stroke-width="9" stroke-linecap="round"/><path d="M150 -170 Q190 -60 160 30" stroke="#fff" stroke-width="2" fill="none"/>
+      <rect x="-30" y="-10" width="46" height="40" rx="8" fill="#7ab8d6" ${ow(4)}/></g>
+    <g id="hero">${gosha("g")}</g>
+    <rect x="${HOLE[0]}" y="${WL}" width="${HOLE[1] - HOLE[0]}" height="1400" fill="url(#wat)" opacity=".8"/>
+    <path d="M${HOLE[0]} ${WL} H${HOLE[1]}" stroke="#bff0ff" stroke-width="6"/>
+    <g id="iceL"><path d="M-600 ${ICE} H${HOLE[0]} V${ICE + 44} H-600Z" fill="url(#icg)" ${ow(5)}/><path d="M-600 ${ICE + 4} H${HOLE[0] - 4}" stroke="#fff" stroke-width="8"/></g>
+    <g id="iceR"><path d="M${HOLE[1] + 110} ${ICE} H3200 V${ICE + 44} H${HOLE[1] + 110}Z" fill="url(#icg)" ${ow(5)}/><path d="M${HOLE[1] + 114} ${ICE + 4} H3200" stroke="#fff" stroke-width="8"/></g>
+    <g id="iceE"><path d="M${HOLE[1]} ${ICE} H${HOLE[1] + 110} V${ICE + 44} H${HOLE[1]}Z" fill="url(#icg)" ${ow(5)}/></g>
+    <g id="iceM1"><path d="M${HOLE[0]} ${ICE} H1430 V${ICE + 44} H${HOLE[0]}Z" fill="url(#icg)" ${ow(5)}/></g>
+    <g id="iceM2"><path d="M1430 ${ICE} H${HOLE[1]} V${ICE + 44} H1430Z" fill="url(#icg)" ${ow(5)}/></g>
+    <path id="crk" d="M1310 ${ICE + 2} l40 18 l30 -12 l30 22 l40 -16 l30 14 l40 -20 l40 14" stroke="${OL}" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    <path id="crk2" d="M${HOLE[1] + 4} ${ICE + 4} l30 16 l30 -14 l40 20" stroke="${OL}" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    <path d="M-600 ${ICE - 10} Q-200 ${ICE - 140} 300 ${ICE - 10} L300 ${ICE + 60} H-600Z" fill="#f4fbff" ${ow(5)}/>${shore}
+    <g id="prints">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="${400 + i * 115}" cy="${ICE + 2}" rx="20" ry="5" fill="#9fc6d8"/>`).join("")}</g>
+    <g id="blanket" opacity="0"><path d="M-70 -118 Q0 -136 70 -118 L96 92 H-96Z" fill="#c0392b" ${ow(5)}/><path d="M-80 -50 H80 M-90 30 H90" stroke="#ffd166" stroke-width="10"/></g>
+    <g id="bub">${Array.from({ length: 10 }, (_, i) => `<circle r="${6 + 8 * hash(i + 3)}" fill="none" stroke="#bff0ff" stroke-width="4"/>`).join("")}</g>
+    <g id="spl">${Array.from({ length: 12 }, () => `<circle r="12" fill="#e6f8ff" ${ow(3)}/>`).join("")}</g>
+    <g id="breath">${[0, 1, 2].map(() => `<g><circle r="22" fill="#fff" opacity=".9"/><circle cx="20" cy="-6" r="16" fill="#fff" opacity=".9"/></g>`).join("")}</g>
+    <g id="flakes">${flakes}</g>`;
+}
+
+/* ---------- сюжет: состояние героя и камеры в момент te ---------- */
+function state(te, t) {
+  const h = { x: 300, y: hipStand, r: 0, s: S, p: {}, rod: true, inWater: false };
+  let cam = { x: 560, y: 980, z: 1 };
+  if (te < 3.2) { // идёт по льду с удочкой, довольный
+    h.x = lerp(300, 1430, te / 3.2); h.p = walkG(te, 1, { face: "smug", ra: 140, la: 22 * Math.sin(te * 8) });
+    cam = { x: lerp(560, 1300, easeInOut(prog(te, .4, 3.2))), y: 980, z: 1 };
+  } else if (te < 4.0) { // треск, застыл
+    h.x = 1430; h.p = { face: te < 3.45 ? "smug" : "shock", ra: 140, lookY: te > 3.45 ? 1 : 0, sq: 1 - .04 * Math.sin((te - 3.2) * 30) * (te < 3.5) };
+    cam = { x: 1430, y: lerp(980, 1010, prog(te, 3.2, 3.6)), z: lerp(1, 1.45, easeOut(prog(te, 3.2, 3.7))) };
+  } else if (te < 4.8) { // проваливается
+    const f = easeIn(prog(te, 4.0, 4.35)); h.x = 1430; h.y = lerp(hipStand, hipWater + 120, f) - 120 * prog(te, 4.35, 4.8); h.inWater = true;
+    h.p = { face: "panic", la: 170, ra: 170, sq: 1 + .15 * f }; h.rod = false; cam = { x: 1430, y: 1040, z: 1.3 };
+  } else if (te < 11.5) { // НЕПРАВИЛЬНО: паника, молотит руками, слабеет
+    const tired = prog(te, 9.2, 11.4), fl = 1 - .6 * tired;
+    h.x = 1430 + 14 * Math.sin(te * 5); h.y = hipWater + 30 * tired + 10 * Math.sin(te * 9) * fl; h.inWater = true; h.rod = false;
+    h.p = { face: tired > .5 ? "cold" : "panic", la: 120 + 50 * Math.sin(te * 14) * fl, ra: 120 + 50 * Math.cos(te * 13) * fl, cold: tired, tilt: 10 * Math.sin(te * 7) * fl };
+    cam = { x: 1430, y: 1020, z: lerp(1.3, 1.6, prog(te, 4.8, 11)) };
+  }
+  return { h, cam };
+}
+// ветка «как надо» (после перемоток), локальное время t
+function stateGood(t) {
+  const h = { x: 1430, y: hipWater, r: 0, s: S, p: {}, rod: false, inWater: true }; let cam = { x: 1430, y: 980, z: 1.55 };
+  if (t < 18.3) { // спокойно дышит
+    const br = Math.sin((t - 12.9) * 1.6); h.y = hipWater + 6 * Math.sin(t * 2);
+    h.p = { face: "focus", la: 70 + 10 * br, ra: 70 + 10 * br, sq: 1 + .03 * br, blink: br > .92 };
+    cam = { x: 1430, y: 960, z: lerp(1.7, 1.55, prog(t, 12.9, 18.3)) };
+  } else if (t < 22.4) { // ОШИБКА 2: лезет на ближний (дальний по ходу) край — ломает
+    const go = easeInOut(prog(t, 18.5, 19.6)), brk = prog(t, 20.4, 20.8);
+    h.x = lerp(1430, 1500, go); h.r = lerp(0, 18, go) - 18 * brk; h.y = lerp(hipWater, hipWater - 30, go) + 90 * brk;
+    h.p = { face: brk > 0 ? "shock" : "smug", la: lerp(70, 160, go), ra: lerp(70, 160, go) };
+    cam = { x: 1480, y: 1000, z: 1.35 };
+  } else { // как надо: разворот, локти, горизонталь, тюлень
+    const turn = easeInOut(prog(t, 23.6, 24.6)), lean = easeInOut(prog(t, 27.0, 27.9)), lie = easeInOut(prog(t, 28.0, 29.8)), out = easeInOut(prog(t, 30.1, 32.1));
+    h.x = lerp(1430, 1350, lean) - lerp(0, 330, out); h.y = lerp(hipWater, hipWater - 40, lean) - lerp(0, 120, lie) - lerp(0, hipWater - 160 - (ICE - 46 * S), out);
+    h.y = lerp(lerp(hipWater, hipWater - 60, lean) - 80 * lie, ICE - 50 * S, out);
+    h.r = lerp(0, -25, lean) + lerp(0, -65, lie); h.flip = turn > .5;
+    const kick = t > 28 && t < 31.6 ? 26 * Math.sin(t * 16) : 0;
+    h.p = { face: "focus", la: lerp(70, 170, lean), ra: lerp(70, 170, lean), ll: kick, rl: -kick, look: turn > .5 ? 1 : -1 };
+    cam = { x: lerp(1430, 1250, prog(t, 26, 32)), y: 1000, z: 1.3 };
+  }
+  return { h, cam };
+}
+function stateEnd(t) {
+  const h = { x: 1100, y: ICE - 50 * S, r: -90, s: S, p: { face: "focus", la: 170, ra: 170 }, rod: false, flip: true }; let cam = { x: 1000, y: 1000, z: 1.25 };
+  if (t < 35.6) { // катится к берегу
+    const k = easeInOut(prog(t, 33.6, 35.5)); h.x = lerp(1100, 380, k); h.r = -90 - 720 * k; h.p = { face: t > 32.3 && t < 33.5 ? "worried" : "focus", la: 170, ra: 170 };
+    cam = { x: lerp(1000, 520, k), y: 980, z: 1.2 };
+  } else if (t < 41) { // на берегу, в одеяле, дрожит
+    h.x = 300; h.y = ICE - 40 - 86 * S; h.r = 0; h.flip = false; const sh = Math.sin(t * 40) * 3 * (t < 37 ? 1 : .3);
+    h.x += sh; h.p = { face: t < 36.8 ? "cold" : t < 39.4 ? "smug" : "happy", cold: t < 37 ? .7 : .2, la: 30, ra: t > 39.4 ? 150 : 30, look: t > 37 ? 1 : 0 };
+    h.blanket = t < 38.5; cam = { x: 420, y: 900, z: 1.35 };
+  } else { // уходит на рыбалку — камера возвращается к первому кадру
+    const k = easeInOut(prog(t, 41, 43.5)); h.x = lerp(-150, 300, k); h.y = hipStand; h.r = 0; h.flip = false; h.rod = true;
+    h.p = walkG(t, 1, { face: "smug", ra: 140, la: 22 * Math.sin(t * 8) }); if (t >= 43.5) h.p = walkG(0, 1, { face: "smug", ra: 140, la: 0 });
+    cam = { x: lerp(420, 560, k), y: lerp(900, 980, k), z: lerp(1.35, 1, k) };
+  }
+  return { h, cam };
+}
+const easeIn = (x) => x * x;
+
+/* ---------- кадр ---------- */
+let VHS = 0;
+function drawWorld(t) {
+  // какое состояние сюжета показываем (с учётом перемоток)
+  let st, rew = null;
+  REW.forEach((r) => { if (t >= r[0] && t < r[1]) rew = r; });
+  if (rew) { const k = easeIn(prog(t, rew[0], rew[1])), te = lerp(rew[0], rew[2], k); st = rew === REW[0] ? state(te, t) : stateGood(te); }
+  else if (t < 11.5) st = state(t, t);
+  else if (t < 32.2) st = stateGood(t);
+  else st = stateEnd(t);
+  const { h, cam } = st;
+  if (t >= 43.6) { const s0 = state(0, 0); Object.assign(h, s0.h); Object.assign(cam, s0.cam); h.p = s0.h.p; } // хвост = первый кадр
+  // герой
+  $("#hero").setAttribute("transform", `translate(${h.x} ${h.y}) rotate(${h.r}) scale(${h.flip ? -h.s : h.s} ${h.s})`);
+  poseG("g", h.p, t >= 43.6 ? 0 : t);
+  $("#rod").setAttribute("transform", h.rod ? `translate(${h.x + (h.flip ? -70 : 70) * 1} ${h.y - 60}) scale(${h.flip ? -1 : 1} 1)` : `translate(1500 ${WL - 8}) rotate(${70 + 4 * Math.sin(t * 2)}) scale(.9)`);
+  $("#rod").setAttribute("opacity", h.rod || (t > 4.2 && t < 35.6) ? 1 : 0);
+  $("#blanket").setAttribute("opacity", h.blanket ? 1 : 0); $("#blanket").setAttribute("transform", `translate(${h.x} ${h.y}) scale(1.6)`);
+  // лёд: середина проваливается в 4.0; край справа ломается во второй ошибке
+  const sink = (rew === REW[0] ? 1 : 1) * easeInOut(prog(rew === REW[0] ? 11.5 : (t < 43.6 ? (t >= 11.5 ? 99 : t) : 0), 4.0, 4.6));
+  const sinkV = t >= 43.6 || (t >= 41 && false) ? 0 : (t < 4.0 ? 0 : t > 41 ? 0 : 1) * (t < 4.6 ? sink : 1);
+  $("#iceM1").setAttribute("transform", `translate(${-20 * sinkV} ${200 * sinkV}) rotate(${-40 * sinkV} 1360 ${ICE})`); $("#iceM1").setAttribute("opacity", 1 - sinkV);
+  $("#iceM2").setAttribute("transform", `translate(${20 * sinkV} ${220 * sinkV}) rotate(${45 * sinkV} 1500 ${ICE})`); $("#iceM2").setAttribute("opacity", 1 - sinkV);
+  const tGood = rew === REW[1] ? lerp(22.4, 18.3, easeIn(prog(t, 22.4, 23.5))) : t;
+  const brkE = t >= 18.3 && t < 23.5 ? easeInOut(prog(tGood, 20.4, 20.9)) : 0;
+  $("#iceE").setAttribute("transform", `translate(${30 * brkE} ${180 * brkE}) rotate(${35 * brkE} ${HOLE[1] + 55} ${ICE})`); $("#iceE").setAttribute("opacity", 1 - .9 * brkE);
+  $("#crk").setAttribute("stroke-dashoffset", t >= 43.6 || t > 41 ? 1 : 1 - prog(t, 3.2, 3.6)); $("#crk").setAttribute("opacity", sinkV > .1 ? 0 : 1);
+  $("#crk2").setAttribute("stroke-dashoffset", t >= 18.3 && t < 23.5 ? 1 - prog(tGood, 19.8, 20.3) : 1);
+  // брызги и пузыри
+  const splashAt = t > 4.0 && t < 5.2 ? t - 4.0 : (t >= 18.3 && t < 23.5 && tGood > 20.4 && tGood < 21.4 ? (tGood - 20.4) : -1);
+  $$("#spl circle").forEach((c, i) => { const a = -Math.PI * (.12 + .76 * hash(i + 1)), v = 300 + 300 * hash(i + 2), p = splashAt;
+    const cx = (splashAt >= 0 && t > 18 ? 1610 : 1430) + Math.cos(a) * v * p, cy = WL + Math.sin(a) * v * p + 700 * p * p;
+    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("opacity", p >= 0 && p < 1.1 ? 1 : 0); });
+  $$("#bub circle").forEach((b, i) => { const k = ((t * .6 + hash(i)) % 1); b.setAttribute("cx", 1380 + 120 * hash(i + 4) + 20 * Math.sin(t * 2 + i)); b.setAttribute("cy", 1500 - 460 * k);
+    b.setAttribute("opacity", t > 4.1 && t < 32 ? .8 * (1 - k) : 0); });
+  // дыхание в «как надо»
+  $$("#breath g").forEach((b, i) => { const k = ((t - 12.9) * .5 + i / 3) % 1, on = t > 12.9 && t < 18.3 && !rew;
+    b.setAttribute("transform", `translate(${1500 + 120 * k} ${790 - 120 * k}) scale(${.4 + .9 * k})`); b.setAttribute("opacity", on ? .9 * (1 - k) : 0); });
+  // рыбка и снег
+  $("#fish").setAttribute("transform", `translate(${((t * 90) % 1800) + 400} ${1500 + 30 * Math.sin(t * 2)})`);
+  $$("#flakes .fl").forEach((f, i) => { const sp = 40 + 50 * hash(i + 7); f.setAttribute("cx", ((hash(i + 2) * 3000 + t * 20) % 3000) - 400); f.setAttribute("cy", ((hash(i + 3) * 1400 + t * sp) % 1400) - 300); });
+  $("#prints").setAttribute("opacity", t > 23.6 && t < 32.2 ? .4 + .6 * Math.abs(Math.sin(t * 3)) : .6);
+  // камера
+  const tr = `translate(540 900) scale(${cam.z * 1.15}) translate(${-cam.x} ${-(cam.y - 30)})`; $("#w").setAttribute("transform", tr);
+  // VHS при перемотке
+  const v = $("#vhs"); v.style.opacity = rew ? 1 : 0; $("#stage").style.filter = rew ? "saturate(.45) contrast(1.15) hue-rotate(-10deg)" : $("#stage").style.filter;
+  if (rew) { $("#vb").style.top = `${(t * 1700) % 1920}px`; v.querySelector("i").textContent = `REC 00:${String(Math.max(0, Math.floor(lerp(rew[0], rew[2], prog(t, rew[0], rew[1]))))).padStart(2, "0")}`; }
+}
+function build() { buildWorld(); grain($("#stage")); }
+const UPD = {}; SCENES.forEach(({ id }) => (UPD[id] = () => {}));
+function OVERLAY(t) { drawWorld(t); }
+
+/* ---------- звук ---------- */
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.wind(a, 43.9, .6));
+  for (let t = .05; t < 3.2; t += .32) add(t, (a) => sfx.noise(a, .07, "bandpass", 1700, 1, .28, .005)); // хруст снега
+  add(.6, (a) => { [880, 990, 1175, 990].forEach((f, i) => sfx.osc("sine", f, a + i * .16, .01, .06, .14)); }); // насвистывает
+  add(3.2, sfx.crack); add(3.5, sfx.crack); add(4.0, sfx.crack); add(4.1, sfx.boom); add(4.15, sfx.splash); add(4.6, (a) => sfx.bubbles(a, 8));
+  for (let t = 5; t < 11.2; t += .28) add(t, (a) => sfx.noise(a, .1, "lowpass", 1400, 1, .25 * (t < 9.2 ? 1 : .5), .01)); // бултыхается
+  const rewind = (a, d) => { sfx.osc("sawtooth", 900, a, .05, .08, d, 200); sfx.noise(a, d, "bandpass", 3000, 2, .2, .05, 800); };
+  add(11.5, (a) => rewind(a, 1.35)); add(22.4, (a) => rewind(a, 1.05));
+  for (let t = 13; t < 18.2; t += 2) { add(t, (a) => sfx.breath(a, .8)); }
+  add(19.8, sfx.crack); add(20.4, sfx.crack); add(20.45, sfx.splash);
+  add(23.7, sfx.whoosh); add(27.0, (a) => sfx.noise(a, .12, "lowpass", 600, 1, .4, .005));
+  for (let t = 28; t < 31.4; t += .3) add(t, (a) => sfx.noise(a, .12, "lowpass", 1500, 1, .25, .01));
+  add(30.2, sfx.whoosh); add(31.9, sfx.ok);
+  for (let t = 33.6; t < 35.4; t += .24) add(t, (a) => sfx.noise(a, .08, "lowpass", 500, 1, .3, .005));
+  for (let t = 35.7; t < 36.9; t += .05) add(t, (a) => sfx.noise(a, .02, "highpass", 2500, 1, .12, .002)); // стучит зубами
+  add(37.1, (a) => { sfx.noise(a, .15, "bandpass", 1200, 1, .25, .2); sfx.noise(a + .35, .2, "highpass", 1500, 1, .5, .005); }); // чих
+  add(39.5, sfx.ding);
+  for (let t = 41.1; t < 43.5; t += .32) add(t, (a) => sfx.noise(a, .07, "bandpass", 1700, 1, .28, .005));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>

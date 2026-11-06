@@ -101,7 +101,7 @@ function render(t) {
       el.style.opacity = i === 0 ? 1 - prog(t, sc.e - .2, sc.e) : i >= N - 2 ? 1 : Math.min(prog(lt, 0, .2), 1 - prog(t, sc.e - .2, sc.e));
       UPD[sc.id](lt, t);
     }
-    if (i > 0 && i < N - 2) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.16);
+    if (i > 0 && i < N - 2 && typeof NOGLITCH === "undefined") gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.16); // NOGLITCH — без глитч-склеек
   });
   const st = $("#stage");
   if (gl > 0) { const dx = (hash(t * 97) - .5) * 26 * gl;
