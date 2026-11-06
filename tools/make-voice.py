@@ -57,7 +57,7 @@ body = re.search(r"const CAPS = \[\n(.*?)\n\];", src, re.S).group(1)
 ENTRY = re.compile(r'\[(\d+(?:\.\d+)?), "((?:[^"\\]|\\.)*)"\]')
 caps = [[float(t), txt] for t, txt in ENTRY.findall(body)]
 DUR = float(re.search(r"const DUR = (\d+(?:\.\d+)?)", src).group(1))
-END_SCENE = float(re.findall(r'\{ id: "s\d", s: (\d+(?:\.\d+)?), e: [\d.]+ \}', src)[-1])
+END_SCENE = float(re.findall(r'\{ id: "s\d+", s: (\d+(?:\.\d+)?), e: [\d.]+ \}', src)[-1])
 
 plain = lambda s: re.sub(r"\{\w:([^}]*)\}", r"\1", s).strip()
 groups, cur = [], []
@@ -306,7 +306,7 @@ def tighten(path):
                     f"silenceremove=stop_periods=-1:stop_duration={GAP_MAX}:stop_threshold=-38dB:stop_silence={GAP_KEEP}", q], check=True)
     return q
 clips = [(t, q, dur_of(q)) for t, p, _ in clips for q in [tighten(p)]]
-SCENE_STARTS = [float(x) for x in re.findall(r'\{ id: "s\d", s: (\d+(?:\.\d+)?), e: [\d.]+ \}', src)]
+SCENE_STARTS = [float(x) for x in re.findall(r'\{ id: "s\d+", s: (\d+(?:\.\d+)?), e: [\d.]+ \}', src)]
 
 # 3. timeline warp: old (story) time -> new (video) time
 olds = [caps[g[0]][0] for g in groups] + [END_SCENE]
