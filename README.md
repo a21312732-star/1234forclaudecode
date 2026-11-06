@@ -98,3 +98,22 @@ node tools/export-mp4.js station-part1/station-part1.mp4 station-part1
 ```bash
 python3 tools/add-banner.py ads/banner.mp4 1812-part1/1812-part1.mp4
 ```
+
+## «Миф про кусты» (Brawl Stars, TikTok/Shorts)
+
+- `brawl-kusty/` — `index.html`, `SCENARIO.md` (текст для озвучки), `voice.mp3`, `brawl-kusty.mp4` (~42 с, закольцован).
+- Сейчас озвучка — черновая, синтезатор RHVoice в ускоренном темпе. Своя или с сайта:
+
+```bash
+PROJECT=brawl-kusty VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
+```
+
+```bash
+node tools/export-mp4.js brawl-kusty/brawl-kusty.mp4 brawl-kusty
+```
+
+Черновик RHVoice пересобирается так (темп, высота голоса и паузы задаются переменными):
+
+```bash
+RATE=128 TARGET_F0=128 PAUSE=0.16 SCENE_PAUSE=0.3 PROJECT=brawl-kusty python3 tools/make-voice.py
+```

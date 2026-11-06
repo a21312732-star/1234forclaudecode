@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Миф про кусты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1a10; --ink:#fff; --yellow:#ffd23f; --red:#ff3b47; --green:#4dff8a; --blue:#3fa9ff;
+  --head:"Montserrat","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+  --emo:"Noto Color Emoji";
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:var(--bg);overflow:hidden;transform-origin:50% 50%}
+#cam{position:absolute;inset:0}
+.scene{position:absolute;inset:0;display:none;transform-origin:540px 640px}
+.abs{position:absolute}
+svg text{font-family:var(--head);font-weight:900}
+/* арена: шахматная трава, бортики */
+.arena{position:absolute;inset:0;background:repeating-conic-gradient(#78d65f 0 25%,#6cc853 0 50%) 0 0/120px 120px}
+.arena::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 26px #c9a46a,inset 0 0 0 34px #8a6a3c,inset 0 0 160px rgba(0,0,0,.35)}
+.half{position:absolute;left:30px;right:30px;overflow:hidden;border-radius:26px;background:repeating-conic-gradient(#78d65f 0 25%,#6cc853 0 50%) 0 0/100px 100px;box-shadow:0 0 0 8px #0c140e}
+.full{position:absolute;left:0;top:0}
+/* верхняя плашка */
+#clock{position:absolute;top:56px;left:50%;transform:translateX(-50%);font:800 30px var(--mono);color:#111;
+  background:var(--yellow);padding:8px 24px;border-radius:12px;letter-spacing:2px;z-index:20;white-space:nowrap;box-shadow:0 6px 0 #b8860b}
+/* субтитры: белые с чёрной обводкой */
+#cap{position:absolute;left:50px;right:50px;top:1250px;min-height:260px;text-align:center;z-index:30;
+  font:900 86px/1.1 var(--head);text-transform:uppercase;letter-spacing:-1px;
+  text-shadow:5px 0 0 #000,-5px 0 0 #000,0 5px 0 #000,0 -5px 0 #000,4px 4px 0 #000,-4px 4px 0 #000,4px -4px 0 #000,-4px -4px 0 #000,0 10px 24px rgba(0,0,0,.8)}
+#cap .w{display:inline-block;margin:0 .13em}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)}
+/* хук-текст */
+#hook{position:absolute;left:40px;right:40px;top:120px;text-align:center;z-index:6;font:900 96px/1.02 var(--head);text-transform:uppercase;
+  text-shadow:6px 0 0 #000,-6px 0 0 #000,0 6px 0 #000,0 -6px 0 #000,5px 5px 0 #000,-5px 5px 0 #000,5px -5px 0 #000,-5px -5px 0 #000,0 14px 30px rgba(0,0,0,.7)}
+#hook b{color:var(--red)} #hook .em{font-family:var(--emo);text-shadow:none}
+/* бейджи и стикеры */
+.badge{position:absolute;padding:14px 26px;border-radius:18px;font:900 46px var(--head);white-space:nowrap;border:6px solid #000;box-shadow:0 10px 0 #000}
+.badge .em{font-family:var(--emo)}
+.b-red{background:var(--red);color:#fff} .b-yel{background:var(--yellow);color:#111} .b-grn{background:var(--green);color:#111} .b-wht{background:#fff;color:#111}
+.sticker{position:absolute;padding:12px 22px;background:#fff;color:#111;font:800 40px var(--head);border-radius:14px;border:5px solid #000;white-space:nowrap}
+.em{font-family:var(--emo)}
+#stamp2{position:absolute;left:0;right:0;top:420px;text-align:center;z-index:8}
+#stamp2 span{display:inline-block;font:900 260px/1 var(--head);color:var(--red);border:22px solid var(--red);padding:0 40px;border-radius:30px;background:rgba(0,0,0,.35);
+  text-shadow:0 0 40px rgba(255,59,71,.6)}
+/* карточки ПРО / НУБ */
+.card{position:absolute;top:260px;width:440px;height:760px;border-radius:36px;border:8px solid #000;box-shadow:0 16px 0 #000;text-align:center;padding-top:50px}
+.card h2{font:900 110px/1 var(--head);color:#111}
+.card .cup{font:900 64px var(--head);margin-top:40px;color:#111}
+.card .cup .em{font-size:72px}
+.card .ln{font:800 38px/1.25 var(--head);color:#111;margin-top:60px;padding:0 20px}
+.card .big{font-size:150px;margin-top:40px;font-family:var(--emo)}
+#vs5{position:absolute;left:0;right:0;top:560px;text-align:center;font:900 130px var(--head);color:var(--yellow);z-index:3;
+  text-shadow:6px 0 0 #000,-6px 0 0 #000,0 6px 0 #000,0 -6px 0 #000,0 0 40px rgba(255,210,63,.8)}
+.lbl6{position:absolute;left:60px;top:22px;font:900 50px var(--head);padding:6px 22px;border-radius:12px;border:5px solid #000;z-index:4}
+#win6{position:absolute;left:0;right:0;top:860px;text-align:center;z-index:6}
+#win6 span{display:inline-block;font:900 92px var(--head);color:#111;background:var(--yellow);padding:10px 40px;border-radius:24px;border:8px solid #000;box-shadow:0 12px 0 #000}
+/* опрос */
+#poll{position:absolute;left:70px;right:70px;top:200px}
+#poll h2{font:900 82px/1.05 var(--head);text-align:center;text-transform:uppercase;text-shadow:5px 5px 0 #000}
+.pbar{position:relative;height:150px;margin-top:56px;border:7px solid #000;border-radius:28px;background:#1b2a1e;overflow:hidden;box-shadow:0 10px 0 #000}
+.pbar .f{position:absolute;left:0;top:0;bottom:0}
+.pbar .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font:900 50px var(--head);color:#fff;text-shadow:3px 3px 0 #000}
+.cmt{position:absolute;padding:14px 22px;background:#fff;color:#111;border-radius:22px 22px 22px 4px;font:800 36px var(--head);border:4px solid #000;white-space:nowrap}
+/* fx */
+#vign{position:absolute;inset:0;pointer-events:none;z-index:38;background:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(0,0,0,.6) 100%)}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+#dark{position:absolute;inset:0;pointer-events:none;z-index:5;background:#000;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--yellow);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#111;background:var(--yellow);border:4px solid #000;padding:18px 40px;border-radius:14px;box-shadow:0 8px 0 #000}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+
+  <!-- S1: хук — сидишь в кусте, тебя выносят -->
+  <div class="scene" id="s1">
+    <div class="arena"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div id="hook">Кусты тебя <b id="hookNe">не</b> спрячут <span class="em">💀</span></div>
+    <div class="badge b-red" id="dead1" style="left:200px;top:880px"><span class="em">💀</span> ТЕБЯ ВЫНЕСЛИ</div>
+    <div class="sticker" id="meme1" style="left:70px;top:440px;font-size:34px">bro думал, он в безопасности <span class="em">💀</span></div>
+  </div>
+
+  <!-- S2: миф -->
+  <div class="scene" id="s2">
+    <div class="arena"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="badge b-wht" id="cut2" style="left:60px;top:150px">ИГРОК #1</div>
+    <div class="badge b-yel" id="ghost2" style="left:270px;top:1000px"><span class="em">👻</span> НЕВИДИМКА?</div>
+    <div class="sticker" id="genius2" style="left:560px;top:300px;transform:rotate(7deg)">гений тактики <span class="em">🧠</span></div>
+    <div id="stamp2"><span>МИФ</span></div>
+  </div>
+
+  <!-- S3: враг подходит вплотную -->
+  <div class="scene" id="s3">
+    <div class="arena"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="badge b-wht" id="slow3" style="left:60px;top:150px">SLOW-MO ×0.5</div>
+    <div class="badge b-red" id="see3" style="left:600px;top:420px"><span class="em">👁</span> ВИЖУ!</div>
+  </div>
+
+  <!-- S4: урон и атака палят -->
+  <div class="scene" id="s4">
+    <div class="arena"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div id="dark"></div>
+    <div class="abs em" id="warn4" style="left:0;right:0;top:420px;text-align:center;font-size:300px;z-index:6">⚠️</div>
+    <div class="badge b-red" id="caught4" style="left:90px;top:260px;z-index:7">ТЫ СПАЛИЛСЯ <span class="em">🚨</span></div>
+    <div class="badge b-red" id="caught4b" style="left:90px;top:260px;z-index:7">ОПЯТЬ СПАЛИЛСЯ <span class="em">💀</span></div>
+    <div class="badge b-wht" id="slow4" style="left:640px;top:150px;z-index:7">×0.25</div>
+  </div>
+
+  <!-- S5: ПРО vs НУБ -->
+  <div class="scene" id="s5">
+    <div class="arena" style="filter:brightness(.55)"></div>
+    <div class="card" id="pro5" style="left:50px;background:var(--green)">
+      <h2>ПРО</h2><div class="cup"><span class="em">🏆</span> 50 000+</div><div class="big">😎</div><div class="ln">ЖДЁТ, ПОКА ВРАГ ПОДОЙДЁТ <span class="em">✅</span></div></div>
+    <div class="card" id="noob5" style="left:590px;background:var(--red)">
+      <h2>НУБ</h2><div class="cup"><span class="em">🏆</span> 3 000</div><div class="big">🤡</div><div class="ln">СТРЕЛЯЕТ ИЗ КУСТА ПЕРВЫМ <span class="em">❌</span></div></div>
+    <div id="vs5">VS</div>
+  </div>
+
+  <!-- S6: кульминация — сплит-скрин -->
+  <div class="scene" id="s6">
+    <div class="abs" style="inset:0;background:#0c140e"></div>
+    <div class="half" id="top6" style="top:130px;height:540px"><svg width="1020" height="540" viewBox="0 0 1020 540" id="a6t"></svg>
+      <div class="lbl6" style="background:var(--red);color:#fff">НУБ</div></div>
+    <div class="half" id="bot6" style="top:700px;height:540px"><svg width="1020" height="540" viewBox="0 0 1020 540" id="a6b"></svg>
+      <div class="lbl6" style="background:var(--green);color:#111">ПРО</div></div>
+    <div id="win6"><span>ПОБЕДА +8 <span class="em">🏆</span></span></div>
+  </div>
+
+  <!-- S7: куст — ловушка -->
+  <div class="scene" id="s7">
+    <div class="arena" style="filter:brightness(.35)"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="badge b-red" id="trap7" style="left:0;right:0;margin:auto;width:max-content;top:200px">КУСТ = ЛОВУШКА</div>
+    <div class="badge b-yel" id="who7" style="left:0;right:0;margin:auto;width:max-content;top:1040px">ДЛЯ КОГО? <span class="em">🤔</span></div>
+  </div>
+
+  <!-- S8: байт на комменты -->
+  <div class="scene" id="s8">
+    <div class="arena" style="filter:brightness(.45)"></div>
+    <div id="poll">
+      <h2>Кустеры — это…</h2>
+      <div class="pbar"><div class="f" id="pA" style="background:var(--green)"></div><div class="t"><span><span class="em">🧠</span> ИМБА-ТАКТИКА</span><span id="pAt">50%</span></div></div>
+      <div class="pbar"><div class="f" id="pB" style="background:var(--red)"></div><div class="t"><span><span class="em">🤡</span> НУБ-СТАЙЛ</span><span id="pBt">50%</span></div></div>
+    </div>
+    <div class="badge b-yel" id="cm8" style="left:0;right:0;margin:auto;width:max-content;top:1000px">ПИШИ В КОММЕНТЫ <span class="em">👇</span></div>
+    <div class="cmt" id="c81" style="left:80px;top:760px">кусты = имба 100%</div>
+    <div class="cmt" id="c82" style="left:520px;top:820px">кустеры — боль <span class="em">😭</span></div>
+    <div class="cmt" id="c83" style="left:160px;top:880px">нуб-стайл, без вариантов</div>
+  </div>
+
+  <!-- S9: камера отъезжает к первому кадру (закольцовка) -->
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s0"></div>
+
+</div>
+  <div id="clock"></div>
+  <div id="cap"></div>
+  <div id="vign"></div><div id="flash"></div>
+</div></div>
+
+<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
+<div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
+<div id="ui">
+  <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="56" step="0.01" value="0">
+  <span id="time">0:00 / 0:56</span><button id="vo">🔊 Голос: вкл</button><button id="fs">⛶</button>
+</div>
+
+<script>
+"use strict";
+const DUR = 55.8;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.4, 2.84], [5.6, 5.49], [7, 7.16], [8.4, 8.68], [11.2, 11.21], [13.4, 13.45], [17.2, 15.72], [19.2, 17.44], [20.2, 18.47], [22.2, 19.98], [23.2, 21.12], [26.2, 22.62], [30.7, 26.18], [31.9, 27.38], [32.9, 28.57], [34.4, 29.90], [35.8, 31.53], [37.2, 33.35], [38.1, 34.57], [39.4, 35.98], [40.9, 37.82], [42.4, 39.48], [45.2, 41.62], [48.4, 44.47], [52.7, 46.91], [54.2, 48.53], [55.5, 49.70], [55.8, 50.00]];
+const VDUR = WARP[WARP.length - 1][1];
+function warp(t, a, b) {
+  for (let i = 1; i < WARP.length; i++) { const p = WARP[i - 1], q = WARP[i];
+    if (t <= q[a] || i === WARP.length - 1) return p[b] + (t - p[a]) * (q[b] - p[b]) / ((q[a] - p[a]) || 1); }
+  return t;
+}
+const toNew = (t) => warp(t, 0, 1), toOld = (t) => warp(t, 1, 0);
+const frame = (t) => render(toOld(t));
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+const pulse = (t, a, b, f = .12) => Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b));
+
+/* ---------- timeline data ---------- */
+const SCENES = [
+  { id: "s1", s: 0, e: 3.2 }, { id: "s2", s: 3.2, e: 11 }, { id: "s3", s: 11, e: 17 }, { id: "s4", s: 17, e: 26 },
+  { id: "s5", s: 26, e: 30.5 }, { id: "s6", s: 30.5, e: 39.2 }, { id: "s7", s: 39.2, e: 45 }, { id: "s8", s: 45, e: 52.5 },
+  { id: "s9", s: 52.5, e: 55.5 }, { id: "s0", s: 55.5, e: 55.8 },
+];
+const CLOCK = [[0, null], [3.2, "МИФ #1 · КУСТЫ"], [52.5, null]];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [["про-игроки", "про игроки"], ["имба-тактика", "имба тактика"], ["нуб-стайл", "нуб стайл"], ["...", "."]];
+// вырезать из записи, если туда попала лишняя фраза
+const DROP = ["подписывайся"];
+// удары: тряска камеры (время сценария)
+const SHAKES = [1.55, 8.4, 19.6, 22.4, 30.5, 33.0, 37.4];
+const CAPS = [
+  [0.1, "Ты {y:в кусте} — {r:и тебя уже видят.}"],
+  [3.4, "Почти все новички"], [4.44, "верят в {y:один миф.}"],
+  [5.6, "Куст — это {y:невидимость.}"],
+  [7, "Сел и {y:ждёшь.}"],
+  [8.4, "{r:Но игра} работает"], [9.71, "{r:вообще не так.}"],
+  [11.2, "Подойди к врагу"], [12.2, "{y:почти вплотную} —"],
+  [13.4, "и куст для него"], [15, "{r:просто исчезнет.}"],
+  [17.2, "А теперь {r:самое жёсткое.}"],
+  [19.2, "{y:Получил урон} —"], [20.2, "и ты {r:засветился.}"],
+  [22.2, "{y:Нажал атаку} —"], [23.2, "{r:тоже засветился.}"],
+  [26.2, "Поэтому {g:про-игроки}"], [27.77, "{r:не стреляют} из кустов первыми."],
+  [30.7, "{y:Смотри разницу.}"],
+  [31.9, "Нуб стреляет —"], [32.9, "и {r:сам себя палит.}"],
+  [34.4, "Про {g:ждёт тиминг.}"],
+  [35.8, "Враг {y:подходит сам.}"],
+  [37.2, "{y:Одна кнопка} —"], [38.1, "и враг {g:в лобби.}"],
+  [39.4, "Куст {r:не прячет} тебя."],
+  [40.9, "Куст — это {y:ловушка.}"],
+  [42.4, "Вопрос только в том,"], [44.03, "{r:для кого.}"],
+  [45.2, "Кустеры — это {g:имба-тактика}"], [47.15, "или {r:нуб-стайл?}"],
+  [48.4, "Пиши в комменты,"], [50, "{y:кто бесит больше всех.}"],
+  [52.7, "А пока {y:запомни одно.}"],
+  [54.2, "{r:Прямо сейчас...}"],
+  [55.5, ""],
+];
+const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
+function parseCap(str) {
+  const out = []; const re = /\{(\w):([^}]*)\}|([^{]+)/g; let m;
+  while ((m = re.exec(str))) {
+    const cls = m[1] || "", txt = m[2] !== undefined ? m[2] : m[3];
+    txt.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, cls }));
+  }
+  return out;
+}
+/* voice lines: group caption chunks into sentences (fallback browser voice) */
+const VOICE = [];
+(() => {
+  let cur = null;
+  CAPS.forEach(([t, s]) => {
+    let plain = s.replace(/\{\w:([^}]*)\}/g, "$1").trim();
+    if (!plain) return;
+    SPEAK.forEach(([a, b]) => { plain = plain.split(a).join(b); });
+    if (!cur) cur = { t, text: "" };
+    cur.text += (cur.text ? " " : "") + plain;
+    if (/[.!?:»—]$/.test(plain)) { VOICE.push(cur); cur = null; }
+  });
+  if (cur) VOICE.push(cur);
+})();
+
+/* ---------- графика: кусты и бойцы (своя рисовка) ---------- */
+function bush(id, r = 150) {
+  const lobes = [[0, 0, 1], [-.62, -.3, .62], [.6, -.36, .6], [-.55, .42, .6], [.58, .4, .62], [0, -.62, .55], [0, .6, .55], [-.9, .05, .45], [.9, .02, .45]];
+  const dark = lobes.map(([x, y, k]) => `<circle cx="${x * r}" cy="${y * r}" r="${k * r * .62}" fill="#1f6b2b" stroke="#0f3d17" stroke-width="10"/>`).join("");
+  const fill = lobes.map(([x, y, k]) => `<circle cx="${x * r}" cy="${y * r}" r="${k * r * .62 - 4}" fill="#2f8f3c"/>`).join("");
+  const hi = lobes.map(([x, y, k], i) => `<circle cx="${x * r - k * r * .15}" cy="${y * r - k * r * .2}" r="${k * r * .22}" fill="#4fb85a" opacity=".85"/>`).join("");
+  return `<g id="${id}">${dark}${fill}${hi}</g>`;
+}
+function fighter(id, color, label, r = 52) {
+  return `<g id="${id}"><g class="body">
+    <ellipse cx="0" cy="${r * .95}" rx="${r * .9}" ry="${r * .25}" fill="rgba(0,0,0,.25)"/>
+    <circle r="${r}" fill="${color}" stroke="#111" stroke-width="8"/>
+    <ellipse cx="${-r * .32}" cy="${-r * .12}" rx="${r * .2}" ry="${r * .26}" fill="#fff"/><ellipse cx="${r * .32}" cy="${-r * .12}" rx="${r * .2}" ry="${r * .26}" fill="#fff"/>
+    <circle class="pup" cx="${-r * .28}" cy="${-r * .08}" r="${r * .1}" fill="#111"/><circle class="pup" cx="${r * .36}" cy="${-r * .08}" r="${r * .1}" fill="#111"/>
+    <path d="M${-r * .5} ${-r * .55} L${-r * .1} ${-r * .42} M${r * .5} ${-r * .55} L${r * .1} ${-r * .42}" stroke="#111" stroke-width="7" stroke-linecap="round"/>
+    <rect x="${-r}" y="${-r - 38}" width="${2 * r}" height="16" rx="8" fill="#111"/><rect class="hp" x="${-r + 3}" y="${-r - 35}" width="${2 * r - 6}" height="10" rx="5" fill="${color === "#ff4d4d" ? "#ff4d4d" : "#4dff8a"}"/>
+    <text y="${-r - 50}" font-size="34" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="7" paint-order="stroke">${label}</text>
+  </g><g class="poof" opacity="0">${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<circle cx="${Math.cos(i * .785) * r}" cy="${Math.sin(i * .785) * r}" r="${r * .32}" fill="#fff"/>`).join("")}
+    <text y="22" font-size="70" text-anchor="middle" fill="#ff3b47" stroke="#000" stroke-width="6" paint-order="stroke">✖</text></g></g>`;
+}
+const ring = (id, r, color = "#fff") => `<circle id="${id}" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="26 18" opacity="0"/>`;
+const shot = (id, color = "#ffd23f") => `<g id="${id}" opacity="0"><circle r="20" fill="${color}" stroke="#111" stroke-width="5"/><circle r="8" fill="#fff"/></g>`;
+const boom = (id) => `<g id="${id}" opacity="0">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `<path d="M0 0 L${Math.cos(i * .628) * 120} ${Math.sin(i * .628) * 120}" stroke="${i % 2 ? "#ffd23f" : "#fff"}" stroke-width="16" stroke-linecap="round"/>`).join("")}<circle r="46" fill="#fff"/></g>`;
+const box = (x, y, s = 110) => `<g transform="translate(${x} ${y})"><rect x="${-s / 2}" y="${-s / 2}" width="${s}" height="${s}" rx="10" fill="#b5793a" stroke="#5a3613" stroke-width="8"/><path d="M${-s / 2 + 10} ${-s / 2 + 10} L${s / 2 - 10} ${s / 2 - 10} M${s / 2 - 10} ${-s / 2 + 10} L${-s / 2 + 10} ${s / 2 - 10}" stroke="#7a4e22" stroke-width="8"/></g>`;
+const dmg = (id, txt) => `<text id="${id}" font-size="64" text-anchor="middle" fill="#ff3b47" stroke="#000" stroke-width="10" paint-order="stroke" opacity="0">${txt}</text>`;
+
+function build() {
+  $("#a1").innerHTML = box(170, 1080) + box(910, 380) + box(910, 490) + `<g transform="translate(540 640)">${bush("bu1", 170)}</g>` +
+    fighter("h1", "#3fa9ff", "ТЫ") + fighter("e1", "#ff4d4d", "ВРАГ", 60) + `<path id="trail1" d="M540 1130 L540 720" stroke="#ff4d4d" stroke-width="70" stroke-linecap="round" opacity="0"/>` + boom("bm1");
+  $("#a2").innerHTML = box(200, 1150) + box(880, 760) + `<g id="bg2">${bush("bu2", 170)}</g>` + fighter("h2", "#3fa9ff", "") + `<g id="zz2" opacity="0"><text font-size="80" fill="#fff" stroke="#000" stroke-width="8" paint-order="stroke">Z z z</text></g>`;
+  $("#a3").innerHTML = box(170, 360) + box(910, 1100) + `<g transform="translate(540 560)">${bush("bu3", 160)}</g>` + fighter("h3", "#3fa9ff", "ТЫ") +
+    `<g id="er3">${ring("rg3", 250)}</g>` + fighter("e3", "#ff4d4d", "ВРАГ") + `<circle id="hl3" cx="540" cy="560" r="95" fill="none" stroke="#ff3b47" stroke-width="12" opacity="0"/>` +
+    `<path id="ar3" d="M760 380 L620 500" stroke="#ff3b47" stroke-width="16" stroke-linecap="round" marker-end="url(#mk)" opacity="0"/>` +
+    `<defs><marker id="mk" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ff3b47"/></marker></defs>`;
+  $("#a4").innerHTML = box(860, 420) + box(180, 1080) + `<g transform="translate(360 640)">${bush("bu4", 160)}</g>` + fighter("h4", "#3fa9ff", "ТЫ") + fighter("e4", "#ff4d4d", "ВРАГ") +
+    shot("sh4a", "#ff4d4d") + shot("sh4b") + dmg("dm4", "-1200") + `<text id="eye4" x="820" y="880" font-size="90" text-anchor="middle" font-family="Noto Color Emoji" opacity="0">👁</text>`;
+  $("#a6t").innerHTML = `<g transform="translate(290 290)">${bush("bu6t", 130)}</g>` + fighter("n6", "#3fa9ff", "НУБ", 46) + fighter("et6", "#ff4d4d", "ВРАГ", 46) + shot("sn6") + shot("se6", "#ff4d4d");
+  $("#a6b").innerHTML = `<g transform="translate(290 290)">${bush("bu6b", 130)}</g>` + fighter("p6", "#3fa9ff", "ПРО", 46) + fighter("eb6", "#ff4d4d", "ВРАГ", 46) + boom("bm6") +
+    `<text id="hg6" x="290" y="120" font-size="80" text-anchor="middle" font-family="Noto Color Emoji" opacity="0">⏳</text>`;
+  $("#a7").innerHTML = `<g id="bg7" transform="translate(540 680)">${bush("bu7", 300)}<g id="eyes7" opacity="0"><ellipse cx="-90" cy="-10" rx="46" ry="30" fill="#ff2a2a"/><ellipse cx="90" cy="-10" rx="46" ry="30" fill="#ff2a2a"/>
+    <ellipse cx="-90" cy="-10" rx="16" ry="22" fill="#2a0000"/><ellipse cx="90" cy="-10" rx="16" ry="22" fill="#2a0000"/></g></g>`;
+}
+const at = (id, x, y, s = 1, o = 1) => { const e = document.getElementById(id); e.setAttribute("transform", `translate(${x} ${y}) scale(${s})`); e.setAttribute("opacity", o); };
+// боец в кусте: полупрозрачный (видишь только ты); vis=1 — засвечен
+const inBush = (id, x, y, vis) => { at(id, x, y, 1, 1); const b = document.querySelector(`#${id} .body`); b.setAttribute("opacity", .5 + .5 * vis);
+  b.style.filter = vis > 0.01 ? `drop-shadow(0 0 ${18 * vis}px rgba(255,59,71,${vis}))` : ""; };
+const poof = (id, p) => { const e = document.getElementById(id); e.querySelector(".body").setAttribute("opacity", 1 - prog(p, 0, .3));
+  const pf = e.querySelector(".poof"); pf.setAttribute("opacity", p > 0 ? 1 - prog(p, .6, 1) : 0); pf.setAttribute("transform", `scale(${.6 + .8 * easeOut(clamp(p))})`); };
+const unpoof = (id) => poof(id, 0);
+const fly = (id, x0, y0, x1, y1, t, a, b) => { const p = prog(t, a, b); at(id, lerp(x0, x1, p), lerp(y0, y1, p), 1, t >= a && t < b ? 1 : 0); };
+const hp = (id, k) => { const e = document.querySelector(`#${id} .hp`); e.setAttribute("width", Math.max(0, (+e.dataset.w || (e.dataset.w = e.getAttribute("width"))) * k)); };
+
+/* ---------- per-frame updates ---------- */
+const show = (el, t, at0, dur = 0.3, dy = 30) => {
+  const p = easeOut(prog(t, at0, at0 + dur));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${0.9 + 0.1 * p})`;
+};
+const pop = (el, t, at0, rot = 0) => { const p = prog(t, at0, at0 + .3); const s = p < 1 ? easeOut(p) * (1 + .25 * Math.sin(p * Math.PI)) : 1; el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `rotate(${rot}deg) scale(${s})`; };
+const hide = (el, t, a, b = a + .2) => { if (t > a) el.style.opacity = Math.min(+el.style.opacity, 1 - prog(t, a, b)); };
+
+const UPD = {
+  s1(lt) {
+    $("#s1").style.transform = ""; $("#s1").style.filter = "";
+    const hit = 1.55;
+    const ey = lt < 1.15 ? lerp(1130, 1080, prog(lt, 0, 1.15)) : lerp(1080, 760, easeOut(prog(lt, 1.15, hit)));
+    at("e1", 540, ey, 1 + .1 * prog(lt, 1.0, 1.15) * (lt < hit ? 1 : 0)); unpoof("e1");
+    $("#trail1").setAttribute("opacity", lt > 1.15 && lt < hit + .25 ? .45 * (1 - prog(lt, hit, hit + .25)) : 0);
+    $("#trail1").setAttribute("d", `M540 1080 L540 ${ey}`);
+    inBush("h1", 540, 640 + (lt > hit ? -40 * easeOut(prog(lt, hit, hit + .2)) : 0), lt > hit ? 1 : 0); poof("h1", prog(lt, hit + .05, hit + .7));
+    hp("h1", lt > hit ? 0 : 1);
+    const b = document.getElementById("bm1"); b.setAttribute("transform", `translate(540 690) scale(${.4 + 1.2 * easeOut(prog(lt, hit, hit + .25))})`); b.setAttribute("opacity", lt > hit ? 1 - prog(lt, hit + .2, hit + .55) : 0);
+    // хук-текст: виден сразу (первый кадр совпадает с последним), «НЕ» мигает
+    const hk = $("#hook"); hk.style.opacity = 1 - prog(lt, 2.5, 2.75); hk.style.transform = `scale(${1 + .03 * Math.sin(lt * 7)})`;
+    $("#hookNe").style.opacity = (lt > .35 && lt < .55) || (lt > .75 && lt < .95) ? .15 : 1;
+    // стоп-кадр после удара
+    if (lt > hit + .1) { const z = easeOut(prog(lt, hit + .1, hit + .5)); $("#s1").style.transform = `scale(${1 + .2 * z})`; $("#s1").style.filter = `saturate(${1 - .75 * z})`; }
+    pop($("#dead1"), lt, hit + .25); pop($("#meme1"), lt, hit + .5, -8);
+    if (lt < hit) { $("#dead1").style.opacity = 0; $("#meme1").style.opacity = 0; }
+  },
+  s2(lt) {
+    // три быстрых нарезки: игроки ныряют в кусты
+    const cols = ["#3fa9ff", "#c77dff", "#ffb347"], cuts = [[540, 700], [360, 820], [700, 600]];
+    if (lt < 2.2) {
+      const k = Math.min(2, Math.floor(lt / .733)), l = lt - k * .733, [bx, by] = cuts[k];
+      $("#bg2").setAttribute("transform", `translate(${bx} ${by})`); $("#bg2").setAttribute("opacity", 1);
+      document.querySelector("#h2 circle:nth-of-type(1)").setAttribute("fill", cols[k]);
+      document.querySelector("#h2 .body circle").setAttribute("fill", cols[k]);
+      const p = easeOut(prog(l, 0, .45)), inside = prog(l, .35, .5);
+      inBush("h2", lerp(k === 1 ? 980 : 100, bx, p), lerp(by + 380, by, p), 1 - inside);
+      $("#cut2").textContent = "ИГРОК #" + (k + 1); $("#cut2").style.opacity = 1; $("#cut2").style.transform = `scale(${1 + .15 * (1 - prog(l, 0, .15))})`;
+    } else {
+      $("#cut2").style.opacity = 0;
+      $("#bg2").setAttribute("transform", `translate(540 700) scale(${1.25 + .05 * Math.sin(lt * 2)})`);
+      document.querySelector("#h2 .body circle").setAttribute("fill", "#3fa9ff");
+      at("h2", 540, 700); document.querySelector("#h2 .body").setAttribute("opacity", .5 * (1 - prog(lt, 2.4, 3.2))); document.querySelector("#h2 .body").style.filter = "";
+    }
+    unpoof("h2"); hp("h2", 1);
+    const g = $("#ghost2"); pop(g, lt, 2.5); if (lt < 2.5) g.style.opacity = 0; hide(g, lt, 5.1);
+    const gn = $("#genius2"); pop(gn, lt, 3.9, 7); if (lt < 3.9) gn.style.opacity = 0; hide(gn, lt, 5.1);
+    const z = document.getElementById("zz2"); z.setAttribute("opacity", lt > 4.0 && lt < 5.2 ? 1 : 0); z.setAttribute("transform", `translate(${600 + 10 * Math.sin(lt * 3)} ${540 - 30 * ((lt * .8) % 1)})`);
+    // штамп «МИФ» с ударом
+    const st = $("#stamp2"), sp = prog(lt, 5.2, 5.4);
+    st.style.opacity = sp > 0 ? 1 : 0; st.style.transform = `rotate(-12deg) scale(${lerp(3, 1, easeOut(sp))})`;
+    $("#a2").style.filter = lt > 5.2 ? "saturate(.3) brightness(.7)" : "";
+  },
+  s3(lt) {
+    const ey = lerp(1150, 790, easeInOut(prog(lt, 0, 3))), rev = prog(lt, 2.3, 2.5);
+    inBush("h3", 540, 560, rev); hp("h3", 1); unpoof("h3"); at("e3", 540, ey); unpoof("e3"); hp("e3", 1);
+    document.querySelectorAll("#e3 .pup").forEach((p, i) => p.setAttribute("cy", -5.2 - 4 * rev));
+    document.getElementById("er3").setAttribute("transform", `translate(540 ${ey})`);
+    const rg = document.getElementById("rg3"); rg.setAttribute("opacity", .9 * prog(lt, .3, .7)); rg.setAttribute("stroke-dashoffset", -lt * 60); rg.setAttribute("stroke", rev > 0 ? "#ff3b47" : "#fff");
+    document.querySelector("#bu3").setAttribute("opacity", 1 - .55 * rev);
+    const hl = document.getElementById("hl3"); hl.setAttribute("opacity", rev); hl.setAttribute("r", 95 + 8 * Math.sin(lt * 10) * rev);
+    document.getElementById("ar3").setAttribute("opacity", rev);
+    const s = $("#slow3"); show(s, lt, .2); hide(s, lt, 2.3);
+    const v = $("#see3"); pop(v, lt, 2.45); if (lt < 2.45) v.style.opacity = 0;
+  },
+  s4(lt) {
+    const d = $("#dark"); d.style.opacity = .55 * (1 - prog(lt, 1.8, 2.2));
+    const w = $("#warn4"); pop(w, lt, .15); if (lt < .15) w.style.opacity = 0; else w.style.opacity = (1 - prog(lt, 1.8, 2.0)) * (.75 + .25 * Math.sin(lt * 14));
+    // попадание по тебе
+    fly("sh4a", 820, 1000, 380, 650, lt, 2.2, 2.6);
+    const v1 = pulse(lt, 2.6, 4.1), v2 = pulse(lt, 5.4, 7.0), vis = Math.max(v1, v2);
+    inBush("h4", 360 + (lt > 2.6 && lt < 2.9 ? 10 * Math.sin(lt * 90) : 0), 640, vis); unpoof("h4"); hp("h4", lt > 2.6 ? .62 : 1);
+    at("e4", 820, 1000); unpoof("e4"); hp("e4", lt > 5.8 ? .7 : 1);
+    const dm = document.getElementById("dm4"), dp = prog(lt, 2.6, 3.6); dm.setAttribute("opacity", lt > 2.6 ? 1 - prog(lt, 3.3, 3.6) : 0); dm.setAttribute("transform", `translate(${380} ${540 - 70 * dp})`);
+    document.getElementById("eye4").setAttribute("opacity", vis);
+    // твоя атака из куста
+    fly("sh4b", 360, 640, 820, 1000, lt, 5.4, 5.8);
+    const c1 = $("#caught4"); pop(c1, lt, 2.7, -4); if (lt < 2.7) c1.style.opacity = 0; hide(c1, lt, 4.9);
+    const c2 = $("#caught4b"); pop(c2, lt, 5.45, 4); if (lt < 5.45) c2.style.opacity = 0;
+    const sl = $("#slow4"); sl.style.opacity = lt > 2.6 && lt < 4.0 ? 1 : 0;
+    $("#a4").style.filter = lt > 2.6 && lt < 4.0 ? "saturate(.6) contrast(1.15)" : "";
+  },
+  s5(lt) {
+    pop($("#pro5"), lt, .15, -3); pop($("#noob5"), lt, .55, 3);
+    const v = $("#vs5"); pop(v, lt, 1.0); if (lt < 1.0) v.style.opacity = 0; else v.style.transform += ` scale(${1 + .06 * Math.sin(lt * 9)})`;
+    const g = prog(lt, 1.5, 1.9); $("#pro5").style.boxShadow = `0 16px 0 #000, 0 0 ${60 * g}px rgba(77,255,138,${g})`;
+  },
+  s6(lt) {
+    // верх: нуб стреляет первым и палится
+    const nShoot = 1.4, nDie = 2.5;
+    inBush("n6", 290, 290, lt > nShoot ? 1 : 0); poof("n6", prog(lt, nDie, nDie + .6)); hp("n6", lt > nDie ? 0 : 1);
+    at("et6", 790, 290); unpoof("et6"); hp("et6", lt > nShoot + .3 ? .8 : 1);
+    fly("sn6", 290, 290, 790, 290, lt, nShoot, nShoot + .3); fly("se6", 790, 290, 290, 290, lt, nDie - .4, nDie);
+    $("#top6").style.opacity = 1 - .5 * prog(lt, 3.2, 3.6);
+    // низ: про ждёт тиминг
+    const ex = lerp(900, 420, easeInOut(prog(lt, 3.9, 6.6))), strike = 6.9;
+    inBush("p6", 290, 290, lt > strike ? 1 : 0); unpoof("p6"); hp("p6", 1);
+    at("eb6", ex, 290 + 6 * Math.sin(lt * 9) * (lt > 3.9 && lt < 6.6 ? 1 : 0)); poof("eb6", prog(lt, strike + .1, strike + .7)); hp("eb6", lt > strike ? 0 : 1);
+    const b = document.getElementById("bm6"); b.setAttribute("transform", `translate(${ex} 290) scale(${.4 + 1.1 * easeOut(prog(lt, strike, strike + .25))})`); b.setAttribute("opacity", lt > strike ? 1 - prog(lt, strike + .2, strike + .6) : 0);
+    const hg = document.getElementById("hg6"); hg.setAttribute("opacity", lt > 3.9 && lt < strike ? 1 : 0); hg.setAttribute("transform", `rotate(${Math.floor(lt * 2) * 180} 290 92)`);
+    $("#bot6").style.boxShadow = lt > 3.6 ? `0 0 0 8px #0c140e, 0 0 0 14px rgba(77,255,138,${.5 + .5 * Math.sin(lt * 6)})` : "";
+    const w = $("#win6"); pop(w, lt, strike + .25); if (lt < strike + .25) w.style.opacity = 0;
+  },
+  s7(lt) {
+    document.getElementById("bg7").setAttribute("transform", `translate(540 680) scale(${1 + .3 * easeInOut(prog(lt, 0, 5.8))})`);
+    const e = document.getElementById("eyes7"); e.setAttribute("opacity", lt > 1.6 ? ((lt > 3.0 && lt < 3.15) ? .1 : 1) * prog(lt, 1.6, 1.9) : 0);
+    const t = $("#trap7"); pop(t, lt, 1.5); if (lt < 1.5) t.style.opacity = 0;
+    const w = $("#who7"); pop(w, lt, 4.3, -3); if (lt < 4.3) w.style.opacity = 0;
+  },
+  s8(lt) {
+    const a = 50 + 14 * Math.sin(lt * 2.3) + 6 * Math.sin(lt * 5.1);
+    const grow = easeOut(prog(lt, .2, 1.0));
+    $("#pA").style.width = a * grow + "%"; $("#pB").style.width = (100 - a) * grow + "%";
+    $("#pAt").textContent = Math.round(a) + "%"; $("#pBt").textContent = Math.round(100 - a) + "%";
+    show($("#poll"), lt, 0);
+    const c = $("#cm8"); pop(c, lt, 3.3); if (lt < 3.3) c.style.opacity = 0; else c.style.transform += ` translateY(${12 * Math.abs(Math.sin(lt * 5))}px)`;
+    [["#c81", 4.3, -3], ["#c82", 4.9, 4], ["#c83", 5.5, -2]].forEach(([id, a0, r]) => { const el = $(id); pop(el, lt, a0, r); if (lt < a0) el.style.opacity = 0; });
+  },
+  // закольцовка: камера отъезжает к первому кадру ролика
+  s9(lt) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0);
+    const z = easeInOut(prog(lt, 0, 2.6));
+    s1.style.transform = `scale(${lerp(1.7, 1, z)})`; s1.style.filter = `brightness(${lerp(.6, 1, z)})`;
+    $("#hook").style.opacity = prog(lt, 2.4, 2.9);
+  },
+  s0() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0); },
+};
+
+let lastCap = -1;
+function render(t) {
+  t = clamp(t, 0, DUR);
+  let gl = 0;
+  SCENES.forEach((sc, i) => {
+    const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
+    const el = document.getElementById(sc.id);
+    if (!on && (sc.id !== "s1" || t >= SCENES[1].s)) el.style.display = "none";
+    if (on) {
+      el.style.display = "block";
+      const lt = t - sc.s;
+      // первая сцена без проявления: первый кадр = последнему (петля)
+      el.style.opacity = i === 0 ? 1 - prog(t, sc.e - .2, sc.e) : Math.min(prog(lt, 0, .2), 1 - prog(t, sc.e - .2, sc.e));
+      if (i >= SCENES.length - 2) el.style.opacity = 1;
+      UPD[sc.id](lt, t);
+    }
+    if (i > 0 && i < SCENES.length - 2) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.18);
+  });
+  const st = $("#stage");
+  if (gl > 0) {
+    const dx = (hash(t * 97) - .5) * 30 * gl;
+    st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,40,80,${.6 * gl})) drop-shadow(${-dx}px 0 0 rgba(40,200,255,${.5 * gl})) contrast(${1 + .3 * gl})`;
+  } else st.style.filter = "";
+  // тряска камеры на ударах
+  let sx = 0, sy = 0; SHAKES.forEach((k) => { if (t > k && t < k + .5) { const a = Math.exp(-(t - k) * 9) * 26; sx += a * Math.sin((t - k) * 70); sy += a * Math.cos((t - k) * 55); } });
+  $("#cam").style.transform = sx || sy ? `translate(${sx}px,${sy}px)` : "";
+  let fl = 0; [1.55, 8.4, 30.5, 37.4].forEach((k) => { if (t > k && t < k + .3) fl = Math.max(fl, .55 * (1 - prog(t, k, k + .3))); });
+  $("#flash").style.opacity = fl;
+  let ck = null; CLOCK.forEach(([a, v]) => { if (t >= a) ck = v; });
+  const c = $("#clock"); c.style.display = ck ? "block" : "none";
+  if (ck) c.textContent = ck;
+  let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
+  const cap = $("#cap");
+  if (ci !== lastCap) {
+    lastCap = ci;
+    cap.innerHTML = ci < 0 ? "" : parseCap(CAPS[ci][1]).map((o) => `<span class="w ${o.cls}">${o.w}</span>`).join(" ");
+  }
+  if (ci >= 0) {
+    const a = CAPS[ci][0], b = capEnd(ci), ws = cap.querySelectorAll(".w"), n = ws.length;
+    const span = Math.min(b - a, 0.26 * n + 0.2) * 0.85;
+    ws.forEach((w, i) => {
+      const on = t >= a + (i / Math.max(1, n)) * span;
+      w.style.opacity = on ? 1 : 0;
+      w.style.transform = on ? `scale(${1 + 0.1 * (1 - prog(t, a + (i / n) * span, a + (i / n) * span + .15))})` : "scale(.7)";
+    });
+    const pp = easeOut(prog(t, a, a + .15));
+    cap.style.transform = `translateY(${(1 - pp) * 14}px)`;
+    cap.style.opacity = Math.min(pp, 1 - prog(t, b - .06, b));
+  } else cap.style.opacity = 0;
+}
+
+/* ---------- audio (Web Audio synth, works live and offline) ---------- */
+function noiseBuf(ctx, sec = 2) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b;
+}
+function scheduleAudio(ctx, out, from) {
+  const NB = noiseBuf(ctx, 3);
+  const TV = (tv) => ctx.currentTime + 0.05 + (tv - from);  // video time -> audio clock
+  const T = (t) => TV(toNew(t));                              // story time -> audio clock
+  const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
+  const osc = (type, f, t0, a, peak, d, f1) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t0); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t0 + a + d); env(g, t0, a, peak, d); o.connect(g).connect(out); o.start(t0); o.stop(t0 + a + d + .05); return o; };
+  const noise = (t0, dur, type, freq, q, peak, a = .01, f1) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.setValueAtTime(freq, t0); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t0 + a + dur); f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
+  const sfx = {
+    kick: (a, v = 1) => osc("sine", 150, a, .003, .9 * v, .28, 42),
+    hat: (a, v = 1) => noise(a, .035, "highpass", 8000, 1, .12 * v, .001),
+    clap: (a, v = 1) => { [0, .012, .024].forEach((d) => noise(a + d, .06, "bandpass", 1500, 1.2, .35 * v, .001)); },
+    bass: (a, f = 55, v = 1) => { osc("sine", f * 1.5, a, .005, .7 * v, .55, f); osc("triangle", f * 2, a, .005, .12 * v, .3, f); },
+    cow: (a, k = 1, v = 1) => { const f = noise(a, .001, "bandpass", 800, 3, .0001); [587, 845].forEach((fr) => osc("square", fr * k, a, .002, .07 * v, .22)); },
+    boom: (a) => { osc("sine", 110, a, .005, 1.0, 1.4, 38); osc("triangle", 220, a, .005, .35, .5, 60); noise(a, .25, "lowpass", 900, 1, .6, .002, 120); }, // Vine Boom
+    whoosh: (a, d = .35) => noise(a, d, "bandpass", 400, 1.5, .5, d * .6, 3500),
+    whooshDown: (a) => noise(a, .8, "bandpass", 3000, 1.2, .5, .1, 200),
+    ding: (a) => { [1320, 1980, 2640].forEach((f, i) => osc("sine", f, a, .002, .3 / (i + 1), 1.2)); },
+    pew: (a) => { osc("square", 1400, a, .002, .12, .16, 300); noise(a, .06, "highpass", 3000, 1, .15, .001); },
+    hit: (a) => { noise(a, .18, "lowpass", 1800, 1, .7, .002); osc("sine", 90, a, .002, .7, .25, 40); },
+    pop: (a) => osc("sine", 600, a, .002, .3, .1, 1300),
+    tick: (a) => noise(a, .015, "highpass", 4000, 1, .2, .001),
+    win: (a) => { [523, 659, 784, 1047].forEach((f, i) => { osc("square", f, a + i * .09, .005, .09, .25); osc("sine", f, a + i * .09, .005, .2, .4); }); },
+  };
+  // музыка в стиле фонк: 140 BPM, сетка в видео-времени (ровный бит при любой растяжке)
+  const BEAT = 60 / 140, endV = toNew(DUR);
+  const sec = (tv) => { const t = toOld(tv);
+    if (t < 8.4) return "A"; if (t < toOld(toNew(8.4) + .35)) return null; if (t < 30.5) return "B"; if (t < 39.2) return "C"; if (t < 45) return "D"; return "E"; };
+  const COW = [1, 1, 1.19, 1, 1.33, 1.19, 1, .89];
+  for (let k = 0; k * BEAT < endV - .01; k++) {
+    const tv = k * BEAT; if (tv < from - .01) continue;
+    const s = sec(tv); if (!s) continue;
+    const a = TV(tv), bar = k % 4;
+    if (s === "D") { if (bar === 0) { sfx.kick(a, .6); sfx.bass(a, 41, .6); } continue; }
+    const lv = s === "C" ? 1 : s === "B" ? .55 : .8;
+    sfx.kick(a, lv);
+    if (bar === 1 || bar === 3) sfx.clap(a, lv);
+    sfx.hat(a + BEAT / 2, lv); if (s !== "B") sfx.hat(a + BEAT / 4, .5 * lv);
+    if (s === "C" || s === "A") { if (bar === 0 || bar === 2) sfx.bass(a, bar === 0 ? 55 : 49, s === "C" ? 1 : .7); }
+    if (s === "C" || s === "E") { sfx.cow(a, COW[(k * 2) % 8], s === "C" ? 1 : .6); sfx.cow(a + BEAT / 2, COW[(k * 2 + 1) % 8], s === "C" ? 1 : .6); }
+  }
+  // звуковые эффекты (время сценария)
+  const EV = [];
+  const add = (t, fn) => EV.push([t, fn]);
+  add(1.15, (a) => sfx.whoosh(a, .3)); add(1.55, sfx.boom); add(1.55, sfx.hit);
+  [3.2, 3.93, 4.66].forEach((t) => add(t, (a) => sfx.whoosh(a, .25)));
+  add(5.7, sfx.pop); add(7.1, sfx.pop); add(8.4, sfx.boom);
+  add(11.0, (a) => sfx.whoosh(a, .3)); add(13.35, sfx.ding); add(13.45, sfx.pop);
+  for (let t = 17.3, d = .2; t < 19.6; t += d, d = Math.max(.045, d * .9)) add(t, (a) => noise(a, .05, "bandpass", 250, 1.5, .45, .002)); // барабанная дробь
+  add(19.2, sfx.pew); add(19.6, sfx.hit); add(19.6, sfx.whooshDown); add(19.7, sfx.pop);
+  add(22.4, sfx.pew); add(22.4, sfx.boom); add(22.5, sfx.pop);
+  add(26.0, (a) => sfx.whoosh(a, .3)); add(26.15, sfx.pop); add(26.55, sfx.pop); add(27.0, sfx.hit);
+  add(30.3, (a) => noise(a, .2, "highpass", 800, 1, .4, .19, 9000)); // подъём перед дропом
+  add(31.9, sfx.pew); add(32.6, sfx.pew); add(33.0, sfx.hit); add(33.0, sfx.boom);
+  for (let t = 34.4; t < 37.4; t += .5) add(t, sfx.tick);
+  add(37.4, sfx.hit); add(37.4, (a) => noise(a, .4, "highpass", 2000, 1, .5, .002)); add(37.65, sfx.win);
+  add(39.2, sfx.whooshDown); add(40.8, (a) => osc("sawtooth", 55, a, .2, .25, 1.5)); add(43.4, sfx.boom);
+  add(45.0, (a) => sfx.whoosh(a, .3)); [48.3, 49.3, 49.9, 50.5].forEach((t) => add(t, sfx.pop));
+  add(52.5, sfx.whooshDown); add(55.0, (a) => noise(a, .45, "bandpass", 300, 1.5, .4, .4, 4000)); // всасывание в начало
+  SCENES.slice(1, -2).forEach((s) => add(s.s - .06, (a) => noise(a, .12, "bandpass", 2000, .7, .15)));
+  EV.forEach(([t, fn]) => { if (toNew(t) >= from - .01) fn(T(t)); });
+}
+
+let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+const vtrack = $("#vtrack"); let voiceFile = true; // записанная озвучка; если не загрузилась — голос браузера
+vtrack.addEventListener("error", () => { voiceFile = false; });
+function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
+function startAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    if (bus) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); }
+    bus = actx.createGain(); bus.gain.value = 0.7;
+    const comp = actx.createDynamicsCompressor(); bus.connect(comp).connect(actx.destination);
+    scheduleAudio(actx, bus, pos);
+  } catch (e) { console.warn("audio", e); }
+}
+function stopAudio() { vtrack.pause(); if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+const synth = window.speechSynthesis;
+let ruVoice = null;
+function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+function stopVoice() { if (synth) synth.cancel(); }
+function speak(text) {
+  if (!synth || !voiceOn || voiceFile) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
+  u.rate = 1.2; u.pitch = 1; u.volume = 1; synth.speak(u);
+}
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => toNew(v.t) >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function play() {
+  if (pos >= VDUR) pos = 0;
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
+  if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
+}
+function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, VDUR); frame(pos); updUI(pos); if (was) play(); }
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(VDUR)}`; }
+function loop() {
+  const t = now();
+  while (vIdx < VOICE.length && toNew(VOICE[vIdx].t) <= t) { if (t - toNew(VOICE[vIdx].t) < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
+  frame(t); updUI(t);
+  // ролик закольцован, как в TikTok
+  if (t >= VDUR) { pos = 0; stopAudio(); play(); return; }
+  raf = requestAnimationFrame(loop);
+}
+
+/* ---------- layout ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- init ---------- */
+build();
+fit(); render(0);
+const qs = new URLSearchParams(location.search);
+if (qs.has("capture")) document.body.classList.add("capture");
+$("#seek").max = VDUR; updUI(0);
+if (qs.has("t")) { pos = +qs.get("t"); frame(pos); }
+$("#start").onclick = () => { $("#start").style.display = "none"; play(); };
+$("#pp").onclick = () => (playing ? pause() : play());
+$("#seek").oninput = (e) => seek(+e.target.value);
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; vtrack.muted = !voiceOn; if (!voiceOn) stopVoice(); };
+$("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
+addEventListener("keydown", (e) => {
+  if ($("#start").style.display !== "none") return;
+  if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === "ArrowRight") seek(now() + 5);
+  if (e.code === "ArrowLeft") seek(now() - 5);
+});
+
+/* hooks for automated checks / export */
+window.__render = frame;
+window.__DUR = VDUR;
+window.__renderAudio = async () => {
+  const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
+  const g = oc.createGain(); g.gain.value = 0.7; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
+  scheduleAudio(oc, g, 0);
+  const buf = await oc.startRendering();
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
+  const ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
+  const ws = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); ws(8, "WAVE"); ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++, o += 4) { v.setInt16(o, clamp(L[i], -1, 1) * 32767, true); v.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); }
+  let bin = ""; const u8 = new Uint8Array(ab); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+</script>
+</body>
+</html>
