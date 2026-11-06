@@ -109,7 +109,7 @@ html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-fami
 /* brawl news */
 #grain,#scan,#tint{display:none!important}
 #vign{background:radial-gradient(ellipse at 50% 45%,transparent 60%,rgba(0,0,0,.45) 100%)!important}
-#cap{top:1180px;font:900 86px/1.08 var(--head);-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 rgba(0,0,0,.35)}
+#cap{display:none;top:1180px;font:900 86px/1.08 var(--head);-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 rgba(0,0,0,.35)}
 #cap .y{color:#ffd23f} #cap .r{color:#ff4d5e} #cap .g{color:#5dff8a}
 #clock{color:#111;background:#ffd23f;border:4px solid #111;font:900 30px var(--head);box-shadow:0 6px 0 #111}
 .rays{position:absolute;left:-600px;top:-180px;width:2280px;height:2280px}
@@ -118,7 +118,7 @@ html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-fami
 .card{position:absolute;border-radius:36px;border:8px solid #111;box-shadow:0 14px 0 rgba(0,0,0,.35);overflow:hidden}
 .card .nm{position:absolute;left:0;right:0;bottom:0;padding:14px 0;text-align:center;font:900 44px var(--head);color:#fff;background:#111;letter-spacing:1px}
 .tag{position:absolute;font:900 44px var(--head);color:#111;background:#5dff8a;border:6px solid #111;border-radius:20px;padding:10px 26px;box-shadow:0 8px 0 #111}
-#host{position:absolute;left:0;top:1490px;z-index:31;transform-origin:50% 100%}
+#host{position:absolute;left:0;top:1490px;z-index:31;transform-origin:50% 50%}
 #host svg{display:block;filter:drop-shadow(0 8px 0 rgba(0,0,0,.35))}
 #subbtn{position:absolute;left:190px;top:820px;width:700px;text-align:center;font:900 70px var(--head);color:#fff;background:#ff2b2b;border:10px solid #111;border-radius:40px;padding:30px 0;box-shadow:0 16px 0 #111}
 /* fx */
@@ -288,7 +288,10 @@ const CLOCK = [[0, "НОВОСТИ · СЕЗОН 56"], [38.6, null]];
 const SPEAK = [["56-й", "пятьдесят шестой"], ["Brawl Pass", "Бравл Пасс"], ["Brawl", "Бравл"], ["100 игроков", "сто игроков"]];
 const DROP = [];
 // эмоция ведущего по времени: smile, laugh, love, shock, wink, thumbs, angry, cry
-const HOST = [[0, "shock"], [1.6, "laugh"], [6.6, "love"], [12.3, "thumbs"], [15.4, "smile"], [18.5, "wink"], [20.5, "smile"], [24.2, "laugh"], [31.2, "thumbs"], [34.4, "shock"], [36.2, "wink"], [38.6, "love"]];
+// появления ведущего: [начало, конец, "cut" — крупно по центру поверх размытого кадра | "peek" — выглядывает из угла, эмоция]
+const HOSTCUT = [[0.15, 1.5, "cut", "shock"], [7.6, 8.7, "cut", "love"], [9.9, 12.3, "peek", "laugh"], [13.4, 15.3, "cut", "thumbs"],
+  [17.8, 20.4, "peek", "wink"], [20.6, 22.0, "cut", "smile"], [26.8, 28.6, "peek", "laugh"], [31.3, 33.6, "peek", "thumbs"],
+  [34.5, 36.2, "cut", "shock"], [38.7, 43.6, "peek", "love"]];
 const CAPS = [
   [0.1, "{y:Новый сезон} уже здесь!"],
   [1.7, "Сегодня стартовал"], [2.69, "{y:56-й сезон} Brawl Pass —"], [4.2, "он называется"], [5.15, "{r:«Мафия Brawl».}"],
@@ -337,7 +340,12 @@ const show = (el, t, at, dur = 0.3, dy = 30) => {
 };
 const pop = (el, t, at, rot = 0) => { const p = prog(t, at, at + .3); const s = p < 1 ? easeOut(p) * (1 + .25 * Math.sin(p * Math.PI)) : 1; el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${s}) rotate(${rot}deg)`; };
 const spin = (el, lt, k = 6) => { el.style.transform = `rotate(${lt * k}deg)`; };
-const punch = (sc, lt) => { sc.style.transform = `scale(${1 + .12 * (1 - easeOut(prog(lt, 0, .35)))})`; };
+let CUR_T = 0;
+const punch = (sc, lt) => {
+  let ci = 0; CAPS.forEach(([a], i) => { if (CUR_T >= a) ci = i; });
+  const jump = ci % 2 ? 1.09 : 1, push = 1 + .05 * Math.min(lt / 4, 1), hit = 1 + .1 * (1 - easeOut(prog(lt, 0, .25)));
+  sc.style.transform = `scale(${jump * push * hit})`; sc.style.transformOrigin = ci % 3 === 2 ? "40% 35%" : "50% 40%";
+};
 
 const UPD = {
   s1(lt) { punch($("#s1"), lt); spin($("#r1"), lt, 20); pop($("#h1a"), lt, 0.0, -4); pop($("#h1b"), lt, 0.35, 3);
@@ -377,26 +385,33 @@ const FACES = { smile: ["norm", "smile"], laugh: ["happy", "grin"], love: ["happ
   wink: ["wink", "grin"], thumbs: ["happy", "grin", "thumb"], angry: ["angry", "angry", "steam", "red"], cry: ["cry", "frown"] };
 function updHost(t) {
   const h = $("#host"); if (!h) return;
-  const end = SCENES[SCENES.length - 1].s;
-  h.style.display = t < end ? "block" : "none";
-  const intro = easeOut(prog(t, 0.2, 0.7));
-  const talk = CAPS.some(([a], i) => t >= a && t < a + 1.2 && CAPS[i][1]);
-  let ex = "smile"; HOST.forEach(([a, e]) => { if (t >= a) ex = e; });
+  const cur = HOSTCUT.find(([a, b]) => t >= a && t < b);
+  document.querySelectorAll(".scene").forEach((sc) => { if (sc.style.display !== "none") sc.style.filter = ""; });
+  if (!cur) { h.style.display = "none"; return; }
+  h.style.display = "block";
+  const [a, b, mode, ex] = cur, lt = t - a;
+  const talk = CAPS.some(([c], i) => t >= c && t < c + 1.2 && CAPS[i][1]);
   const [eye, mouth, fx, red] = [...FACES[ex], null, null];
   const m = talk && Math.sin(t * 16) > 0 ? "open" : mouth;
   document.querySelectorAll("#hostSvg .ey").forEach((g) => g.style.display = g.id === "e_" + eye ? "" : "none");
   document.querySelectorAll("#hostSvg .mo").forEach((g) => g.style.display = g.id === "m_" + m ? "" : "none");
   document.querySelectorAll("#hostSvg .fx").forEach((g) => g.style.display = g.id === "x_" + fx || (red && g.id === "x_steam") ? "" : "none");
   $("#redface").setAttribute("opacity", ex === "angry" ? .55 : 0);
-  const pulse = 1 + .06 * Math.max(0, Math.sin(t * 8));
-  ["#x_heart", "#x_sweat", "#x_thumb"].forEach((id) => $(id).setAttribute("transform", `translate(${id === "#x_thumb" ? 46 : 220} ${id === "#x_thumb" ? 200 : 40}) scale(${pulse}) translate(${id === "#x_thumb" ? -46 : -220} ${id === "#x_thumb" ? -200 : -40})`));
-  const wave = t > 38.6 ? Math.sin(t * 9) * 8 : Math.sin(t * 2) * 3;
-  h.style.transform = `translateY(${(1 - intro) * 300 + Math.abs(Math.sin(t * 6)) * -10}px) rotate(${wave}deg)`;
+  if (mode === "cut") {
+    // врезка: ведущий крупно, кадр под ним размыт и затемнён, лёгкий наезд
+    SCENES.forEach((sc) => { if (t >= sc.s && t < sc.e) document.getElementById(sc.id).style.filter = "blur(14px) brightness(.75)"; });
+    const z = 2.1 + .12 * prog(lt, 0, b - a), inn = easeOut(prog(lt, 0, .12));
+    h.style.transform = `translate(310px, ${-760 + (1 - inn) * 120}px) scale(${z * (.85 + .15 * inn)})`;
+  } else {
+    // выглядывает из правого нижнего угла и уезжает обратно
+    const sl = easeOut(prog(lt, 0, .3)) * (1 - easeInOut(prog(lt, b - a - .3, b - a)));
+    h.style.transform = `translate(${1080 - 420 * sl}px, ${30 + Math.abs(Math.sin(t * 6)) * -10}px) rotate(${-14 + (t > 38.6 ? Math.sin(t * 9) * 8 : 0)}deg)`;
+  }
 }
 
 let lastCap = -1;
 function render(t) {
-  t = clamp(t, 0, DUR);
+  t = clamp(t, 0, DUR); CUR_T = t;
   let gl = 0;
   SCENES.forEach((sc, i) => {
     const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
@@ -413,7 +428,7 @@ function render(t) {
   const st = $("#stage");
   if (gl > 0) {
     const dx = (hash(t * 97) - .5) * 26 * gl;
-    st.style.filter = `drop-shadow(${dx}px 0 0 rgba(255,40,40,${.6 * gl})) drop-shadow(${-dx}px 0 0 rgba(255,200,120,${.5 * gl})) contrast(${1 + .4 * gl})`;
+    st.style.filter = `blur(${gl * 12}px) brightness(${1 + .35 * gl})`; // переход: вспышка-размытие
   } else st.style.filter = "";
   $("#flash").style.opacity = t > 0 && t < 0.25 ? 0.5 * (1 - prog(t, 0, 0.25)) : 0;
   // плёночное зерно
