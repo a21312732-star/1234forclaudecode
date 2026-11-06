@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проснулся в 2018-м</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=JetBrains+Mono:wght@500;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0807; --ink:#f2efe8; --yellow:#ffc94a; --red:#e8323c; --green:#3ee08f; --cyan:#4fc3ff;
+  --amber:#ffb347; --paper:#e9e1cc; --soviet:#b3121b;
+  --head:"Montserrat","Inter","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+  --hand:"Caveat","DejaVu Sans",cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:var(--bg);overflow:hidden;transform-origin:50% 50%}
+.scene{position:absolute;inset:0;display:none}
+.abs{position:absolute}
+.wall{position:absolute;inset:0}
+/* date pill */
+#clock{position:absolute;top:64px;left:50%;transform:translateX(-50%);font:700 30px var(--mono);color:var(--yellow);
+  border:2px solid rgba(255,201,74,.45);padding:8px 22px;border-radius:8px;background:rgba(24,16,4,.65);letter-spacing:2px;z-index:20;white-space:nowrap}
+/* captions */
+#cap{position:absolute;left:60px;right:60px;top:1240px;min-height:260px;text-align:center;z-index:30;
+  font:900 82px/1.12 var(--head);text-transform:uppercase;letter-spacing:-1px;text-shadow:0 6px 30px rgba(0,0,0,.95)}
+#cap .w{display:inline-block;margin:0 .14em}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)}
+/* badges */
+.badge{position:absolute;display:flex;align-items:center;gap:14px;padding:12px 20px;border:2px solid;border-radius:10px;
+  font:800 30px var(--mono);white-space:nowrap}
+.badge small{display:block;font:500 16px var(--mono);opacity:.75;letter-spacing:1px;margin-top:2px}
+.badge i{font-style:normal;width:30px;height:30px;border:2px solid;border-radius:6px;display:grid;place-items:center;font-size:18px;flex:none}
+.b-red{color:#fff;border-color:var(--red);background:rgba(60,6,10,.85);box-shadow:0 0 30px rgba(232,50,60,.45)} .b-red i{color:var(--red)}
+.b-yellow{color:#fff;border-color:var(--yellow);background:rgba(40,28,4,.88);box-shadow:0 0 30px rgba(255,201,74,.35)} .b-yellow i{color:var(--yellow)}
+.b-green{color:#fff;border-color:var(--green);background:rgba(4,36,20,.85);box-shadow:0 0 30px rgba(62,224,143,.35)} .b-green i{color:var(--green)}
+/* tear-off calendar */
+.cal{position:absolute;background:#efe8d6;border-radius:8px;box-shadow:0 18px 40px rgba(0,0,0,.6);overflow:hidden;text-align:center;color:#1a1410}
+.cal .top{background:var(--soviet);color:#fff;font:800 26px var(--mono);letter-spacing:4px;padding:10px 0}
+.cal .big{font:900 92px/1 var(--head);margin-top:22px}
+.cal .mon{font:800 34px var(--head);letter-spacing:2px;margin-top:10px}
+.cal .rings{position:absolute;top:-2px;left:0;right:0;display:flex;justify-content:space-around}
+.cal .rings u{display:block;width:14px;height:22px;border-radius:7px;background:#111}
+/* S1 */
+#title1{position:absolute;left:60px;right:60px;top:150px;text-align:center;font:900 64px/1.08 var(--head);color:#fff;
+  text-transform:uppercase;text-shadow:0 0 30px rgba(232,50,60,.55),0 6px 20px rgba(0,0,0,.9);z-index:5}
+#title1 b{color:var(--red)}
+.portrait{position:absolute;border:14px solid #5b3d1e;box-shadow:inset 0 0 0 4px #8a6532,0 18px 40px rgba(0,0,0,.6);background:#17120e}
+.desk{position:absolute;background:linear-gradient(180deg,#4a3020 0,#2c1c12 14px,#1c120c 100%);box-shadow:0 -2px 0 #6b4a30}
+/* S2 */
+#paper{position:absolute;left:250px;top:300px;width:580px;height:760px;background:var(--paper);border-radius:4px;
+  box-shadow:0 30px 60px rgba(0,0,0,.7);padding:70px 50px 0 70px;transform-origin:50% 50%;
+  background-image:repeating-linear-gradient(180deg,transparent 0 58px,rgba(60,90,160,.25) 58px 60px),linear-gradient(90deg,transparent 46px,rgba(200,40,40,.35) 46px 48px,transparent 48px)}
+#paper .hl{font:700 46px/60px var(--hand);color:#1d2a5a;white-space:nowrap;overflow:hidden}
+#paper .scr{height:60px;position:relative}
+#paper .scr u{position:absolute;left:0;top:30px;height:4px;border-radius:2px;background:#2b3a72;opacity:.55}
+#stamp{position:absolute;left:310px;top:640px;font:900 64px var(--head);color:rgba(200,20,30,.85);border:8px solid rgba(200,20,30,.85);
+  padding:6px 20px;transform:rotate(-14deg);letter-spacing:4px}
+.bars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 120px,#15181c 120px 146px,#2b3036 146px 150px,transparent 150px 150px)}
+/* S5 */
+#door{position:absolute;left:300px;top:240px;width:480px;height:880px;border-radius:8px;
+  background:linear-gradient(90deg,#2a3138,#3b4550 50%,#2a3138);box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 0 0 16px #15181b}
+#slot{position:absolute;left:120px;top:250px;width:240px;height:80px;background:#030303;border:6px solid #1c2126;border-radius:4px;overflow:hidden}
+.rivet{position:absolute;width:14px;height:14px;border-radius:50%;background:#57626d;box-shadow:inset -2px -2px 3px rgba(0,0,0,.5)}
+/* end */
+#end{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 60px}
+#end h1{font:900 150px/0.95 var(--head);letter-spacing:-4px}
+#end h3{font:900 64px var(--head);color:var(--red);margin-top:14px}
+#end p{font:800 40px/1.3 var(--head);margin-top:70px;color:#e6e1d6;text-transform:uppercase}
+
+/* part 1 */
+.street-sky{position:absolute;inset:0;background:linear-gradient(180deg,#1b2238 0%,#3a3044 45%,#7a4a3a 70%,#2a1c18 100%)}
+.ico-row{position:absolute;left:0;right:0;display:flex;justify-content:center;gap:56px}
+.ico{position:relative;width:200px;height:200px;border-radius:24px;background:rgba(20,16,14,.82);border:2px solid rgba(255,255,255,.14);display:grid;place-items:center}
+.ico svg{width:130px;height:130px}
+.ico .x{position:absolute;inset:-6px}
+.ico em{position:absolute;bottom:-44px;left:0;right:0;text-align:center;font:800 24px var(--mono);font-style:normal;color:#cfc8bc;letter-spacing:2px}
+.bigcal{position:absolute;left:150px;top:170px;width:780px;background:#efe8d6;border-radius:12px;color:#1a1410;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.bigcal .top{background:var(--soviet);color:#fff;font:900 40px var(--head);padding:14px 0;text-align:center;letter-spacing:3px}
+.bigcal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:18px}
+.bigcal .grid div{position:relative;height:62px;display:grid;place-items:center;font:800 30px var(--mono)}
+.bigcal .grid div.x::after{content:"";position:absolute;left:14%;right:14%;top:50%;height:6px;background:#c8102e;transform:rotate(-30deg) scaleX(var(--k,0));transform-origin:left}
+.bigcal .grid div.d19{color:#c8102e}
+.bigcal .grid div.d19::before{content:"";position:absolute;inset:4px 18px;border:5px solid #c8102e;border-radius:50%;opacity:var(--k,0)}
+#dclock{position:absolute;right:150px;top:640px;font:800 92px var(--mono);color:var(--red);text-shadow:0 0 30px rgba(232,50,60,.6);background:#140707;padding:6px 26px;border-radius:12px;border:3px solid #3a1010}
+.kgb{position:absolute;left:90px;top:300px;width:900px;height:860px;background:linear-gradient(180deg,#3d3f44,#26282c);box-shadow:inset 0 0 80px rgba(0,0,0,.6)}
+.kgb .plate{position:absolute;left:180px;top:330px;width:540px;background:#7a5a1e;border:6px solid #a8822c;color:#f4e3b0;text-align:center;font:900 26px/1.25 var(--head);padding:14px 10px;letter-spacing:1px}
+.kgb .col{position:absolute;top:120px;width:60px;height:740px;background:linear-gradient(90deg,#4a4c52,#5d6066 50%,#3a3c41)}
+.kgb .door{position:absolute;left:330px;top:470px;width:240px;height:390px;background:#1a120c;border:8px solid #5a3a20}
+.kgb .win{position:absolute;width:110px;height:150px;background:#1a2230;border:6px solid #55585e}
+#ad{position:absolute;inset:0;background:linear-gradient(180deg,#0b0420,#1a0638 55%,#05010d);overflow:hidden}
+#ad .grid{position:absolute;left:-400px;right:-400px;bottom:0;height:820px;transform:perspective(500px) rotateX(62deg);transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(255,40,200,.75) 3px,transparent 3px),linear-gradient(90deg,rgba(0,230,255,.7) 3px,transparent 3px);background-size:100% 80px,90px 100%}
+#ad .logo{position:absolute;left:0;right:0;top:470px;text-align:center;font:900 132px var(--head);letter-spacing:4px;color:#fff;
+  text-shadow:0 0 18px #00e6ff,0 0 40px #00e6ff,4px 0 0 #ff2bd6,-4px 0 0 #00e6ff}
+#ad .tag{position:absolute;left:60px;right:60px;top:660px;text-align:center;font:800 36px/1.3 var(--mono);color:#ffd6f6;text-shadow:0 0 14px #ff2bd6}
+#ad .btn{position:absolute;left:290px;top:820px;width:500px;text-align:center;font:900 38px var(--head);color:#0b0420;background:#00e6ff;border-radius:16px;padding:22px 0;box-shadow:0 0 40px #00e6ff}
+#ad .lbl{position:absolute;left:40px;top:150px;font:700 22px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:6px;letter-spacing:2px}
+#ad .vhs{position:absolute;left:0;right:0;height:26px;background:rgba(255,255,255,.12);mix-blend-mode:screen}
+#hcl{position:absolute;left:0;right:0;top:560px;text-align:center;font:900 96px/1 var(--head);color:#fff;text-shadow:0 0 30px rgba(232,50,60,.6)}
+#hcl b{color:var(--red)}
+#black8{position:absolute;inset:0;background:#000;opacity:0;z-index:6}
+
+
+
+
+/* 2018 */
+#grain,#scan,#tint{display:none!important}
+#vign{background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(0,0,0,.35) 100%)!important}
+#cap{top:1300px;font:900 80px/1.08 var(--head);-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 rgba(0,0,0,.3)}
+#cap .y{color:#ffd23f} #cap .r{color:#ff4d5e} #cap .g{color:#5dff8a}
+#clock{color:#111;background:#fff;border:4px solid #111;font:900 30px var(--head);box-shadow:0 6px 0 #111}
+.flat{position:absolute;inset:0}
+.floor{position:absolute;left:0;right:0;bottom:0;height:520px}
+.big{position:absolute;left:0;right:0;text-align:center;font:900 120px/0.95 var(--head);color:#fff;-webkit-text-stroke:12px #111;paint-order:stroke fill;text-transform:uppercase}
+.pill{position:absolute;font:900 44px var(--head);color:#111;background:#fff;border:6px solid #111;border-radius:22px;padding:10px 26px;box-shadow:0 8px 0 #111;white-space:nowrap}
+.scr{position:absolute;background:#111;border:10px solid #111;border-radius:30px;overflow:hidden}
+.note{position:absolute;background:#fff7c2;border:5px solid #111;padding:18px 24px;font:800 40px/1.2 var(--mono);color:#111;transform:rotate(-4deg);box-shadow:0 8px 0 rgba(0,0,0,.3)}
+.who{position:absolute}
+#endt{position:absolute;left:60px;right:60px;top:520px;text-align:center;font:900 92px/1.05 var(--head);color:#fff;-webkit-text-stroke:10px #111;paint-order:stroke fill}
+#endt b{color:#ffd23f}
+/* fx */
+#grain{position:absolute;inset:0;pointer-events:none;z-index:39;opacity:.07;mix-blend-mode:screen}
+#scan{position:absolute;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 2px,transparent 2px 4px)}
+#vign{position:absolute;inset:0;pointer-events:none;z-index:38;background:radial-gradient(ellipse at 50% 42%,transparent 45%,rgba(0,0,0,.82) 100%)}
+#tint{position:absolute;inset:0;pointer-events:none;z-index:37;background:rgba(120,70,20,.08);mix-blend-mode:multiply}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--red);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#fff;border:3px solid var(--red);padding:18px 40px;border-radius:14px;box-shadow:0 0 40px rgba(232,50,60,.5)}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+  <!-- S1: пробуждение, старый телефон, календарь -->
+  <div class="scene" id="s1"><div class="flat" style="background:#9fc6ff"></div><div class="floor" style="background:#c58a5a"></div>
+    <svg class="abs" style="left:640px;top:220px" width="320" height="320" viewBox="0 0 100 100"><rect x="4" y="4" width="92" height="92" fill="#dff1ff" stroke="#111" stroke-width="5"/><path d="M50 4 V96 M4 50 H96" stroke="#111" stroke-width="5"/><circle cx="74" cy="26" r="10" fill="#ffd23f"/></svg>
+    <div class="abs" id="cal1" style="left:120px;top:250px;width:300px;height:330px;background:#fff;border:6px solid #111;border-radius:12px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.25)">
+      <div style="background:#ff4d5e;border-bottom:6px solid #111;font:900 40px var(--head);color:#fff;padding:10px 0">ЯНВАРЬ</div><div style="font:900 130px/1.4 var(--head)">2018</div></div>
+    <svg class="abs" style="left:60px;top:900px" width="960" height="360" viewBox="0 0 960 360"><rect x="0" y="120" width="960" height="200" rx="20" fill="#5a7bd6" stroke="#111" stroke-width="8"/><rect x="40" y="60" width="260" height="120" rx="40" fill="#fff" stroke="#111" stroke-width="8"/><rect x="0" y="300" width="40" height="60" fill="#3a2a1a"/><rect x="920" y="300" width="40" height="60" fill="#3a2a1a"/></svg>
+    <div class="who" id="h1" style="left:110px;top:780px;transform:rotate(-80deg);transform-origin:50% 60%"></div>
+    <svg class="abs" id="alarm1" style="left:700px;top:700px" width="240" height="240" viewBox="0 0 100 100"><circle cx="50" cy="56" r="34" fill="#ff4d5e" stroke="#111" stroke-width="5"/><circle cx="50" cy="56" r="24" fill="#fff" stroke="#111" stroke-width="4"/><path d="M50 56 V40 M50 56 L60 62" stroke="#111" stroke-width="4"/><circle cx="24" cy="22" r="10" fill="#ffd23f" stroke="#111" stroke-width="4"/><circle cx="76" cy="22" r="10" fill="#ffd23f" stroke="#111" stroke-width="4"/></svg>
+    <div class="scr" id="ph1" style="left:330px;top:420px;width:420px;height:760px;background:#2a2f3a">
+      <svg width="400" height="740" viewBox="0 0 400 740"><rect x="20" y="40" width="360" height="640" rx="10" fill="#3d8bff"/><path d="M60 120 L200 300 L150 420 L330 640 M200 300 L340 220 M150 420 L40 560" stroke="#fff" stroke-width="6" fill="none" opacity=".85"/><text x="200" y="720" font-size="30" font-weight="900" text-anchor="middle" fill="#888" font-family="JetBrains Mono,DejaVu Sans Mono">2018</text></svg></div>
+  </div>
+
+  <!-- S2: зеркало, причёска «под горшок», спиннер -->
+  <div class="scene" id="s2"><div class="flat" style="background:#ffd6a8"></div>
+    <div class="abs" style="left:190px;top:200px;width:700px;height:1040px;border:22px solid #8a5a2a;border-radius:340px 340px 30px 30px;background:linear-gradient(135deg,#d8f0ff,#a8d4ff)"></div>
+    <div class="who" id="h2" style="left:300px;top:420px"></div>
+    <svg class="abs" id="spin2" style="left:700px;top:260px" width="260" height="260" viewBox="0 0 100 100"><g stroke="#111" stroke-width="4"><circle cx="50" cy="18" r="16" fill="#3aa0ff"/><circle cx="22" cy="66" r="16" fill="#3aa0ff"/><circle cx="78" cy="66" r="16" fill="#3aa0ff"/><circle cx="50" cy="50" r="18" fill="#ffd23f"/></g><circle cx="50" cy="50" r="6" fill="#111"/></svg>
+  </div>
+
+  <!-- S3: план на доске -->
+  <div class="scene" id="s3"><div class="flat" style="background:#b8e6c8"></div>
+    <div class="abs" style="left:80px;top:180px;width:920px;height:620px;background:#fff;border:10px solid #111;border-radius:16px;box-shadow:0 12px 0 rgba(0,0,0,.25)"></div>
+    <div class="big" id="t3" style="top:220px;font-size:76px">ПЛАН: 💰</div>
+    <svg class="abs" style="left:120px;top:360px" width="840" height="420" viewBox="0 0 840 420">
+      <g id="p1"><circle cx="140" cy="140" r="90" fill="#fff" stroke="#111" stroke-width="8"/><path d="M140 50 l40 60 l-40 40 l-40 -40z M100 110 l-50 30 M180 110 l50 30 M140 150 v80" stroke="#111" stroke-width="7" fill="#111"/><text x="140" y="290" font-size="36" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">СТАВКИ</text></g>
+      <g id="p2"><circle cx="420" cy="140" r="90" fill="#ffb300" stroke="#111" stroke-width="8"/><text x="420" y="178" font-size="110" font-weight="900" text-anchor="middle" fill="#fff" font-family="Montserrat,Inter">₿</text><text x="420" y="290" font-size="36" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">БИТКОИН</text></g>
+      <g id="p3"><rect x="610" y="70" width="180" height="130" rx="10" fill="#3aa0ff" stroke="#111" stroke-width="8"/><rect x="680" y="200" width="40" height="30" fill="#111"/><text x="700" y="290" font-size="36" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">МАЙНИНГ</text></g>
+      <path id="arr3" d="M140 320 Q420 420 700 320" stroke="#ff4d5e" stroke-width="10" fill="none" stroke-dasharray="1" pathLength="1" stroke-dashoffset="1"/></svg>
+    <svg class="abs" style="left:780px;top:880px" width="180" height="180" viewBox="0 0 100 100"><path d="M20 40 h60 v46 q0 8 -8 8 h-44 q-8 0 -8 -8z" fill="#fff" stroke="#111" stroke-width="5"/><path d="M24 44 h52 v20 q-26 14 -52 0z" fill="#7dff9a"/><text x="50" y="84" font-size="14" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">СЛАЙМ</text></svg>
+    <div class="who" id="h3" style="left:120px;top:820px"></div>
+  </div>
+
+  <!-- S4: копилка -->
+  <div class="scene" id="s4"><div class="flat" style="background:#ffc2d9"></div>
+    <svg class="abs" id="pig4" style="left:190px;top:380px" width="700" height="560" viewBox="0 0 200 160"><ellipse cx="100" cy="90" rx="80" ry="58" fill="#ff8ab8" stroke="#111" stroke-width="6"/><circle cx="168" cy="84" r="20" fill="#ff8ab8" stroke="#111" stroke-width="6"/><circle cx="164" cy="80" r="3" fill="#111"/><circle cx="174" cy="80" r="3" fill="#111"/>
+      <rect x="80" y="30" width="40" height="8" rx="4" fill="#111"/><path d="M50 140 v16 M80 144 v14 M120 144 v14 M150 140 v16" stroke="#111" stroke-width="8"/><circle cx="130" cy="64" r="6" fill="#111"/>
+      <g id="coin4"><circle cx="100" cy="-20" r="14" fill="#ffd23f" stroke="#111" stroke-width="5"/></g></svg>
+    <div class="pill" id="z4" style="left:390px;top:1000px">1 МОНЕТКА</div>
+  </div>
+
+  <!-- S5: магазин, ценник на видеокарту -->
+  <div class="scene" id="s5"><div class="flat" style="background:#d6e4ff"></div><div class="floor" style="background:#8a9ab8;height:420px"></div>
+    <svg class="abs" style="left:110px;top:330px" width="560" height="320" viewBox="0 0 280 160"><rect x="10" y="30" width="250" height="100" rx="10" fill="#2a2f3a" stroke="#111" stroke-width="6"/><circle cx="80" cy="80" r="34" fill="#555" stroke="#111" stroke-width="5"/><circle cx="190" cy="80" r="34" fill="#555" stroke="#111" stroke-width="5"/><rect x="40" y="130" width="160" height="16" fill="#ffd23f" stroke="#111" stroke-width="4"/></svg>
+    <div class="pill" id="tag5" style="left:150px;top:700px;font-size:60px;background:#ff4d5e;color:#fff;transform:rotate(-6deg)">ЦЕНА: 1 ПОЧКА</div>
+    <div class="who" id="sell5" style="left:640px;top:620px"></div>
+    <div class="pill" id="ha5" style="left:640px;top:520px;background:#ffd23f">ХА-ХА-ХА</div>
+  </div>
+
+  <!-- S6: «ферма» и мама -->
+  <div class="scene" id="s6"><div class="flat" id="room6" style="background:#ffe9a8"></div><div class="floor" style="background:#b88a5a"></div>
+    <svg class="abs" id="farm6" style="left:80px;top:620px" width="920" height="560" viewBox="0 0 460 280">
+      <rect x="20" y="40" width="130" height="220" rx="8" fill="#ccc" stroke="#111" stroke-width="6"/><circle cx="85" cy="200" r="30" fill="#888" stroke="#111" stroke-width="5"/><g id="fanb"><path d="M85 200 l0 -26 M85 200 l24 12 M85 200 l-24 12" stroke="#111" stroke-width="8"/></g>
+      <g transform="translate(170 140)"><circle cx="50" cy="50" r="46" fill="#3aa0ff" stroke="#111" stroke-width="6"/><g id="fan6"><path d="M50 50 q20 -40 0 -44 q-10 30 0 44 M50 50 q40 20 44 0 q-30 -10 -44 0 M50 50 q-20 40 0 44 q10 -30 0 -44 M50 50 q-40 -20 -44 0 q30 10 44 0" fill="#fff" stroke="#111" stroke-width="3"/></g><rect x="44" y="96" width="12" height="44" fill="#111"/></g>
+      <g transform="translate(320 120)" id="dryer6"><path d="M0 20 h90 q20 0 20 20 q0 20 -20 20 h-90z" fill="#ff8ab8" stroke="#111" stroke-width="6"/><rect x="20" y="58" width="24" height="70" rx="6" fill="#ff8ab8" stroke="#111" stroke-width="6"/></g>
+      <path d="M150 230 Q240 270 330 200" stroke="#111" stroke-width="4" fill="none" stroke-dasharray="10 6"/></svg>
+    <div class="who" id="h6" style="left:520px;top:300px"></div>
+    <div class="abs" style="left:40px;top:180px;width:300px;height:700px;background:#c8935a;border:8px solid #111"></div>
+    <div class="pill" id="mom6" style="left:60px;top:200px;background:#fff;font-size:40px;white-space:normal;width:520px">ЛЁША! ПОЧЕМУ СЧЁТ ЗА СВЕТ КАК ЗА ЗАВОД?!</div>
+    <div class="flat" id="dark6" style="background:#000;opacity:0;pointer-events:none"></div>
+  </div>
+
+  <!-- S7: экран майнера -->
+  <div class="scene" id="s7"><div class="flat" style="background:#20242c"></div>
+    <div class="scr" style="left:90px;top:280px;width:900px;height:640px;background:#04110a;padding:50px">
+      <div style="font:800 40px var(--mono);color:#58ff9a">MINER v0.1 · 2018</div>
+      <div style="font:800 40px/1.6 var(--mono);color:#58ff9a">ХЕШРЕЙТ: 0.8 H/s<br>ТЕМПЕРАТУРА: 97°C 🔥</div>
+      <div style="font:900 64px/1.3 var(--mono);color:#fff;margin-top:30px">ДОБЫТО:<br><span id="btc7" style="color:#ffd23f">0.0000000</span> BTC</div></div>
+    <div class="who" id="h7" style="left:620px;top:860px"></div>
+  </div>
+
+  <!-- S8: ЧМ-2018, Германия — Корея -->
+  <div class="scene" id="s8"><div class="flat" style="background:#9fe0ff"></div><div class="floor" style="background:#7fd17f"></div>
+    <div class="pill" style="left:330px;top:180px;background:#ffd23f">☀️ ЛЕТО 2018</div>
+    <div class="scr" style="left:110px;top:300px;width:860px;height:560px;background:#2b8a2b">
+      <svg width="840" height="540" viewBox="0 0 840 540"><rect x="20" y="20" width="800" height="500" fill="none" stroke="#fff" stroke-width="6"/><circle cx="420" cy="270" r="80" fill="none" stroke="#fff" stroke-width="6"/><path d="M420 20 V520" stroke="#fff" stroke-width="6"/>
+        <text x="420" y="110" font-size="44" font-weight="900" text-anchor="middle" fill="#fff" font-family="Montserrat,Inter">ЧМ-2018 · РОССИЯ</text></svg></div>
+    <div class="pill" id="sc8" style="left:140px;top:900px;font-size:58px">ГЕРМАНИЯ <span id="s8a">0</span> : <span id="s8b">0</span> КОРЕЯ</div>
+  </div>
+
+  <!-- S9: ставка, друзья, Россия — Испания -->
+  <div class="scene" id="s9"><div class="flat" style="background:#ffe1b0"></div><div class="floor" style="background:#c58a5a"></div>
+    <div class="scr" id="ph9" style="left:390px;top:200px;width:300px;height:520px;background:#fff"><div style="font:900 40px/1.3 var(--head);text-align:center;margin-top:120px">СТАВКА<br><span style="color:#2bb36b;font-size:90px">✓</span></div></div>
+    <div class="who" id="f9a" style="left:20px;top:640px"></div><div class="who" id="f9b" style="left:740px;top:640px"></div>
+    <div class="who" id="h9" style="left:380px;top:720px"></div>
+    <div class="pill" id="sc9" style="left:80px;top:220px;font-size:46px">РОССИЯ 1:1 ИСПАНИЯ · ПЕН. 4:3</div>
+  </div>
+
+  <!-- S10: финал, Франция — Хорватия, выигрыш -->
+  <div class="scene" id="s10"><div class="flat" style="background:#ffd23f"></div>
+    <svg class="abs" id="conf10" style="left:0;top:0" width="1080" height="1300"></svg>
+    <div class="pill" id="sc10" style="left:110px;top:250px;font-size:56px">ФРАНЦИЯ 4 : 2 ХОРВАТИЯ</div>
+    <div class="big" id="win10" style="top:440px">+<span id="w10">0</span> ₽</div>
+    <div class="who" id="h10" style="left:300px;top:700px"></div>
+    <div class="who" id="f10a" style="left:-40px;top:780px"></div><div class="who" id="f10b" style="left:800px;top:780px"></div>
+  </div>
+
+  <!-- S11: аккаунт ограничен -->
+  <div class="scene" id="s11"><div class="flat" style="background:#ffd23f"></div>
+    <div class="scr" id="ph11" style="left:240px;top:230px;width:600px;height:900px;background:#f2f2f2">
+      <div id="ntf11" style="margin:60px 30px;background:#fff;border:6px solid #ff4d5e;border-radius:24px;padding:30px;font:800 40px/1.25 var(--head);color:#111"><span style="color:#ff4d5e;font-size:54px">⛔ Ваш аккаунт ограничен</span><br>Подозрительная активность.<br><span style="font:800 32px var(--mono);color:#777">макс. ставка: 10 ₽</span></div></div>
+    <div class="who" id="h11" style="left:620px;top:860px"></div>
+  </div>
+
+  <!-- S12: график биткоина -->
+  <div class="scene" id="s12"><div class="flat" style="background:#16202c"></div>
+    <svg class="abs" style="left:60px;top:200px" width="960" height="900" viewBox="0 0 960 900">
+      <g stroke="#2a3a4c" stroke-width="3"><path d="M80 100 H920 M80 300 H920 M80 500 H920 M80 700 H920"/></g>
+      <g fill="#8fa3b8" font-family="JetBrains Mono,DejaVu Sans Mono" font-size="30" font-weight="800"><text x="0" y="110">$69K</text><text x="0" y="510">$17K</text><text x="0" y="710">$3K</text>
+        <text x="90" y="790">ЯНВ 2018</text><text x="380" y="790">ДЕК 2018</text><text x="700" y="790">2021</text></g>
+      <path id="drop12" d="M90 500 L160 560 L220 520 L300 620 L380 660 L440 700" stroke="#ff4d5e" stroke-width="10" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <path id="fut12" d="M440 700 L560 560 L640 420 L760 100" stroke="#5dff8a" stroke-width="10" fill="none" stroke-dasharray="20 14" opacity="0"/>
+      <g id="buy12" opacity="0"><circle cx="440" cy="700" r="22" fill="#5dff8a" stroke="#111" stroke-width="5"/><rect x="380" y="610" width="140" height="56" rx="12" fill="#5dff8a" stroke="#111" stroke-width="5"/><text x="450" y="650" font-size="32" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">КУПИЛ</text></g>
+      <g id="k100" opacity="0"><rect x="700" y="20" width="230" height="64" rx="14" fill="#ffd23f" stroke="#111" stroke-width="5"/><text x="815" y="64" font-size="36" font-weight="900" text-anchor="middle" font-family="Montserrat,Inter">$100K+</text></g></svg>
+    <div class="pill" id="pan12" style="left:120px;top:1080px;background:#ff4d5e;color:#fff">ВСЕ: ПАНИКА 😱</div>
+  </div>
+
+  <!-- S13: бумажка с паролем, флешка в ящик -->
+  <div class="scene" id="s13"><div class="flat" style="background:#c9b8ff"></div>
+    <div class="abs" style="left:80px;top:620px;width:920px;height:560px;background:#a8723a;border:10px solid #111;border-radius:12px"></div>
+    <div class="abs" id="drw13" style="left:200px;top:700px;width:680px;height:220px;background:#c8935a;border:8px solid #111;border-radius:10px"><div style="margin:84px auto;width:120px;height:24px;background:#111;border-radius:12px"></div></div>
+    <div class="note" id="pw13" style="left:160px;top:250px">пароль:<br>Lekha2018!btc</div>
+    <svg class="abs" id="usb13" style="left:620px;top:280px" width="220" height="140" viewBox="0 0 110 70"><rect x="4" y="16" width="70" height="38" rx="8" fill="#3aa0ff" stroke="#111" stroke-width="5"/><rect x="74" y="24" width="30" height="22" fill="#ccc" stroke="#111" stroke-width="5"/></svg>
+    <div class="who" id="h13" style="left:640px;top:360px"></div>
+  </div>
+
+  <!-- S14: декабрь 2018, релиз игры -->
+  <div class="scene" id="s14"><div class="flat" style="background:#8a4dff"></div>
+    <div class="pill" style="left:300px;top:180px;background:#ffd23f">❄️ ДЕКАБРЬ 2018</div>
+    <div class="scr" id="ph14" style="left:290px;top:300px;width:500px;height:860px;background:#1a1040">
+      <div style="margin:80px 30px;text-align:center;font:900 46px/1.2 var(--head);color:#fff">ГЛОБАЛЬНЫЙ<br>РЕЛИЗ</div>
+      <div style="margin:0 30px;text-align:center;font:900 64px/1.1 var(--head);color:#ffd23f">BRAWL STARS</div>
+      <div style="margin:60px 60px;padding:22px 0;text-align:center;font:900 44px var(--head);color:#111;background:#5dff8a;border:6px solid #111;border-radius:20px">СКАЧАТЬ</div></div>
+    <div class="who" id="h14" style="left:620px;top:860px"></div>
+  </div>
+
+  <!-- S15: снова будильник, 2026 -->
+  <div class="scene" id="s15"><div class="flat" style="background:#9fc6ff"></div><div class="floor" style="background:#c58a5a"></div>
+    <div class="abs" style="left:120px;top:250px;width:300px;height:330px;background:#fff;border:6px solid #111;border-radius:12px;text-align:center"><div style="background:#3aa0ff;border-bottom:6px solid #111;font:900 40px var(--head);color:#fff;padding:10px 0">СЕГОДНЯ</div><div style="font:900 130px/1.4 var(--head)">2026</div></div>
+    <svg class="abs" id="alarm15" style="left:700px;top:300px" width="240" height="240" viewBox="0 0 100 100"><circle cx="50" cy="56" r="34" fill="#ff4d5e" stroke="#111" stroke-width="5"/><circle cx="50" cy="56" r="24" fill="#fff" stroke="#111" stroke-width="4"/><path d="M50 56 V40 M50 56 L60 62" stroke="#111" stroke-width="4"/><circle cx="24" cy="22" r="10" fill="#ffd23f" stroke="#111" stroke-width="4"/><circle cx="76" cy="22" r="10" fill="#ffd23f" stroke="#111" stroke-width="4"/></svg>
+    <div class="who" id="h15" style="left:300px;top:640px"></div>
+  </div>
+
+  <!-- S16: бабушкин стол, флешка, «Введите пароль» -->
+  <div class="scene" id="s16"><div class="flat" style="background:#e6d2b0"></div>
+    <div class="abs" style="left:60px;top:760px;width:960px;height:460px;background:#7a4a22;border:10px solid #111;border-radius:12px"></div>
+    <div class="abs" id="drw16" style="left:180px;top:840px;width:720px;height:200px;background:#9a6232;border:8px solid #111;border-radius:10px"><div style="margin:74px auto;width:120px;height:24px;background:#111;border-radius:12px"></div></div>
+    <div class="scr" id="lap16" style="left:170px;top:220px;width:740px;height:480px;background:#0f1a2a"><div style="margin:150px 0;text-align:center;font:900 54px var(--head);color:#fff">ВВЕДИТЕ ПАРОЛЬ<br><span style="font:800 50px var(--mono);color:#5dff8a">▮<span id="cur16">_</span></span></div></div>
+    <svg class="abs" id="usb16" style="left:430px;top:880px" width="220" height="140" viewBox="0 0 110 70"><rect x="4" y="16" width="70" height="38" rx="8" fill="#3aa0ff" stroke="#111" stroke-width="5"/><rect x="74" y="24" width="30" height="22" fill="#ccc" stroke="#111" stroke-width="5"/></svg>
+  </div>
+
+  <!-- S17: поиски и флешбэк — мама выкидывает «мусор» -->
+  <div class="scene" id="s17"><div class="flat" id="bg17" style="background:#ffe9a8"></div>
+    <svg class="abs" id="papers17" style="left:0;top:0" width="1080" height="1300"></svg>
+    <div class="who" id="h17" style="left:300px;top:560px"></div>
+    <div class="abs" id="fb17" style="inset:0;opacity:0;filter:sepia(.85) saturate(.8)"><div class="flat" style="background:#f2dfb8"></div>
+      <div class="pill" style="left:380px;top:180px;background:#fff">2018</div>
+      <div class="who" id="mom17" style="left:180px;top:420px"></div>
+      <svg class="abs" style="left:640px;top:860px" width="260" height="320" viewBox="0 0 100 120"><path d="M14 30 h72 l-8 86 h-56z" fill="#888" stroke="#111" stroke-width="5"/><rect x="8" y="20" width="84" height="12" rx="4" fill="#666" stroke="#111" stroke-width="5"/></svg>
+      <div class="note" id="pw17" style="left:560px;top:520px;font-size:30px">пароль:<br>Lekha2018!btc</div></div>
+  </div>
+
+  <!-- S18: «...Мам» — крупный план -->
+  <div class="scene" id="s18"><div class="flat" style="background:#2a2f3a"></div><div class="who" id="h18" style="left:190px;top:300px"></div></div>
+
+  <!-- S19: финальный титр -->
+  <div class="scene" id="s19"><div class="flat" style="background:#3aa0ff"></div>
+    <div id="endt">А что бы сделал <b>ты</b>, если бы проснулся <b>в 2018-м?</b></div>
+    <div class="pill" id="cm19" style="left:180px;top:1000px;font-size:54px">Пиши в комментариях 👇</div></div>
+  <div class="scene" id="s20"><div class="flat" style="background:#3aa0ff"></div></div>
+
+  <div id="clock"></div>
+  <div id="cap"></div>
+  <canvas id="grain" width="270" height="480"></canvas>
+  <div id="tint"></div><div id="vign"></div><div id="scan"></div><div id="flash"></div>
+</div></div>
+
+<audio id="vtrack" src="voice.mp3" preload="auto"></audio>
+<div id="start"><b>▶ СМОТРЕТЬ</b><span>Включите звук · пробел — пауза · ←/→ — перемотка</span></div>
+<div id="ui">
+  <button id="pp">❚❚</button><input id="seek" type="range" min="0" max="230" step="0.01" value="0">
+  <span id="time">0:00 / 3:50</span><button id="vo">🔊 Голос: вкл</button><button id="fs">⛶</button>
+</div>
+
+<script>
+"use strict";
+const DUR = 230;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [230, 230]];
+const VDUR = WARP[WARP.length - 1][1];
+function warp(t, a, b) {
+  for (let i = 1; i < WARP.length; i++) { const p = WARP[i - 1], q = WARP[i];
+    if (t <= q[a] || i === WARP.length - 1) return p[b] + (t - p[a]) * (q[b] - p[b]) / ((q[a] - p[a]) || 1); }
+  return t;
+}
+const toNew = (t) => warp(t, 0, 1), toOld = (t) => warp(t, 1, 0);
+const frame = (t) => render(toOld(t));
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+/* ---------- timeline data ---------- */
+const SCENES = [
+  { id: "s1", s: 0, e: 6 }, { id: "s2", s: 6, e: 20 }, { id: "s3", s: 20, e: 36 }, { id: "s4", s: 36, e: 45 },
+  { id: "s5", s: 45, e: 55 }, { id: "s6", s: 55, e: 68 }, { id: "s7", s: 68, e: 80 }, { id: "s8", s: 80, e: 92 },
+  { id: "s9", s: 92, e: 104 }, { id: "s10", s: 104, e: 116 }, { id: "s11", s: 116, e: 130 }, { id: "s12", s: 130, e: 148 },
+  { id: "s13", s: 148, e: 170 }, { id: "s14", s: 170, e: 185 }, { id: "s15", s: 185, e: 193 }, { id: "s16", s: 193, e: 205 },
+  { id: "s17", s: 205, e: 214 }, { id: "s18", s: 214, e: 220 }, { id: "s19", s: 220, e: 228 }, { id: "s20", s: 228, e: 230 },
+];
+const CLOCK = [[0, "ЯНВАРЬ 2018"], [80, "ЛЕТО 2018"], [130, "2018"], [170, "ДЕКАБРЬ 2018"], [185, "2026"], [205, "2026 · ФЛЕШБЭК 2018"], [214, "2026"], [220, null]];
+// как читать субтитры вслух (для сверки с озвучкой)
+const SPEAK = [["2018-го", "две тысячи восемнадцатого"], ["0:2", "ноль — два"], ["4:2", "четыре — два"], ["2021-м", "двадцать первом"], ["69 тысяч", "шестьдесят девять тысяч"]];
+const DROP = [];
+const CAPS = [
+  [1, "Так. {y:Это не мой телефон.}"], [3.4, "И это {r:не мой год.}"],
+  [8.5, "Нет..."], [10, "Только не {r:спиннеры...}"],
+  [21, "Спокойно. {y:Я знаю будущее.}"], [23.8, "Значит, у меня {y:три пути} к богатству:"], [27, "{g:ставки на спорт,}"], [28.6, "{y:биткоин}"], [29.6, "и {y:майнинг.}"], [31, "Что может {r:пойти не так?}"],
+  [39.5, "...Ну, для начала"], [41, "{r:нужны деньги.}"],
+  [46, "В начале 2018-го"], [47.6, "{y:все майнили.}"], [49.4, "Видеокарты стоили"], [50.8, "{r:как почка.}"],
+  [62, "{r:Лёша!} Почему счёт за свет"], [64, "{r:как за завод?!}"],
+  [71, "Ладно."], [72, "Майнинг на старом компе"], [73.8, "— {r:не мой путь.}"],
+  [81, "А вот тут {y:я знаю всё.}"], [83.4, "Германия, действующий чемпион,"], [85.6, "{r:вылетает в группе} —"], [87.2, "проигрывает Южной Корее"], [88.8, "{y:0:2.}"],
+  [100, "{g:Россия проходит Испанию}"], [101.6, "{g:по пенальти!}"],
+  [107, "А в финале"], [108, "{y:Франция обыгрывает Хорватию}"], [110, "{y:4:2.}"],
+  [118, "Оказалось, букмекеры не любят тех,"], [120.4, "кто {r:слишком часто выигрывает.}"], [122.6, "Они тебе просто..."], [124, "{r:режут ставки.}"],
+  [125.6, "Казино {y:всегда в плюсе,}"], [127.4, "даже когда ты {y:из будущего.}"],
+  [133, "Все вокруг {r:паниковали.}"], [135, "А я знал:"], [136, "в 2021-м он будет"], [137.4, "{g:почти 69 тысяч,}"], [139.2, "а потом и {g:выше сотни.}"],
+  [156, "Всё."], [157, "Я — {y:будущий миллионер.}"],
+  [174, "О, это я тоже знаю..."], [176, "Только на этот раз"], [177.2, "прокачаю {y:Леона} с первого дня."],
+  [187.5, "{r:Сон?!}"], [189, "{r:Нет-нет-нет...}"], [191.2, ""],
+  [217.5, "{y:...Мам.}"], [219.4, ""], [228, ""],
+];
+const capEnd = (i) => (i + 1 < CAPS.length ? CAPS[i + 1][0] : DUR);
+function parseCap(str) {
+  const out = []; const re = /\{(\w):([^}]*)\}|([^{]+)/g; let m;
+  while ((m = re.exec(str))) {
+    const cls = m[1] || "", txt = m[2] !== undefined ? m[2] : m[3];
+    txt.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, cls }));
+  }
+  return out;
+}
+/* voice lines: group caption chunks into sentences (fallback browser voice) */
+const VOICE = [];
+(() => {
+  let cur = null;
+  CAPS.forEach(([t, s]) => {
+    let plain = s.replace(/\{\w:([^}]*)\}/g, "$1").trim();
+    if (!plain) return;
+    SPEAK.forEach(([a, b]) => { plain = plain.split(a).join(b); });
+    if (!cur) cur = { t, text: "" };
+    cur.text += (cur.text ? " " : "") + plain;
+    if (/[.!?:»—]$/.test(plain)) { VOICE.push(cur); cur = null; }
+  });
+  if (cur) VOICE.push(cur);
+})();
+
+/* ---------- персонажи: одна функция, разные причёски и эмоции ---------- */
+function person(o) {
+  const w = o.w || 300, skin = o.skin || "#f1c19a", hc = o.hairColor || "#6b3a1e", sc = o.shirt || "#3aa0ff";
+  const hair = {
+    bowl: `<path d="M44 132 Q40 40 120 38 Q200 40 196 132 L196 118 Q120 104 44 118Z" fill="${hc}"/><path d="M44 118 Q120 100 196 118 L196 126 Q120 112 44 126Z" fill="${hc}"/>`,
+    mess: `<path d="M48 120 L40 70 L70 82 L72 44 L100 66 L120 30 L140 66 L168 44 L170 82 L200 70 L192 120 Q120 92 48 120Z" fill="${hc}"/>`,
+    bun: `<circle cx="120" cy="40" r="30" fill="${hc}"/><path d="M48 130 Q44 52 120 50 Q196 52 192 130 Q170 90 120 92 Q70 90 48 130Z" fill="${hc}"/>`,
+    bald: `<path d="M60 90 Q120 70 180 90" stroke="${hc}" stroke-width="10" fill="none"/>`,
+  }[o.hair || "mess"];
+  const eyes = {
+    norm: `<ellipse cx="94" cy="136" rx="9" ry="12" fill="#111"/><ellipse cx="146" cy="136" rx="9" ry="12" fill="#111"/>`,
+    shock: `<circle cx="94" cy="134" r="18" fill="#fff" stroke="#111" stroke-width="5"/><circle cx="146" cy="134" r="18" fill="#fff" stroke="#111" stroke-width="5"/><circle cx="94" cy="136" r="7" fill="#111"/><circle cx="146" cy="136" r="7" fill="#111"/>`,
+    happy: `<path d="M80 140 q14 -16 28 0 M132 140 q14 -16 28 0" stroke="#111" stroke-width="7" fill="none" stroke-linecap="round"/>`,
+    sleep: `<path d="M80 138 h28 M132 138 h28" stroke="#111" stroke-width="7" stroke-linecap="round"/>`,
+    sad: `<path d="M80 128 l26 8 M160 128 l-26 8" stroke="#111" stroke-width="6" stroke-linecap="round"/><ellipse cx="94" cy="144" rx="8" ry="10" fill="#111"/><ellipse cx="146" cy="144" rx="8" ry="10" fill="#111"/>`,
+    smug: `<path d="M80 136 h28 M132 136 h28" stroke="#111" stroke-width="7" stroke-linecap="round"/><path d="M84 140 q10 8 20 0 M136 140 q10 8 20 0" fill="#111"/>`,
+  }[o.eyes || "norm"];
+  const mouth = {
+    smile: `<path d="M102 176 q18 16 36 0" stroke="#111" stroke-width="7" fill="none" stroke-linecap="round"/>`,
+    grin: `<path d="M88 170 Q120 166 152 170 Q148 202 120 204 Q92 202 88 170Z" fill="#fff" stroke="#111" stroke-width="6"/><path d="M88 182 h64" stroke="#111" stroke-width="4"/>`,
+    o: `<ellipse cx="120" cy="182" rx="12" ry="16" fill="#7a1a1a" stroke="#111" stroke-width="5"/>`,
+    open: `<path d="M96 170 Q120 166 144 170 Q140 206 120 208 Q100 206 96 170Z" fill="#7a1a1a" stroke="#111" stroke-width="6"/>`,
+    frown: `<path d="M102 188 q18 -16 36 0" stroke="#111" stroke-width="7" fill="none" stroke-linecap="round"/>`,
+    flat: `<path d="M104 182 h32" stroke="#111" stroke-width="7" stroke-linecap="round"/>`,
+    laugh: `<path d="M90 168 Q120 164 150 168 Q146 212 120 214 Q94 212 90 168Z" fill="#7a1a1a" stroke="#111" stroke-width="6"/><path d="M96 172 h48" stroke="#fff" stroke-width="8"/>`,
+  }[o.mouth || "smile"];
+  const spinner = o.spinner ? `<g transform="translate(120 290)"><g class="tee-spin"><circle cx="0" cy="-22" r="13" fill="#3aa0ff" stroke="#111" stroke-width="4"/><circle cx="-19" cy="11" r="13" fill="#3aa0ff" stroke="#111" stroke-width="4"/><circle cx="19" cy="11" r="13" fill="#3aa0ff" stroke="#111" stroke-width="4"/><circle r="12" fill="#ffd23f" stroke="#111" stroke-width="4"/></g></g>` : "";
+  const apron = o.apron ? `<path d="M80 250 h80 v110 h-80z" fill="#fff" stroke="#111" stroke-width="5"/>` : "";
+  const stache = o.stache ? `<path d="M92 162 q14 -10 28 0 q14 -10 28 0 q-14 12 -28 4 q-14 8 -28 -4z" fill="#3a2a1a"/>` : "";
+  const arm = { up: `<path d="M196 260 L250 150" stroke="${sc}" stroke-width="40" stroke-linecap="round"/><path d="M196 260 L250 150" stroke="#111" stroke-width="52" stroke-linecap="round" opacity="0"/><circle cx="252" cy="142" r="22" fill="${skin}" stroke="#111" stroke-width="6"/>`,
+    temple: `<path d="M196 260 L214 160" stroke="${sc}" stroke-width="38" stroke-linecap="round"/><circle cx="206" cy="128" r="20" fill="${skin}" stroke="#111" stroke-width="6"/><circle class="twirl" cx="236" cy="104" r="22" fill="none" stroke="#ffd23f" stroke-width="6" stroke-dasharray="14 8"/>`,
+    phone: `<path d="M196 270 L170 210" stroke="${sc}" stroke-width="38" stroke-linecap="round"/><rect x="140" y="160" width="46" height="76" rx="8" fill="#111"/><circle cx="168" cy="218" r="20" fill="${skin}" stroke="#111" stroke-width="6"/>`,
+    marker: `<path d="M196 270 L240 190" stroke="${sc}" stroke-width="38" stroke-linecap="round"/><rect x="232" y="150" width="16" height="44" fill="#ff4d5e" stroke="#111" stroke-width="4" transform="rotate(30 240 172)"/><circle cx="242" cy="186" r="20" fill="${skin}" stroke="#111" stroke-width="6"/>` }[o.arm] || "";
+  return `<svg width="${w}" height="${w * 1.5}" viewBox="-20 0 280 360"><g stroke="#111" stroke-width="6" stroke-linejoin="round">
+    <path d="M40 360 Q44 236 120 220 Q196 236 200 360Z" fill="${sc}"/><rect x="104" y="196" width="32" height="32" fill="${skin}"/>
+    <ellipse cx="46" cy="140" rx="12" ry="18" fill="${skin}"/><ellipse cx="194" cy="140" rx="12" ry="18" fill="${skin}"/>
+    <ellipse cx="120" cy="132" rx="74" ry="82" fill="${skin}"/></g>${hair}${apron}${spinner}
+    <circle cx="80" cy="166" r="10" fill="#ff8aa0" opacity=".6"/><circle cx="160" cy="166" r="10" fill="#ff8aa0" opacity=".6"/>${eyes}${stache}${mouth}${arm}</svg>`;
+}
+const LEKHA18 = { hair: "bowl", hairColor: "#7a4a22", shirt: "#ffffff", spinner: true };
+const LEKHA26 = { hair: "mess", hairColor: "#3a2a1a", shirt: "#2fb36b" };
+const FRIEND_A = { hair: "mess", hairColor: "#e8b83a", shirt: "#ff4d5e" }, FRIEND_B = { hair: "mess", hairColor: "#222", shirt: "#8a4dff", skin: "#c99a74" };
+const put = (id, o) => { const el = document.getElementById(id); if (el) el.innerHTML = person(o); };
+// одна позиция — несколько «кадров» эмоций, переключаются по времени
+const faces = {};
+function cast(id, frames) { const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = frames.map(([, o], i) => `<div class="fr" style="display:${i ? "none" : "block"}">${person(o)}</div>`).join(""); faces[id] = frames.map(([t]) => t); }
+function face(id, lt) { const el = document.getElementById(id); if (!el || !faces[id]) return; let k = 0; faces[id].forEach((t, i) => { if (lt >= t) k = i; });
+  el.querySelectorAll(":scope > .fr").forEach((f, i) => f.style.display = i === k ? "block" : "none"); }
+
+/* ---------- static builders ---------- */
+function buildPeople() {
+  cast("h1", [[0, { ...LEKHA18, eyes: "sleep", mouth: "flat", w: 280, arm: "phone" }], [1.0, { ...LEKHA18, eyes: "shock", mouth: "o", w: 280, arm: "phone" }]]);
+  cast("h2", [[0, { ...LEKHA18, eyes: "shock", mouth: "open", w: 480 }], [2.4, { ...LEKHA18, eyes: "sad", mouth: "frown", w: 480 }]]);
+  cast("h3", [[0, { ...LEKHA18, eyes: "smug", mouth: "smile", w: 300, arm: "marker" }], [11, { ...LEKHA18, eyes: "happy", mouth: "grin", w: 300, arm: "marker" }]]);
+  cast("sell5", [[0, { hair: "bald", hairColor: "#888", shirt: "#ff4d5e", stache: true, eyes: "happy", mouth: "laugh", w: 360 }]]);
+  cast("h6", [[0, { ...LEKHA18, eyes: "happy", mouth: "grin", w: 320 }], [7, { ...LEKHA18, eyes: "shock", mouth: "o", w: 320 }]]);
+  cast("h7", [[0, { ...LEKHA18, eyes: "sad", mouth: "flat", w: 340 }]]);
+  cast("h9", [[0, { ...LEKHA18, eyes: "smug", mouth: "smile", w: 300, arm: "phone" }], [7.6, { ...LEKHA18, eyes: "happy", mouth: "grin", w: 300, arm: "up" }]]);
+  cast("f9a", [[0, { ...FRIEND_A, eyes: "norm", mouth: "smile", w: 300, arm: "temple" }], [7.6, { ...FRIEND_A, eyes: "shock", mouth: "open", w: 300 }]]);
+  cast("f9b", [[0, { ...FRIEND_B, eyes: "smug", mouth: "grin", w: 300, arm: "temple" }], [7.6, { ...FRIEND_B, eyes: "shock", mouth: "o", w: 300 }]]);
+  cast("h10", [[0, { ...LEKHA18, eyes: "happy", mouth: "laugh", w: 460, arm: "up" }]]);
+  cast("f10a", [[0, { ...FRIEND_A, eyes: "shock", mouth: "o", w: 320 }]]); cast("f10b", [[0, { ...FRIEND_B, eyes: "shock", mouth: "open", w: 320 }]]);
+  cast("h11", [[0, { ...LEKHA18, eyes: "shock", mouth: "o", w: 380 }], [6, { ...LEKHA18, eyes: "sad", mouth: "frown", w: 380 }]]);
+  cast("h13", [[0, { ...LEKHA18, eyes: "smug", mouth: "smile", w: 380 }], [8, { ...LEKHA18, eyes: "happy", mouth: "grin", w: 380, arm: "up" }]]);
+  cast("h14", [[0, { ...LEKHA18, eyes: "smug", mouth: "grin", w: 360, arm: "phone" }]]);
+  cast("h15", [[0, { ...LEKHA26, eyes: "sleep", mouth: "flat", w: 480 }], [1.6, { ...LEKHA26, eyes: "shock", mouth: "open", w: 480 }]]);
+  cast("h17", [[0, { ...LEKHA26, eyes: "shock", mouth: "o", w: 480 }]]);
+  cast("mom17", [[0, { hair: "bun", hairColor: "#5a3a2a", shirt: "#ff8ab8", apron: true, eyes: "norm", mouth: "smile", w: 420 }]]);
+  cast("h18", [[0, { ...LEKHA26, eyes: "sad", mouth: "flat", w: 700 }], [2.2, { ...LEKHA26, eyes: "smug", mouth: "flat", w: 700 }]]);
+}
+function buildConfetti10() { let s = ""; for (let i = 0; i < 46; i++) s += `<rect class="cf" x="${hash(i) * 1080}" y="0" width="18" height="30" fill="${["#ff4d5e", "#5dff8a", "#3aa0ff", "#fff", "#8a4dff"][i % 5]}"/>`; $("#conf10").innerHTML = s; }
+function buildPapers() { let s = ""; for (let i = 0; i < 14; i++) s += `<rect class="pp" x="${hash(i + 4) * 900}" y="0" width="140" height="100" fill="#fff" stroke="#111" stroke-width="5"/>`; $("#papers17").innerHTML = s; }
+
+/* ---------- per-frame updates ---------- */
+const show = (el, t, at, dur = 0.3, dy = 30) => {
+  const p = easeOut(prog(t, at, at + dur));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) scale(${0.9 + 0.1 * p})`;
+};
+const pop = (el, t, at, rot = 0) => { const p = prog(t, at, at + .3); const s = p < 1 ? easeOut(p) * (1 + .25 * Math.sin(p * Math.PI)) : 1; el.style.opacity = p > 0 ? 1 : 0; el.style.transform = `scale(${s}) rotate(${rot}deg)`; };
+let CUR_T = 0;
+// быстрый монтаж: наезд камеры и «прыжок» зума на каждой новой фразе
+const punch = (sc, lt) => {
+  let ci = 0; CAPS.forEach(([a], i) => { if (CUR_T >= a) ci = i; });
+  const jump = ci % 2 ? 1.07 : 1, push = 1 + .04 * Math.min(lt / 5, 1), hit = 1 + .08 * (1 - easeOut(prog(lt, 0, .25)));
+  sc.style.transform = `scale(${jump * push * hit})`; sc.style.transformOrigin = ci % 3 === 2 ? "45% 40%" : "50% 45%";
+};
+const spinEls = (lt, k = 900) => document.querySelectorAll(".tee-spin").forEach((g) => g.setAttribute("transform", `rotate(${lt * k})`));
+const bob = (id, lt, a = 6, f = 4) => { const el = document.getElementById(id); if (el) el.style.transform = `translateY(${Math.sin(lt * f) * a}px)`; };
+
+const UPD = {
+  s1(lt) { punch($("#s1"), lt); face("h1", lt);
+    $("#alarm1").style.transform = lt < 1 ? `rotate(${Math.sin(lt * 70) * 12}deg)` : "";
+    const ph = $("#ph1"); pop(ph, lt, 1.2); if (lt > 3.2) ph.style.opacity = 1 - prog(lt, 3.2, 3.5);
+    const c = $("#cal1"); c.style.transform = lt > 3.4 ? `scale(${1 + .5 * easeOut(prog(lt, 3.4, 3.9))}) translate(${prog(lt, 3.4, 3.9) * 120}px,${prog(lt, 3.4, 3.9) * 140}px)` : ""; c.style.zIndex = lt > 3.4 ? 5 : 0; },
+  s2(lt) { punch($("#s2"), lt); face("h2", lt); spinEls(lt); $("#spin2").style.transform = `rotate(${lt * 720}deg) translateY(${Math.sin(lt * 3) * 10}px)`; },
+  s3(lt) { punch($("#s3"), lt); face("h3", lt); pop($("#t3"), lt, .2);
+    pop($("#p1"), lt, 7.0); pop($("#p2"), lt, 8.6); pop($("#p3"), lt, 9.6);
+    ["#p1", "#p2", "#p3"].forEach((id, i) => { const el = $(id); el.style.transformOrigin = `${[140, 420, 700][i]}px 140px`; el.style.transformBox = "view-box"; });
+    $("#arr3").setAttribute("stroke-dashoffset", 1 - easeInOut(prog(lt, 10.2, 11.2))); bob("h3", lt); spinEls(lt, 400); },
+  s4(lt) { const z = 1 + .25 * easeInOut(prog(lt, 0, 3.4)); $("#s4").style.transform = `scale(${z})`;
+    const d = prog(lt, 2.4, 3.0); $("#coin4").setAttribute("transform", `translate(0 ${d * 60})`); $("#coin4").setAttribute("opacity", d < 1 ? 1 : 0);
+    $("#pig4").style.transform = lt > 3.0 && lt < 3.4 ? `rotate(${Math.sin(lt * 80) * 3}deg)` : ""; show($("#z4"), lt, 3.2); },
+  s5(lt) { punch($("#s5"), lt); face("sell5", lt); pop($("#tag5"), lt, 4.8, -6); show($("#ha5"), lt, 1.2);
+    $("#sell5").style.transform = `translateY(${-Math.abs(Math.sin(lt * 9)) * 16}px)`; },
+  s6(lt) { punch($("#s6"), lt); face("h6", lt); spinEls(lt);
+    $("#fan6").setAttribute("transform", `rotate(${lt * 1400} 50 50)`); $("#fanb").setAttribute("transform", `rotate(${lt * 900} 85 200)`);
+    $("#farm6").style.transform = `translate(${Math.sin(lt * 60) * 3}px,0)`; $("#dryer6").setAttribute("transform", `translate(320 120) rotate(${Math.sin(lt * 30) * 4})`);
+    $("#dark6").style.opacity = lt > 3 && lt < 9 ? (hash(Math.floor(lt * 8)) > .6 ? .55 : 0) : 0;
+    const m = $("#mom6"); pop(m, lt, 6.8, -3); if (lt < 6.8) m.style.opacity = 0; },
+  s7(lt) { punch($("#s7"), lt); face("h7", lt);
+    const v = 0.0000003 * easeOut(prog(lt, 0.4, 3.5)); $("#btc7").textContent = v.toFixed(7); },
+  s8(lt) { punch($("#s8"), lt); $("#s8b").textContent = lt > 8.0 ? (lt > 8.8 ? 2 : 1) : 0; const sc = $("#sc8"); show(sc, lt, 2.6);
+    sc.style.background = lt > 8.8 ? "#ffd23f" : "#fff"; },
+  s9(lt) { punch($("#s9"), lt); face("h9", lt); face("f9a", lt); face("f9b", lt); spinEls(lt);
+    document.querySelectorAll("#s9 .twirl").forEach((c) => c.setAttribute("transform", `rotate(${lt * 600} ${c.getAttribute("cx")} ${c.getAttribute("cy")})`));
+    pop($("#ph9"), lt, .3); if (lt > 3) $("#ph9").style.opacity = 1 - prog(lt, 3, 3.3);
+    const sc = $("#sc9"); pop(sc, lt, 7.8); if (lt < 7.8) sc.style.opacity = 0; },
+  s10(lt) { punch($("#s10"), lt); spinEls(lt); pop($("#sc10"), lt, 3.6); pop($("#win10"), lt, 6.2);
+    $("#w10").textContent = Math.round(1840000 * easeOut(prog(lt, 6.2, 8.2))).toLocaleString("ru-RU");
+    $("#h10").style.transform = `translateY(${-Math.abs(Math.sin(lt * 7)) * 30}px)`;
+    document.querySelectorAll("#conf10 .cf").forEach((c, i) => c.setAttribute("transform", lt > 6 ? `translate(0 ${((lt * (500 + hash(i) * 400) + hash(i + 9) * 1300) % 1400) - 100}) rotate(${lt * 300 + i * 20} ${+c.getAttribute("x") + 9} 15)` : "translate(0 -200)")); },
+  s11(lt) { punch($("#s11"), lt); face("h11", lt); spinEls(lt); const n = $("#ntf11"); n.style.transform = `translateY(${(1 - easeOut(prog(lt, .2, .6))) * -300}px)`;
+    $("#ph11").style.transform = lt > .6 && lt < 1.2 ? `translateX(${Math.sin(lt * 70) * 10}px)` : ""; },
+  s12(lt) { punch($("#s12"), lt); $("#drop12").setAttribute("stroke-dashoffset", 1 - easeInOut(prog(lt, .3, 2.6)));
+    show($("#pan12"), lt, 2.8); $("#buy12").setAttribute("opacity", prog(lt, 4.6, 5.0));
+    $("#fut12").setAttribute("opacity", prog(lt, 6.0, 6.6)); $("#k100").setAttribute("opacity", prog(lt, 9.0, 9.4)); },
+  s13(lt) { punch($("#s13"), lt); face("h13", lt); spinEls(lt); pop($("#pw13"), lt, .4, -4);
+    const u = easeInOut(prog(lt, 3.0, 4.2)); $("#usb13").style.transform = `translate(${-u * 160}px,${u * 520}px)`; $("#usb13").style.opacity = u < 1 ? 1 : 0;
+    const d = easeInOut(prog(lt, 1.8, 2.6)) * (1 - easeInOut(prog(lt, 4.4, 5.0))); $("#drw13").style.transform = `translateY(${d * 160}px)`;
+    $("#h13").style.transform = lt > 5 && lt < 6.2 ? `translateY(${Math.abs(Math.sin((lt - 5) * 12)) * -14}px)` : ""; },
+  s14(lt) { punch($("#s14"), lt); face("h14", lt); spinEls(lt); pop($("#ph14"), lt, .3); },
+  s15(lt) { punch($("#s15"), lt); face("h15", lt); $("#alarm15").style.transform = lt < 1.6 ? `rotate(${Math.sin(lt * 70) * 12}deg)` : ""; },
+  s16(lt) { punch($("#s16"), lt); const d = easeOut(prog(lt, .4, 1.2)); $("#drw16").style.transform = `translateY(${d * 150}px)`;
+    $("#usb16").style.transform = `translateY(${d * 150}px) scale(${1 + .1 * Math.sin(lt * 6)})`; $("#usb16").style.filter = `drop-shadow(0 0 ${20 + 10 * Math.sin(lt * 6)}px #5dff8a)`;
+    show($("#lap16"), lt, 3.0); $("#cur16").style.opacity = Math.floor(lt * 2) % 2 ? 1 : 0; },
+  s17(lt) { punch($("#s17"), lt); face("h17", lt);
+    document.querySelectorAll("#papers17 .pp").forEach((p, i) => p.setAttribute("transform", `translate(0 ${((lt * (600 + hash(i) * 300) + hash(i + 2) * 1300) % 1400) - 120}) rotate(${lt * 200 + i * 30} ${+p.getAttribute("x") + 70} 50)`));
+    const fb = prog(lt, 3.2, 3.6) * (1 - prog(lt, 8.4, 8.8)); $("#fb17").style.opacity = fb;
+    const toss = easeInOut(prog(lt, 4.6, 6.0)); $("#pw17").style.transform = `translate(${toss * 160}px,${toss * 420}px) rotate(${-4 + toss * 200}deg) scale(${1 - .5 * toss})`; },
+  s18(lt) { face("h18", lt); $("#s18").style.transform = `scale(${1 + .08 * easeInOut(prog(lt, 0, 3.4))})`; },
+  s19(lt) { pop($("#endt"), lt, .2, -2); pop($("#cm19"), lt, 1.0); $("#cm19").style.transform += ` translateY(${Math.sin(lt * 5) * 8}px)`; },
+  s20() {},
+};
+function updHost() {}
+
+let lastCap = -1;
+function render(t) {
+  t = clamp(t, 0, DUR); CUR_T = t;
+  let gl = 0;
+  SCENES.forEach((sc, i) => {
+    const on = t >= sc.s && (t < sc.e || (i === SCENES.length - 1 && t <= sc.e));
+    const el = document.getElementById(sc.id);
+    el.style.display = on ? "block" : "none";
+    if (on) {
+      const lt = t - sc.s;
+      el.style.opacity = Math.min(prog(lt, 0, .3), 1 - prog(t, sc.e - .25, sc.e));
+      if (i === SCENES.length - 1) el.style.opacity = 1;
+      UPD[sc.id](lt, t);
+    }
+    if (i > 0 && i < SCENES.length - 1) gl = Math.max(gl, 1 - Math.abs(t - sc.s) / 0.22);
+  });
+  const st = $("#stage");
+  if (gl > 0) {
+    const dx = (hash(t * 97) - .5) * 26 * gl;
+    st.style.filter = `blur(${gl * 12}px) brightness(${1 + .35 * gl})`; // переход: вспышка-размытие
+  } else st.style.filter = "";
+  $("#flash").style.opacity = t > 214 && t < 214.2 ? 0.4 * (1 - prog(t, 214, 214.2)) : 0;
+  // плёночное зерно
+  const g = $("#grain"), gc = g.getContext("2d"), id = gc.createImageData(270, 480), sd = Math.floor(t * 24);
+  for (let i = 0; i < id.data.length; i += 4) { const v = hash(i * .013 + sd * 1.7) * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gc.putImageData(id, 0, 0);
+  updHost(t);
+  let ck = null; CLOCK.forEach(([a, v]) => { if (t >= a) ck = v; });
+  const c = $("#clock"); c.style.display = ck ? "block" : "none";
+  if (ck) c.textContent = ck;
+  let ci = -1; CAPS.forEach(([a], i) => { if (t >= a) ci = i; });
+  const cap = $("#cap");
+  if (ci !== lastCap) {
+    lastCap = ci;
+    cap.innerHTML = ci < 0 ? "" : parseCap(CAPS[ci][1]).map((o) => `<span class="w ${o.cls}">${o.w}</span>`).join(" ");
+  }
+  if (ci >= 0) {
+    const a = CAPS[ci][0], b = capEnd(ci), ws = cap.querySelectorAll(".w"), n = ws.length;
+    const span = Math.min(b - a, 0.28 * n + 0.2) * 0.85;
+    ws.forEach((w, i) => {
+      const on = t >= a + (i / Math.max(1, n)) * span;
+      w.style.opacity = on ? 1 : 0.28;
+      w.style.transform = on ? `scale(${1 + 0.08 * (1 - prog(t, a + (i / n) * span, a + (i / n) * span + .18))})` : "scale(1)";
+    });
+    const pp = easeOut(prog(t, a, a + .2));
+    cap.style.transform = `translateY(${(1 - pp) * 18}px)`;
+    cap.style.opacity = Math.min(pp, 1 - prog(t, b - .08, b));
+  }
+  if (t >= SCENES[SCENES.length - 2].s) cap.style.opacity = 0; // на финальной заставке текст уже крупно
+}
+
+/* ---------- audio (Web Audio synth, works live and offline) ---------- */
+function noiseBuf(ctx, sec = 2) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b;
+}
+function scheduleAudio(ctx, out, from) {
+  const NB = noiseBuf(ctx, 3);
+  const T = (t) => ctx.currentTime + 0.05 + (toNew(t) - from); // story time t -> audio clock
+  const live = (t) => toNew(t) >= from - 0.01;
+  const env = (g, t0, a, peak, d) => { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); };
+  const osc = (type, f, t0, a, peak, d, dest = out) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f; env(g, t0, a, peak, d); o.connect(g).connect(dest); o.start(t0); o.stop(t0 + a + d + .05); return o; };
+  const noise = (t0, dur, type, freq, q, peak, a = .01) => { const s = ctx.createBufferSource(); s.buffer = NB; s.loop = true; const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); env(g, t0, a, peak, dur); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + a + dur + .05); return f; };
+  // мрачный гул
+  const start = ctx.currentTime + 0.05, stop = T(DUR);
+  const dg = ctx.createGain(); dg.gain.setValueAtTime(0.0001, start); dg.gain.exponentialRampToValueAtTime(0.15, start + 2); dg.connect(out);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 220; lp.connect(dg);
+  [].forEach((f) => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(start); o.stop(stop); });
+  const ns = ctx.createBufferSource(); ns.buffer = NB; ns.loop = true; const nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 350; const ng = ctx.createGain(); ng.gain.value = 0; ns.connect(nf).connect(ng).connect(out); ns.start(start); ns.stop(stop);
+  dg.gain.setValueAtTime(0.15, Math.max(start + 2, T(229.6))); dg.gain.exponentialRampToValueAtTime(0.0001, Math.max(start + 2.1, T(230)));
+  const EV = [];
+  // лёгкий бит под голосом (стихает перед панчлайном)
+  const B = 60 / 100, kick = (a) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(140, a); o.frequency.exponentialRampToValueAtTime(50, a + .12); env(g, a, .002, .35, .2); o.connect(g).connect(out); o.start(a); o.stop(a + .25); };
+  const chords = [[261.6, 329.6, 392], [220, 261.6, 329.6], [174.6, 220, 261.6], [196, 246.9, 293.7]];
+  for (let i = 0, t = 0.05; t < 213.5; i++, t += B) {
+    if (i % 2 === 0) EV.push([t, (a) => kick(a)]);
+    EV.push([t + B / 2, (a) => noise(a, .025, "highpass", 7000, 1, .06, .001)]);
+    if (i % 4 === 0) { const c = chords[Math.floor(i / 8) % 4]; EV.push([t, (a) => c.forEach((f) => osc("triangle", f, a, .02, .025, B * 3.6))]); }
+  }
+  for (let i = 0, t = 220.1; t < 229.5; i++, t += B) { EV.push([t, (a) => kick(a)]); if (i % 4 === 0) EV.push([t, (a) => [329.6, 392, 523.3].forEach((f) => osc("triangle", f, a, .02, .03, B * 3.6))]); }
+  // будильники
+  for (let k = 0; k < 8; k++) EV.push([0.05 + k * .12, (a) => osc("square", 1600, a, .002, .06, .06)]);
+  for (let k = 0; k < 12; k++) EV.push([185.05 + k * .12, (a) => osc("square", 1600, a, .002, .06, .06)]);
+  // жужжание спиннера, маркер, монетка
+  EV.push([6.2, (t) => { const o = osc("sawtooth", 120, t, .2, .04, 6); }]);
+  for (let k = 0; k < 6; k++) EV.push([27 + k * .8, (t) => noise(t, .25, "bandpass", 3500, 4, .08, .02)]);
+  EV.push([38.4, (t) => { osc("sine", 2200, t, .002, .2, .25); osc("sine", 3300, t + .03, .002, .12, .3); }]);
+  EV.push([39.2, (t) => osc("sine", 1800, t, .002, .1, .2)]);
+  // продавец смеётся
+  for (let k = 0; k < 6; k++) EV.push([46.2 + k * .22, (t) => osc("square", 300 - k * 12, t, .005, .08, .12)]);
+  // ферма: гул, мигание, стук в дверь
+  EV.push([55.2, (t) => { noise(t, 12, "bandpass", 220, 1, .12, .4); osc("sawtooth", 100, t, .4, .05, 12); }]);
+  [61.0, 61.3, 61.6].forEach((t) => EV.push([t, (a) => { osc("sine", 90, a, .002, .6, .2); noise(a, .1, "lowpass", 600, 1, .4, .002); }]));
+  // майнер: писк
+  for (let k = 0; k < 6; k++) EV.push([68.6 + k * .5, (t) => osc("square", 880, t, .002, .04, .05)]);
+  EV.push([71, (t) => { [392, 370, 349, 330].forEach((f, i) => osc("sawtooth", f, t + i * .25, .01, .06, .3)); }]);
+  // стадион, свисток, гол
+  EV.push([80.2, (t) => noise(t, 11, "bandpass", 900, .6, .08, .8)]);
+  [88.0, 88.8].forEach((t) => EV.push([t, (a) => noise(a, 1.0, "bandpass", 1200, .8, .3, .05)]));
+  EV.push([99.2, (t) => { osc("sine", 2600, t, .005, .12, .6); osc("sine", 2650, t, .005, .12, .6); }]);
+  EV.push([99.8, (t) => noise(t, 1.6, "bandpass", 1100, .7, .35, .05)]);
+  // выигрыш: фанфары, монеты
+  EV.push([110, (t) => { [523, 659, 784, 1046].forEach((f, i) => osc("triangle", f, t + i * .12, .005, .12, .4)); }]);
+  for (let k = 0; k < 14; k++) EV.push([110.3 + k * .12, (t) => osc("sine", 2000 + (k % 3) * 300, t, .002, .06, .08)]);
+  // уведомление и «грустный тромбон»
+  EV.push([116.3, (t) => { osc("sine", 988, t, .005, .15, .12); osc("sine", 740, t + .14, .005, .15, .25); }]);
+  EV.push([124.2, (t) => { [311, 294, 277, 262].forEach((f, i) => osc("sawtooth", f, t + i * .35, .02, .07, i === 3 ? .9 : .32)); }]);
+  // график: падение, «купил», мечты
+  EV.push([130.4, (t) => { const o = osc("sawtooth", 600, t, .02, .08, 2.2); o.frequency.exponentialRampToValueAtTime(120, t + 2.2); }]);
+  EV.push([134.6, (t) => { osc("sine", 1320, t, .003, .12, .1); osc("sine", 1760, t + .08, .003, .1, .15); }]);
+  EV.push([136.0, (t) => { const o = osc("triangle", 300, t, .05, .06, 3); o.frequency.exponentialRampToValueAtTime(1200, t + 3); }]);
+  // ящик, похлопывание, телефон
+  [149.8, 152.4].forEach((t) => EV.push([t, (a) => noise(a, .4, "bandpass", 500, 2, .25, .05)]));
+  [153.2, 153.4].forEach((t) => EV.push([t, (a) => noise(a, .05, "lowpass", 400, 1, .4, .002)]));
+  EV.push([170.4, (t) => { osc("sine", 1175, t, .003, .12, .12); osc("sine", 1568, t + .1, .003, .1, .2); }]);
+  // 2026: ящик, флешка, ошибка пароля, вихрь флешбэка
+  EV.push([193.4, (t) => noise(t, .5, "bandpass", 500, 2, .3, .05)]);
+  EV.push([195.2, (t) => { osc("sine", 660, t, .003, .1, .1); osc("sine", 990, t + .1, .003, .1, .15); }]);
+  EV.push([196.2, (t) => { osc("square", 220, t, .003, .08, .25); osc("square", 196, t + .28, .003, .08, .35); }]);
+  for (let k = 0; k < 10; k++) EV.push([205.2 + k * .25, (t) => noise(t, .15, "bandpass", 1800, 1, .12, .02)]);
+  EV.push([208.2, (t) => { const f = noise(t, .6, "bandpass", 400, 1.5, .3, .1); f.frequency.exponentialRampToValueAtTime(4000, t + .6); }]);
+  // пауза перед «...Мам» — тишина, затем короткий «бум»
+  EV.push([217.4, (t) => osc("sine", 55, t, .01, .5, 1.2)]);
+  SCENES.slice(1, -1).forEach((s) => { if (s.s < 214 || s.s >= 220) EV.push([s.s - .1, (t) => { const f = noise(t, .22, "bandpass", 900, 1.2, .18, .05); f.frequency.exponentialRampToValueAtTime(5000, t + .22); }]); });
+  EV.forEach(([t, fn]) => { if (live(t)) fn(T(t)); });
+}
+
+let actx = null, bus = null, playing = false, pos = 0, t0 = 0, voiceOn = true, raf = 0, vIdx = 0;
+const vtrack = $("#vtrack"); let voiceFile = true; // записанная озвучка; если не загрузилась — голос браузера
+vtrack.addEventListener("error", () => { voiceFile = false; });
+function now() { return playing ? (performance.now() - t0) / 1000 : pos; }
+function startAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx.resume();
+    if (bus) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); }
+    bus = actx.createGain(); bus.gain.value = 0.9;
+    const comp = actx.createDynamicsCompressor(); bus.connect(comp).connect(actx.destination);
+    scheduleAudio(actx, bus, pos);
+  } catch (e) { console.warn("audio", e); }
+}
+function stopAudio() { vtrack.pause(); if (bus && actx) { bus.gain.setTargetAtTime(0, actx.currentTime, .02); const b = bus; setTimeout(() => b.disconnect(), 200); bus = null; } stopVoice(); }
+const synth = window.speechSynthesis;
+let ruVoice = null;
+function pickVoice() { if (!synth) return; const vs = synth.getVoices(); ruVoice = vs.find((v) => /ru/i.test(v.lang) && /google|yandex|milena|natural/i.test(v.name)) || vs.find((v) => /ru/i.test(v.lang)) || null; }
+if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+function stopVoice() { if (synth) synth.cancel(); }
+function speak(text) {
+  if (!synth || !voiceOn || voiceFile) return;
+  const u = new SpeechSynthesisUtterance(text); u.lang = "ru-RU"; if (ruVoice) u.voice = ruVoice;
+  u.rate = 1.05; u.pitch = 0.8; u.volume = 1; synth.speak(u);
+}
+function syncVoiceIdx(t) { vIdx = VOICE.findIndex((v) => toNew(v.t) >= t - 0.05); if (vIdx < 0) vIdx = VOICE.length; }
+function play() {
+  if (pos >= VDUR) pos = 0;
+  playing = true; t0 = performance.now() - pos * 1000; syncVoiceIdx(pos); startAudio();
+  if (voiceFile) { try { vtrack.currentTime = pos; } catch (e) {} vtrack.muted = !voiceOn; vtrack.play().catch(() => {}); } $("#pp").textContent = "❚❚"; loop();
+}
+function pause() { pos = now(); playing = false; stopAudio(); cancelAnimationFrame(raf); $("#pp").textContent = "▶"; }
+function seek(t) { const was = playing; if (was) pause(); pos = clamp(t, 0, VDUR); frame(pos); updUI(pos); if (was) play(); }
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function updUI(t) { $("#seek").value = t; $("#time").textContent = `${fmt(t)} / ${fmt(VDUR)}`; }
+function loop() {
+  const t = now();
+  while (vIdx < VOICE.length && toNew(VOICE[vIdx].t) <= t) { if (t - toNew(VOICE[vIdx].t) < 0.6) speak(VOICE[vIdx].text); vIdx++; }
+  if (voiceFile && !vtrack.paused && Math.abs(vtrack.currentTime - t) > 0.3) vtrack.currentTime = t;
+  frame(t); updUI(t);
+  if (t >= VDUR) { pos = VDUR; playing = false; stopAudio(); $("#pp").textContent = "↻"; $("#ui").classList.add("show"); return; }
+  raf = requestAnimationFrame(loop);
+}
+
+/* ---------- layout ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- init ---------- */
+buildPeople(); buildConfetti10(); buildPapers();
+fit(); render(0);
+const qs = new URLSearchParams(location.search);
+if (qs.has("capture")) document.body.classList.add("capture");
+$("#seek").max = VDUR; updUI(0);
+if (qs.has("t")) { pos = +qs.get("t"); frame(pos); }
+$("#start").onclick = () => { $("#start").style.display = "none"; play(); };
+$("#pp").onclick = () => (playing ? pause() : play());
+$("#seek").oninput = (e) => seek(+e.target.value);
+$("#vo").onclick = () => { voiceOn = !voiceOn; $("#vo").textContent = voiceOn ? "🔊 Голос: вкл" : "🔇 Голос: выкл"; vtrack.muted = !voiceOn; if (!voiceOn) stopVoice(); };
+$("#fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
+addEventListener("keydown", (e) => {
+  if ($("#start").style.display !== "none") return;
+  if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === "ArrowRight") seek(now() + 5);
+  if (e.code === "ArrowLeft") seek(now() - 5);
+});
+
+/* hooks for automated checks / export */
+window.__render = frame;
+window.__DUR = VDUR;
+window.__renderAudio = async () => {
+  const sr = 44100, oc = new OfflineAudioContext(2, Math.ceil(sr * VDUR), sr);
+  const g = oc.createGain(); g.gain.value = 0.9; const comp = oc.createDynamicsCompressor(); g.connect(comp).connect(oc.destination);
+  scheduleAudio(oc, g, 0);
+  const buf = await oc.startRendering();
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
+  const ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
+  const ws = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); ws(8, "WAVE"); ws(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++, o += 4) { v.setInt16(o, clamp(L[i], -1, 1) * 32767, true); v.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); }
+  let bin = ""; const u8 = new Uint8Array(ab); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+</script>
+</body>
+</html>

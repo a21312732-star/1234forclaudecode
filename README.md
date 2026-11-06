@@ -110,3 +110,15 @@ PROJECT=brawl-news VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-
 ```bash
 node tools/export-mp4.js brawl-news/brawl-news.mp4 brawl-news
 ```
+
+## «Проснулся в 2018-м»
+
+- `woke-2018/` — 2D-история Лёхи (`index.html`, `SCENARIO.md` с текстом для озвучки):
+
+```bash
+PROJECT=woke-2018 VOICE_FILE=путь/к/озвучке.mp3 python3 tools/make-voice.py
+```
+
+```bash
+node tools/export-mp4.js woke-2018/woke-2018.mp4 woke-2018
+```
