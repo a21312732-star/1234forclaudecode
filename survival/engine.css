@@ -1,0 +1,60 @@
+/* Общие стили серии «Выживи» */
+:root{
+  --ink:#fff; --yellow:#ffd23f; --red:#ff3b47; --green:#4dff8a; --blue:#5cc8ff;
+  --head:"Montserrat","DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","DejaVu Sans Mono",monospace;
+  --emo:"Noto Color Emoji";
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;font-family:var(--head)}
+#wrap{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1080px;height:1920px;background:#0b1622;overflow:hidden;transform-origin:50% 50%}
+#cam{position:absolute;inset:0}
+.scene{position:absolute;inset:0;display:none;transform-origin:540px 760px}
+.abs{position:absolute}
+.full{position:absolute;left:0;top:0}
+svg text{font-family:var(--head);font-weight:900}
+.em{font-family:var(--emo)}
+/* верхняя плашка серии */
+#clock{position:absolute;top:56px;left:50%;transform:translateX(-50%);font:800 30px var(--mono);color:#111;
+  background:var(--yellow);padding:8px 24px;border-radius:12px;letter-spacing:2px;z-index:20;white-space:nowrap;box-shadow:0 6px 0 #a67c00}
+/* субтитры: белые с чёрной обводкой */
+#cap{position:absolute;left:50px;right:50px;top:1290px;min-height:260px;text-align:center;z-index:30;
+  font:900 82px/1.1 var(--head);text-transform:uppercase;letter-spacing:-1px;
+  text-shadow:5px 0 0 #000,-5px 0 0 #000,0 5px 0 #000,0 -5px 0 #000,4px 4px 0 #000,-4px 4px 0 #000,4px -4px 0 #000,-4px -4px 0 #000,0 10px 24px rgba(0,0,0,.8)}
+#cap .w{display:inline-block;margin:0 .13em}
+#cap .y{color:var(--yellow)} #cap .r{color:var(--red)} #cap .g{color:var(--green)} #cap .b{color:var(--blue)}
+/* хук-текст */
+.hook{position:absolute;left:40px;right:40px;top:120px;text-align:center;z-index:6;font:900 96px/1.02 var(--head);text-transform:uppercase;
+  text-shadow:6px 0 0 #000,-6px 0 0 #000,0 6px 0 #000,0 -6px 0 #000,5px 5px 0 #000,-5px 5px 0 #000,5px -5px 0 #000,-5px -5px 0 #000,0 14px 30px rgba(0,0,0,.7)}
+.hook b{color:var(--red)} .hook .em{text-shadow:none}
+/* плашки и карточки */
+.badge{position:absolute;padding:14px 26px;border-radius:18px;font:900 46px var(--head);white-space:nowrap;border:6px solid #000;box-shadow:0 10px 0 #000;z-index:7}
+.b-red{background:var(--red);color:#fff} .b-yel{background:var(--yellow);color:#111} .b-grn{background:var(--green);color:#111} .b-wht{background:#fff;color:#111} .b-blu{background:var(--blue);color:#111}
+.ctr{left:0;right:0;margin:auto;width:max-content}
+.rule{position:absolute;left:70px;right:70px;height:190px;border-radius:30px;border:7px solid #000;box-shadow:0 12px 0 #000;display:flex;align-items:center;gap:30px;padding:0 34px;color:#111;z-index:4}
+.rule .ic{font:400 100px var(--emo);flex:none;width:120px;text-align:center}
+.rule .n{font:900 76px/1 var(--head);flex:none;min-width:150px}
+.rule .tx{font:900 44px/1.12 var(--head);text-transform:uppercase}
+.rule.done{filter:saturate(.8)}
+.big{position:absolute;left:0;right:0;text-align:center;font:900 150px/1 var(--head);z-index:6;
+  text-shadow:7px 0 0 #000,-7px 0 0 #000,0 7px 0 #000,0 -7px 0 #000,0 16px 30px rgba(0,0,0,.6)}
+.opt{position:absolute;left:90px;right:90px;height:130px;border-radius:26px;border:6px solid #000;box-shadow:0 10px 0 #000;background:#fff;color:#111;
+  display:flex;align-items:center;gap:24px;padding:0 30px;font:900 50px var(--head);z-index:4}
+.opt .em{font-size:66px}
+.opt .k{margin-left:auto;font:900 40px var(--mono);color:#555}
+.cmt{position:absolute;padding:14px 22px;background:#fff;color:#111;border-radius:22px 22px 22px 4px;font:800 36px var(--head);border:4px solid #000;white-space:nowrap;z-index:5}
+/* fx */
+#vign{position:absolute;inset:0;pointer-events:none;z-index:38;background:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(0,0,0,.6) 100%)}
+#flash{position:absolute;inset:0;pointer-events:none;z-index:41;background:#fff;opacity:0}
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:100;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .3s}
+body:hover #ui,#ui.show{opacity:1}
+#ui button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font:600 14px var(--head);cursor:pointer;white-space:nowrap}
+#seek{flex:1;accent-color:var(--yellow);min-width:60px}
+#time{font:600 13px var(--mono);color:#ccc;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:rgba(0,0,0,.72);cursor:pointer}
+#start b{font:900 44px var(--head);letter-spacing:2px;color:#111;background:var(--yellow);border:4px solid #000;padding:18px 40px;border-radius:14px;box-shadow:0 8px 0 #000}
+#start span{font:500 16px var(--mono);color:#aaa;padding:0 16px;text-align:center}
+.capture #ui,.capture #start{display:none!important}

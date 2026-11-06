@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #3 — Заблудился в лесу</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#1b1430}
+.dusk{position:absolute;inset:0;background:linear-gradient(180deg,#24183d,#3b2650 55%,#140e22)}
+#phone4{position:absolute;left:290px;top:250px;width:500px;height:900px;border-radius:66px;background:#111;border:12px solid #333;box-shadow:0 20px 50px rgba(0,0,0,.6);z-index:5;
+  display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+#phone4 .num{font:900 170px var(--head);letter-spacing:4px}
+#phone4 .st{font:800 34px/1.3 var(--mono);margin-top:20px;text-align:center;padding:0 30px}
+#phone4 .top{position:absolute;top:36px;left:44px;right:44px;display:flex;justify-content:space-between;font:800 30px var(--mono)}
+#phone4 .sv{position:absolute;bottom:70px;left:30px;right:30px;height:110px;border-radius:24px;background:#222;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:800 24px var(--head)}
+#phone4 .tg{flex:none;width:110px;height:60px;border-radius:30px;background:#555;position:relative}
+#phone4 .tg i{position:absolute;top:6px;left:6px;width:48px;height:48px;border-radius:50%;background:#fff}
+.sig{position:absolute;left:0;right:0;display:flex;justify-content:center;gap:40px;z-index:4}
+.sig .s{width:180px;height:180px;border-radius:30px;background:rgba(255,255,255,.1);border:4px solid rgba(255,255,255,.25);display:grid;place-items:center;font:400 110px var(--emo)}
+.sig .s svg{width:140px;height:140px}
+.slab{position:absolute;left:0;right:0;text-align:center;font:900 46px var(--head);z-index:4;text-shadow:3px 3px 0 #000}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+
+  <!-- S1: хук — один в лесу на закате -->
+  <div class="scene" id="s1">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1">Заблудился <b>в лесу</b>? <span class="em">🌲</span></div>
+    <div class="badge b-yel" id="dark1" style="left:70px;top:420px"><span class="em">🌙</span> ЧЕРЕЗ 1 ЧАС</div>
+    <div class="badge b-red" id="bat1" style="left:640px;top:420px"><span class="em">🔋</span> 15%</div>
+  </div>
+
+  <!-- S2: не бегай кругами (карта) -->
+  <div class="scene" id="s2">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="badge b-red" id="run2" style="left:60px;top:180px"><span class="em">🏃</span> НЕ БЕГИ</div>
+    <div class="badge b-wht" id="far2" style="left:520px;top:1120px">ВСЁ ДАЛЬШЕ <span class="em">📏</span></div>
+  </div>
+
+  <!-- S3: правило СТОП -->
+  <div class="scene" id="s3">
+    <div class="dusk"></div>
+    <div class="big" id="t3" style="top:150px;color:var(--yellow)">С · Т · О · П</div>
+    <div class="rule" id="r31" style="top:350px;background:var(--yellow)"><div class="n">С</div><div class="tx">сядь</div><div class="ic" style="margin-left:auto">🪵</div></div>
+    <div class="rule" id="r32" style="top:565px;background:var(--blue)"><div class="n">Т</div><div class="tx">трезво подумай</div><div class="ic" style="margin-left:auto">🧠</div></div>
+    <div class="rule" id="r33" style="top:780px;background:var(--green)"><div class="n">О</div><div class="tx">осмотрись</div><div class="ic" style="margin-left:auto">👀</div></div>
+    <div class="rule" id="r34" style="top:995px;background:#ff8a3d"><div class="n">П</div><div class="tx">планируй</div><div class="ic" style="margin-left:auto">🗺️</div></div>
+  </div>
+
+  <!-- S4: звонок 112 -->
+  <div class="scene" id="s4">
+    <div class="dusk"></div>
+    <div id="phone4">
+      <div class="top"><span id="net4">✖ НЕТ СЕТИ</span><span style="color:#ff5a5a">🔋 15%</span></div>
+      <div class="num">112</div><div class="st" id="st4">ВЫЗОВ…</div>
+      <div class="sv"><span>ЭНЕРГОСБЕРЕЖЕНИЕ</span><div class="tg" id="tg4"><i></i></div></div>
+    </div>
+    <div class="badge b-yel ctr" id="op4" style="top:1150px">ЧЕРЕЗ ДРУГОГО ОПЕРАТОРА <span class="em">📡</span></div>
+  </div>
+
+  <!-- S5: укрытие и лапник -->
+  <div class="scene" id="s5">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="badge b-yel" id="sh5" style="left:70px;top:200px"><span class="em">🏕️</span> УКРЫТИЕ ДО ТЕМНОТЫ</div>
+    <div class="badge b-blu" id="cold5" style="left:70px;top:1140px">ЗЕМЛЯ ЗАБИРАЕТ ТЕПЛО <span class="em">🥶</span></div>
+    <div class="badge b-grn" id="lap5" style="left:70px;top:1140px">ЛАПНИК <span class="em">🌲</span> = ТЕПЛО <span class="em">✅</span></div>
+  </div>
+
+  <!-- S6: сигнал бедствия — три -->
+  <div class="scene" id="s6">
+    <div class="dusk"></div>
+    <div class="big" id="t6" style="top:150px;color:var(--yellow)">3 = SOS</div>
+    <div class="sig" id="g61" style="top:360px">
+      <div class="s"><svg viewBox="0 0 100 100"><path d="M15 45 H70 A22 22 0 1 1 48 67 V58 H15Z" fill="#ffd23f" stroke="#000" stroke-width="5"/><circle cx="70" cy="67" r="8" fill="#000"/></svg></div>
+      <div class="s"><svg viewBox="0 0 100 100"><path d="M15 45 H70 A22 22 0 1 1 48 67 V58 H15Z" fill="#ffd23f" stroke="#000" stroke-width="5"/><circle cx="70" cy="67" r="8" fill="#000"/></svg></div>
+      <div class="s"><svg viewBox="0 0 100 100"><path d="M15 45 H70 A22 22 0 1 1 48 67 V58 H15Z" fill="#ffd23f" stroke="#000" stroke-width="5"/><circle cx="70" cy="67" r="8" fill="#000"/></svg></div></div>
+    <div class="slab" id="l61" style="top:555px">ТРИ СВИСТКА</div>
+    <div class="sig" id="g62" style="top:640px"><div class="s">🔥</div><div class="s">🔥</div><div class="s">🔥</div></div>
+    <div class="slab" id="l62" style="top:835px">ТРИ КОСТРА</div>
+    <div class="sig" id="g63" style="top:920px"><div class="s">🔦</div><div class="s">🔦</div><div class="s">🔦</div></div>
+    <div class="slab" id="l63" style="top:1115px">ТРИ ВСПЫШКИ</div>
+    <div class="badge b-grn ctr" id="stay6" style="top:560px;font-size:64px"><span class="em">📍</span> ОСТАВАЙСЯ<br>НА МЕСТЕ</div>
+  </div>
+
+  <!-- S7: вопрос в комменты -->
+  <div class="scene" id="s7">
+    <div class="dusk"></div>
+    <div class="big" style="top:170px;font-size:80px;line-height:1.05" id="q7">А У ТЕБЯ<br>В РЮКЗАКЕ<br>ЕСТЬ СВИСТОК? <span class="em">🎒</span></div>
+    <div class="opt" id="o71" style="top:600px"><span class="em">✅</span>ДА, ВСЕГДА<span class="k">A</span></div>
+    <div class="opt" id="o72" style="top:770px"><span class="em">❌</span>НЕТ<span class="k">B</span></div>
+    <div class="opt" id="o73" style="top:940px"><span class="em">🤔</span>А ЗАЧЕМ?<span class="k">C</span></div>
+    <div class="cmt" id="c71" style="left:110px;top:1110px">куплю завтра же</div>
+    <div class="cmt" id="c72" style="left:560px;top:1160px">свищу без свистка <span class="em">😎</span></div>
+  </div>
+
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 55.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.8, 1.45], [3.1, 2.77], [5.1, 5.01], [6.6, 6.72], [12.6, 11.26], [13.6, 12.05], [15.2, 13.40], [16, 13.82], [17.3, 14.77], [18.3, 15.52], [21.1, 16.92], [23.8, 20.25], [28.2, 24.92], [30.1, 26.81], [32, 28.56], [33.6, 30.12], [35, 31.52], [37.1, 32.67], [38.6, 34.25], [41.8, 37.56], [46.1, 40.94], [48.3, 42.85], [51.1, 44.25], [53.4, 47.04], [55, 48.18], [55.3, 48.48]];
+const SCENES = [
+  { id: "s1", s: 0, e: 5 }, { id: "s2", s: 5, e: 12.5 }, { id: "s3", s: 12.5, e: 21 }, { id: "s4", s: 21, e: 30 },
+  { id: "s5", s: 30, e: 37 }, { id: "s6", s: 37, e: 46 }, { id: "s7", s: 46, e: 51 },
+  { id: "s8", s: 51, e: 55 }, { id: "s9", s: 55, e: 55.3 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [["15%", "пятнадцать процентов"], ["112", "сто двенадцать"], ["СТОП", "стоп"]];
+const DROP = ["подписывайся"];
+const SHAKES = [5.1, 32.0];
+const FLASHES = [];
+const clockText = (t) => (t >= 5 && t < 51 ? "ВЫЖИВИ #3 · ЛЕС" : null);
+const CAPS = [
+  [0.1, "Ты {r:заблудился в лесу.}"], [1.8, "Через час {r:стемнеет.}"], [3.1, "Телефон — {r:15%.}"],
+  [5.1, "Первая ошибка — {r:бежать.}"], [6.6, "Чем больше ходишь кругами,"], [8.79, "тем дальше уходишь"], [10.34, "от тех, {y:кто тебя ищет.}"],
+  [12.6, "{y:Остановись.}"], [13.6, "Есть правило: {y:СТОП.}"], [15.2, "{y:Сядь.}"], [16, "{y:Трезво подумай.}"], [17.3, "{y:Осмотрись.}"], [18.3, "{y:Планируй.}"],
+  [21.1, "Звони {g:112} прямо сейчас,"], [22.6, "пока есть заряд."], [23.8, "Даже если твоя сеть не ловит,"], [25.52, "вызов может пройти"],
+  [26.61, "{y:через другого оператора.}"], [28.2, "Включи {y:энергосбережение.}"],
+  [30.1, "Дальше — {y:укрытие до темноты.}"], [32, "Не ложись {r:на голую землю:}"], [33.6, "она {r:вытягивает тепло.}"], [35, "Подстели {g:лапник.}"],
+  [37.1, "Сигнал бедствия — {y:три.}"], [38.6, "Три свистка, три костра,"], [40.22, "три вспышки фонарика."],
+  [41.8, "И главное: если тебя ищут,"], [44.05, "{g:оставайся на месте.}"],
+  [46.1, "А у тебя в рюкзаке {y:есть свисток?}"], [48.3, "{y:Пиши в комменты.}"],
+  [51.1, "И помни: {y:темнеет быстрее,}"], [52.55, "{y:чем кажется.}"], [53.4, "{r:Особенно когда...}"],
+  [55, ""],
+];
+const MUSIC = { bpm: 88, root: 52, parts: [[0, 12.5, "pulse", .8], [12.5, 21, "pad", .7], [21, 46, "drive", .55], [46, 51, "pad", .6], [51, 55.3, "pulse", .7]] };
+
+/* ---------- рисовка ---------- */
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hat: "#ff5a5a", hat2: "#fff", scarf: "#ffd23f", pants: "#3b3f58" };
+function forestBg(p, ground = 1060, sun = 0) {
+  const layer = (n, y, h0, col, seed) => { let s = ""; for (let i = 0; i < n; i++) { const w = 1180 / n, x = i * w - 50 + 30 * hash(i + seed), h = h0 * (.8 + .5 * hash(i + seed + 1));
+    s += `<path d="M${x} ${y} L${x + w * .5} ${y - h} L${x + w} ${y}Z M${x + w * .12} ${y - h * .35} L${x + w * .5} ${y - h * .8} L${x + w * .88} ${y - h * .35}Z" fill="${col}"/><rect x="${x + w * .46}" y="${y - 6}" width="${w * .08}" height="40" fill="${col}"/>`; } return s; };
+  return `<defs><linearGradient id="${p}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1d4a"/><stop offset=".55" stop-color="#c2557a"/><stop offset="1" stop-color="#ffb25a"/></linearGradient></defs>
+    <rect width="1080" height="${ground}" fill="url(#${p}sky)"/><circle id="${p}sun" cx="760" cy="${ground - 300 + sun}" r="110" fill="#ffd27a"/>
+    ${layer(9, ground - 120, 420, "#5a2f5e", 3)}${layer(7, ground - 30, 560, "#3a1f45", 11)}
+    <rect y="${ground - 40}" width="1080" height="${1960 - ground}" fill="#22162e"/>${layer(5, ground + 120, 780, "#120b1c", 21)}`;
+}
+// карта сверху
+function mapBg() {
+  let t = ""; for (let i = 0; i < 70; i++) { const x = hash(i + 1) * 1080, y = 150 + hash(i + 2) * 1100, r = 34 + 30 * hash(i + 3);
+    t += `<circle cx="${x}" cy="${y}" r="${r}" fill="#2f6b3c"/><circle cx="${x - r * .25}" cy="${y - r * .25}" r="${r * .55}" fill="#3d8a4c"/>`; }
+  return `<rect width="1080" height="1920" fill="#5a9a5a"/>${t}`;
+}
+// петляющий маршрут: старт в центре, круги уводят всё дальше
+const PATH = (() => { const pts = []; for (let i = 0; i <= 180; i++) { const a = i / 180, ang = a * Math.PI * 7, r = 40 + 330 * a;
+  pts.push([540 + Math.cos(ang) * r * .9 + 120 * a, 700 + Math.sin(ang) * r * .75 + 160 * a]); } return pts; })();
+
+function build() {
+  $("#a1").innerHTML = forestBg("a") + person("p1", HERO) + `<rect id="dk1" width="1080" height="1920" fill="#0b0618" opacity="0"/>`;
+  $("#a2").innerHTML = mapBg() + `<path id="tr2" d="M${PATH.map((p) => p.join(" ")).join(" L")}" stroke="#ff3b47" stroke-width="12" fill="none" stroke-dasharray="22 14"/>` +
+    `<g transform="translate(540 700)"><circle r="70" fill="#ffd23f" opacity=".35"/><circle r="24" fill="#ffd23f" stroke="#000" stroke-width="5"/>
+      <text y="-90" font-size="44" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="8" paint-order="stroke">ТУТ ИЩУТ 🔦</text></g>
+     <g id="me2"><circle r="30" fill="${HERO.hat}" stroke="#000" stroke-width="6"/><text y="-44" font-size="40" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="8" paint-order="stroke">ТЫ</text></g>
+     <path id="dl2" stroke="#fff" stroke-width="6" stroke-dasharray="12 10" opacity="0"/>`;
+  $("#a5").innerHTML = forestBg("c", 1060, 260) + `<rect width="1080" height="1920" fill="#0b0618" opacity=".35"/>
+    <rect x="740" y="520" width="70" height="580" fill="#4a2d1e"/>` +
+    Array.from({ length: 9 }, (_, i) => `<path class="st5" d="M${790 - i * 2} ${560 + i * 6} L${300 + i * 50} 1080" stroke="#7a5230" stroke-width="18" stroke-linecap="round"/>`).join("") +
+    `<g id="lap5g">${Array.from({ length: 14 }, (_, i) => `<path d="M${260 + i * 40} 1062 l20 -26 l20 26 l-12 0 l14 -18 l14 18" fill="#2f8f3c" stroke="#1d5a28" stroke-width="3"/>`).join("")}
+     <rect x="250" y="1040" width="580" height="26" rx="12" fill="#2f8f3c"/></g>` + `<g id="body5">${person("p5", HERO)}</g>` +
+    `<g id="cold5g">${[0, 1, 2, 3].map((i) => `<path d="M${380 + i * 110} 1150 V1080" stroke="#5cc8ff" stroke-width="12" stroke-linecap="round" marker-end="url(#ca)"/>`).join("")}
+     <defs><marker id="ca" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#5cc8ff"/></marker></defs></g>`;
+}
+
+/* ---------- сцены ---------- */
+const UPD = {
+  s1(lt) {
+    $("#a1").style.transform = "";
+    const look = Math.sin(lt * 2.2);
+    at("p1", 540, 1000, 1.9);
+    setPose("p1", { la: 15, ra: 15 + (lt > 3.1 ? 70 * prog(lt, 3.1, 3.5) : 0), face: lt > 1.8 ? "worried" : "calm", look: look > .3 ? 1 : look < -.3 ? -1 : 0, tilt: 6 * look });
+    $("#asun").setAttribute("cy", 760 + 120 * prog(lt, 0, 5));
+    $("#dk1").setAttribute("opacity", .35 * prog(lt, 1.8, 3.5));
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(lt, 4.2, 4.5); hk.style.transform = `scale(${1 + .03 * Math.sin(lt * 7)})`;
+    popIn("#dark1", lt, 1.85, -3); popIn("#bat1", lt, 3.15, 3);
+    if (lt > 3.6) { const z = easeOut(prog(lt, 3.6, 5)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${1 + .12 * z})`; }
+  },
+  s2(lt) {
+    const p = easeInOut(prog(lt, .3, 6.6)), n = Math.round(p * (PATH.length - 1)), [x, y] = PATH[n];
+    const tr = $("#tr2"), len = tr.getTotalLength(); tr.style.strokeDasharray = `22 14`;
+    tr.setAttribute("d", "M" + PATH.slice(0, n + 1).map((q) => q.join(" ")).join(" L"));
+    $("#me2").setAttribute("transform", `translate(${x} ${y})`);
+    const dl = $("#dl2"); dl.setAttribute("d", `M540 700 L${x} ${y}`); dl.setAttribute("opacity", lt > 3.2 ? 1 : 0);
+    popIn("#run2", lt, .1, -3); popIn("#far2", lt, 3.3, 3);
+  },
+  s3(lt) {
+    show($("#t3"), lt, .05);
+    popIn("#r31", lt, 2.7, -1); popIn("#r32", lt, 3.5, 1); popIn("#r33", lt, 4.8, -1); popIn("#r34", lt, 5.8, 1);
+  },
+  s4(lt) {
+    const ph = $("#phone4"); show(ph, lt, .05, .35, 80);
+    const conn = lt > 5.6; $("#net4").textContent = lt > 4.6 ? "📡 SOS" : "✖ НЕТ СЕТИ"; $("#net4").style.color = lt > 4.6 ? "#4dff8a" : "#ff5a5a";
+    $("#st4").textContent = conn ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(lt * 3) % 3);
+    popIn("#op4", lt, 5.65, 0, 7.1);
+    const on = prog(lt, 7.25, 7.5); $("#tg4").style.background = on > .5 ? "#2bd46b" : "#555"; $("#tg4 i").style.transform = `translateX(${50 * on}px)`;
+    $(".sv", ph); ph.querySelector(".sv").style.boxShadow = on > .5 ? "0 0 0 5px #4dff8a" : "";
+  },
+  s5(lt) {
+    $$(".st5").forEach((s, i) => s.setAttribute("opacity", prog(lt, .1 + i * .12, .25 + i * .12)));
+    const lap = prog(lt, 5.0, 5.4);
+    at("p5", 560, 1040 - 40 * lap, 1.15, 1, -90);
+    setPose("p5", { la: 160, ra: 20, face: lt > 5.2 ? "happy" : lt > 2 ? "cold" : "calm" });
+    $("#lap5g").setAttribute("opacity", lap); $("#lap5g").setAttribute("transform", `translate(0 ${-14 * lap})`);
+    $("#cold5g").setAttribute("opacity", lt > 2 && lt < 5.1 ? .6 + .4 * Math.sin(lt * 8) : 0);
+    $("#cold5g").setAttribute("transform", `translate(0 ${-20 * ((lt * 1.5) % 1)})`);
+    popIn("#sh5", lt, .2, -2); popIn("#cold5", lt, 2.0, -2, 4.9); popIn("#lap5", lt, 5.05, 2);
+  },
+  s6(lt) {
+    show($("#t6"), lt, .1);
+    const rows = [["#g61", "#l61", 1.6], ["#g62", "#l62", 2.4], ["#g63", "#l63", 3.2]], out = 4.75;
+    rows.forEach(([g, l, a]) => { const kids = $(g).children; [...kids].forEach((k, i) => { pop(k, lt, a + i * .18); if (lt < a + i * .18) k.style.opacity = 0;
+      if (lt > a + 1) k.style.transform += ` scale(${1 + .06 * Math.max(0, Math.sin((lt - i * .3) * 6))})`; });
+      const L = $(l); show(L, lt, a + .3); if (lt < a + .3) L.style.opacity = 0;
+      const o = 1 - prog(lt, out, out + .3); $(g).style.opacity = o; if (lt > out) L.style.opacity = o; });
+    popIn("#stay6", lt, 6.6, -2);
+  },
+  s7(lt) {
+    show($("#q7"), lt, .1);
+    popIn("#o71", lt, 1.0, -1); popIn("#o72", lt, 1.35, 1); popIn("#o73", lt, 1.7, -1);
+    popIn("#c71", lt, 2.8, -2); popIn("#c72", lt, 3.5, 3);
+  },
+  s8(lt) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0);
+    const z = easeInOut(prog(lt, 0, 3.3));
+    $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.6, 1, z)})`; $("#a1").style.filter = `brightness(${lerp(.55, 1, z)})`;
+    $("#hook1").style.opacity = prog(lt, 3.2, 3.8);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0); $("#a1").style.filter = ""; },
+};
+
+/* ---------- звук ---------- */
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.wind(a, 55, .7));
+  [0.6, 2.6, 4.4].forEach((t) => add(t, (a) => { sfx.osc("sine", 1800, a, .02, .05, .12, 2400); sfx.osc("sine", 2200, a + .15, .02, .04, .1, 1700); })); // птица
+  add(1.85, sfx.pop); add(3.15, sfx.no);
+  add(5.1, sfx.boom); for (let t = 5.3; t < 11.5; t += .3) add(t, (a) => sfx.noise(a, .06, "bandpass", 900, 1, .2, .005)); add(8.3, sfx.whoosh); add(8.35, sfx.pop);
+  add(12.6, sfx.whooshDown); [15.2, 16.0, 17.3, 18.3].forEach((t) => add(t, sfx.pop)); add(19.0, sfx.ok);
+  add(21.1, sfx.whoosh); for (let t = 21.6; t < 25.6; t += 1.2) add(t, sfx.beep); add(26.6, sfx.ok); add(28.25, sfx.pop);
+  for (let i = 0; i < 9; i++) add(30.1 + i * .12, (a) => sfx.noise(a, .07, "lowpass", 900, 1, .3, .005)); add(32.0, sfx.no); add(35.0, sfx.ok);
+  add(37.1, sfx.boom);
+  [38.6, 38.95, 39.3].forEach((t) => add(t, (a) => sfx.whistle(a, .3)));
+  add(39.4, (a) => sfx.fire(a, 1.8)); [40.2, 40.4, 40.6].forEach((t) => add(t, sfx.tick));
+  add(43.6, sfx.ok); add(46.1, sfx.whoosh); [47.1, 47.45, 47.8].forEach((t) => add(t, sfx.pop)); add(48.9, sfx.pop); add(49.6, sfx.pop);
+  add(51, sfx.whooshDown); add(54.2, (a) => sfx.riser(a, .8));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>

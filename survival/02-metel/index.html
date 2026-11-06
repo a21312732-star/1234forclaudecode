@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #2 — Метель в машине</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#141d33}
+.night{position:absolute;inset:0;background:linear-gradient(180deg,#0f1628,#1d2a48 60%,#0c1220)}
+.rule .tx{font-size:46px}
+#phone6{position:absolute;left:330px;top:300px;width:420px;height:760px;border-radius:60px;background:#111;border:10px solid #333;box-shadow:0 20px 50px rgba(0,0,0,.6);z-index:6;
+  display:flex;flex-direction:column;align-items:center;padding-top:110px;color:#fff}
+#phone6 .num{font:900 150px var(--head);letter-spacing:4px}
+#phone6 .st{font:800 34px var(--mono);color:#9fe3a8;margin-top:20px}
+#phone6 .bt{position:absolute;top:34px;right:40px;font:800 28px var(--mono);color:#ffd23f}
+#phone6 .call{position:absolute;bottom:80px;width:130px;height:130px;border-radius:50%;background:#2bd46b;display:grid;place-items:center;font:400 64px var(--emo)}
+.item{position:absolute;width:280px;height:200px;border-radius:26px;background:#fff;border:6px solid #000;box-shadow:0 10px 0 #000;color:#111;text-align:center;z-index:4}
+.item .em{display:block;font-size:96px;margin-top:14px}
+.item b{font:900 34px var(--head)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+
+  <!-- S1: хук — машину заметает -->
+  <div class="scene" id="s1">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1">Застрял <b>в метель</b>? <span class="em">🥶</span></div>
+    <div class="badge b-blu" id="temp1" style="left:650px;top:430px"><span class="em">🌡️</span> −20°C</div>
+  </div>
+
+  <!-- S2: не уходи от машины -->
+  <div class="scene" id="s2">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="badge b-red ctr" id="no2" style="top:200px;font-size:60px"><span class="em">🚫</span> НЕ УХОДИ</div>
+    <div class="badge b-yel" id="m2" style="left:420px;top:1100px">ВСЕГО 10 МЕТРОВ</div>
+    <div class="badge b-grn" id="ok2" style="left:70px;top:330px">МАШИНА = УКРЫТИЕ <span class="em">✅</span></div>
+    <div class="badge b-wht" id="find2" style="left:70px;top:330px">ЕЁ ЛЕГЧЕ НАЙТИ <span class="em">🔦</span></div>
+  </div>
+
+  <!-- S3: угарный газ из засыпанной трубы -->
+  <div class="scene" id="s3">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="badge b-yel ctr" id="know3" style="top:200px">ЭТОГО НЕ ЗНАЮТ МНОГИЕ <span class="em">⚠️</span></div>
+    <div class="badge b-blu" id="pipe3" style="left:60px;top:1150px">ТРУБУ ЗАМЕЛО <span class="em">❄️</span></div>
+    <div class="badge b-red" id="co3" style="left:470px;top:330px"><span class="em">☠️</span> УГАРНЫЙ ГАЗ</div>
+    <div class="badge b-wht" id="inv3" style="left:300px;top:450px">НЕ ВИДНО · НЕ ПАХНЕТ</div>
+  </div>
+
+  <!-- S4: откопай трубу -->
+  <div class="scene" id="s4">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="badge b-grn ctr" id="ok4" style="top:240px;font-size:56px">ТРУБА ЧИСТАЯ <span class="em">✅</span></div>
+  </div>
+
+  <!-- S5: правила -->
+  <div class="scene" id="s5">
+    <div class="night"></div>
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="rule" id="r51" style="top:200px;background:var(--yellow)"><div class="ic">⏱️</div><div class="tx">мотор: 10 минут<br>в час</div></div>
+    <div class="rule" id="r52" style="top:420px;background:var(--blue)"><div class="ic">🪟</div><div class="tx">окно: оставь<br>щель</div></div>
+    <div class="rule" id="r53" style="top:640px;background:#ff8a3d"><div class="ic">🧣</div><div class="tx">яркая тряпка<br>на антенну</div></div>
+    <div class="rule" id="r54" style="top:860px;background:#fff"><div class="ic">💡</div><div class="tx">свет в салоне,<br>пока мотор работает</div></div>
+  </div>
+
+  <!-- S6: двигайся, не потей, звони 112 -->
+  <div class="scene" id="s6">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="badge b-red" id="sweat6" style="left:560px;top:260px">НЕ ДО ПОТА <span class="em">💦</span></div>
+    <div id="phone6"><div class="bt">🔋 23%</div><div class="num">112</div><div class="st" id="st6">ВЫЗОВ…</div><div class="call">📞</div></div>
+  </div>
+
+  <!-- S7: багажник -->
+  <div class="scene" id="s7">
+    <div class="night"></div>
+    <div class="big" id="q7" style="top:160px;font-size:80px;line-height:1.05">ЧТО У ТЕБЯ<br>В БАГАЖНИКЕ? <span class="em">🧳</span></div>
+    <div class="item" id="i1" style="left:80px;top:420px"><span class="em">🪏</span><b>ЛОПАТА</b></div>
+    <div class="item" id="i2" style="left:400px;top:420px"><span class="em">🧣</span><b>ПЛЕД</b></div>
+    <div class="item" id="i3" style="left:720px;top:420px"><span class="em">☕</span><b>ТЕРМОС</b></div>
+    <div class="item" id="i4" style="left:80px;top:660px"><span class="em">🔦</span><b>ФОНАРИК</b></div>
+    <div class="item" id="i5" style="left:400px;top:660px"><span class="em">🔋</span><b>ПАУЭРБАНК</b></div>
+    <div class="item" id="i6" style="left:720px;top:660px"><span class="em">❓</span><b>А У ТЕБЯ?</b></div>
+    <div class="cmt" id="c71" style="left:100px;top:920px">трос и лопата всегда</div>
+    <div class="cmt" id="c72" style="left:520px;top:990px">у меня там только кот <span class="em">😹</span></div>
+  </div>
+
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 52.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.8, 1.42], [4.5, 4.09], [5.4, 5.10], [6.7, 6.33], [7.6, 6.92], [10.5, 9.81], [13.6, 13.23], [15.8, 15.72], [17.6, 17.70], [20.3, 20.86], [23.1, 22.53], [26.6, 24.80], [29.3, 27.87], [31, 29.69], [32.8, 31.71], [33.9, 32.70], [36.6, 34.07], [39.4, 37.12], [43.1, 39.83], [45.2, 41.82], [48.6, 43.52], [50.1, 45.12], [52, 46.49], [52.3, 46.79]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.4 }, { id: "s2", s: 4.4, e: 13.5 }, { id: "s3", s: 13.5, e: 23 }, { id: "s4", s: 23, e: 26.5 },
+  { id: "s5", s: 26.5, e: 36.5 }, { id: "s6", s: 36.5, e: 43 }, { id: "s7", s: 43, e: 48.5 },
+  { id: "s8", s: 48.5, e: 52 }, { id: "s9", s: 52, e: 52.3 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [["112", "сто двенадцать"]];
+const DROP = ["подписывайся"];
+const SHAKES = [6.7, 17.6];
+const FLASHES = [6.7];
+const clockText = (t) => (t >= 4.4 && t < 48.5 ? "ВЫЖИВИ #2 · МЕТЕЛЬ" : null);
+const CAPS = [
+  [0.1, "Ты {r:застрял на трассе.}"], [1.8, "Метель, {b:минус двадцать,}"], [3.28, "машину {r:замело.}"],
+  [4.5, "Первое желание —"], [5.4, "{y:пойти за помощью.}"], [6.7, "{r:Не надо.}"],
+  [7.6, "В метель люди теряются"], [8.86, "{r:в десяти метрах} от машины."],
+  [10.5, "Машина — {g:твоё укрытие,}"], [12.09, "и её {g:легче найти.}"],
+  [13.6, "Теперь главное,"], [14.44, "о чём {y:не знают многие.}"], [15.8, "Выхлопную трубу {r:замело снегом.}"],
+  [17.6, "Если завести мотор,"], [18.67, "{r:угарный газ} пойдёт в салон."], [20.3, "{r:Без цвета} и без запаха."],
+  [23.1, "Поэтому сначала {g:откапываешь трубу.}"],
+  [26.6, "Мотор — {y:десять минут в час,}"], [28.19, "чтобы согреться."], [29.3, "Окно — {y:приоткрыто на щель.}"],
+  [31, "Яркую тряпку — {y:на антенну.}"], [32.8, "{y:Свет в салоне} —"], [33.9, "пока работает мотор."],
+  [36.6, "Двигайся, чтобы не замёрзнуть,"], [38.39, "но {r:не до пота.}"], [39.4, "И звони {g:112,}"], [40.78, "пока телефон {y:жив.}"],
+  [43.1, "А что у тебя {y:в багажнике зимой?}"], [45.2, "{y:Пиши в комменты.}"],
+  [48.6, "Проверь, {y:пока не поздно.}"], [50.1, "{r:Потому что однажды...}"],
+  [52, ""],
+];
+const MUSIC = { bpm: 92, root: 49, parts: [[0, 13.5, "pulse", .8], [13.5, 23, "pad", .8], [23, 43, "drive", .6], [43, 48.5, "pad", .6], [48.5, 52.3, "pulse", .7]] };
+
+/* ---------- рисовка ---------- */
+const HERO = { coat: "#3a7bd5", coat2: "#24539a", hat: "#ff8a3d", hat2: "#fff", scarf: "#ffd23f", gloves: "#ff8a3d" };
+function nightBg(p, ground = 1000) {
+  let trees = ""; for (let i = 0; i < 14; i++) { const x = i * 82 + 30 * hash(i), h = 160 + 120 * hash(i + 5);
+    trees += `<path d="M${x} ${ground - 60} L${x + 40} ${ground - 60 - h} L${x + 80} ${ground - 60}Z" fill="#22344f"/><path d="M${x + 22} ${ground - 60 - h * .55} L${x + 40} ${ground - 60 - h} L${x + 58} ${ground - 60 - h * .55}Z" fill="#dfe8f2" opacity=".8"/>`; }
+  return `<defs><linearGradient id="${p}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1426"/><stop offset="1" stop-color="#34466b"/></linearGradient>
+    <linearGradient id="${p}gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f0f8"/><stop offset="1" stop-color="#9fb2c8"/></linearGradient>
+    <radialGradient id="${p}beam"><stop offset="0" stop-color="#fff6b0" stop-opacity=".8"/><stop offset="1" stop-color="#fff6b0" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="url(#${p}sky)"/>${trees}
+    <rect y="${ground - 60}" width="1080" height="${1980 - ground}" fill="url(#${p}gr)"/>
+    <path d="M0 ${ground + 40} H1080" stroke="#b8c6d6" stroke-width="10" stroke-dasharray="80 60" opacity=".5"/>`;
+}
+// машина сбоку, мордой вправо; (0,0) — земля под центром
+function car(id) {
+  return `<g id="${id}">
+    <path d="M-260 -40 Q-262 -110 -200 -118 L-120 -124 Q-70 -200 20 -205 L110 -205 Q160 -200 200 -130 L240 -122 Q268 -116 266 -60 L262 -30 Q262 -10 240 -10 L-240 -10 Q-262 -10 -260 -40Z" fill="#c8323c" stroke="#5a0f14" stroke-width="6"/>
+    <path d="M-120 -126 Q-80 -200 20 -205 L110 -205 Q160 -200 200 -130Z" fill="#fff" opacity=".9"/>
+    <g class="inhead" transform="translate(60 -150)"><circle r="26" fill="#f4c7a1"/><path d="M-27 -4 Q-27 -34 0 -34 Q27 -34 27 -4Z" fill="${HERO.hat}"/><circle cx="-8" cy="4" r="3.5" fill="#222"/><circle cx="8" cy="4" r="3.5" fill="#222"/></g>
+    <path d="M-100 -128 Q-60 -186 10 -188 L10 -128Z" fill="#9fd0ef" opacity=".55"/><path d="M30 -188 L100 -188 Q140 -184 176 -128 L30 -128Z" fill="#9fd0ef" opacity=".55"/>
+    <path class="cabin" d="M-100 -128 Q-60 -186 10 -188 L100 -188 Q140 -184 176 -128Z" fill="#9aa3ad" opacity="0"/>
+    <path d="M20 -126 V-20 M-110 -120 V-20" stroke="#5a0f14" stroke-width="4"/><rect x="40" y="-100" width="40" height="10" rx="5" fill="#5a0f14"/>
+    <circle cx="-160" cy="-10" r="52" fill="#1d1d1d"/><circle cx="-160" cy="-10" r="22" fill="#888"/><circle cx="160" cy="-10" r="52" fill="#1d1d1d"/><circle cx="160" cy="-10" r="22" fill="#888"/>
+    <rect x="248" y="-92" width="18" height="30" rx="6" fill="#fff3a0"/><rect x="-266" y="-92" width="14" height="30" rx="5" fill="#ff3030" class="tail"/>
+    <rect x="-282" y="-20" width="44" height="14" rx="6" fill="#777" stroke="#333" stroke-width="3"/>
+    <path d="M-60 -122 L-90 -270" stroke="#333" stroke-width="5"/><path class="flag" d="M-88 -266 Q-50 -250 -20 -270 L-14 -228 Q-48 -210 -82 -226Z" fill="#ff8a3d" opacity="0"/>
+    <path class="light" d="M266 -78 L700 -200 L700 60Z" fill="url(#beam_${id})" opacity=".55"/>
+    <defs><radialGradient id="beam_${id}" cx="0" cy=".5" r="1"><stop offset="0" stop-color="#fff6b0" stop-opacity=".7"/><stop offset="1" stop-color="#fff6b0" stop-opacity="0"/></radialGradient></defs>
+  </g>`;
+}
+// сугроб перед машиной, высота h (0..1)
+const drift = (id) => `<path id="${id}" d="M-420 0 Q-330 -150 -200 -120 Q-60 -170 60 -110 Q200 -160 330 -90 Q400 -60 440 0Z" fill="#eef4fa" stroke="#c4d2e0" stroke-width="6"/>`;
+const snowLayer = (id, n = 110) => `<g id="${id}">${Array.from({ length: n }, (_, i) => `<circle r="${3 + 6 * hash(i + 1)}" fill="#fff" opacity="${.5 + .5 * hash(i + 2)}"/>`).join("")}</g>`;
+function updSnow(id, t, k = 1, wind = 1) {
+  document.querySelectorAll(`#${id} circle`).forEach((c, i) => {
+    const sp = 180 + 260 * hash(i + 7);
+    const y = ((hash(i + 3) * 1920 + t * sp * k) % 1920 + 1920) % 1920, x = ((hash(i + 5) * 1180 - t * sp * .9 * wind * k + 4000) % 1180) - 50;
+    c.setAttribute("cx", x); c.setAttribute("cy", y);
+  });
+}
+const gas = (id) => `<g id="${id}">${Array.from({ length: 14 }, (_, i) => `<g class="gp"><circle r="${30 + 20 * hash(i)}" fill="#8f99a6" opacity=".55"/><circle r="${30 + 20 * hash(i)}" fill="none" stroke="#c8d0da" stroke-width="3" stroke-dasharray="8 8"/></g>`).join("")}</g>`;
+
+function build() {
+  $("#a1").innerHTML = nightBg("a") + `<g transform="translate(540 1020) scale(1.25)">${car("c1")}<g id="dr1">${drift("dd1")}</g></g>` + snowLayer("sn1");
+  $("#a2").innerHTML = nightBg("b") + `<g transform="translate(300 1020)">${car("c2")}<g transform="scale(1 .9)">${drift("dd2")}</g></g>` + person("p2", HERO) +
+    `<path id="dist2" d="M570 1040 H880" stroke="#ffd23f" stroke-width="8" stroke-dasharray="20 12" opacity="0"/><rect id="wo2" width="1080" height="1920" fill="#e9f0f7" opacity="0"/>` + snowLayer("sn2", 140) +
+    `<path id="beam2" d="M1100 120 L420 840 L620 980 Z" fill="#fff6b0" opacity="0"/>`;
+  $("#a3").innerHTML = nightBg("c", 1080) + `<g transform="translate(760 1100) scale(1.6)">${car("c3")}<g transform="translate(-120 0) scale(.55 .8)">${drift("dd3")}</g></g>` + gas("g3") + snowLayer("sn3", 70) +
+    `<g id="cozz3" opacity="0"><text x="830" y="760" font-size="64" fill="#fff" stroke="#000" stroke-width="6" paint-order="stroke">Z z z</text></g>`;
+  $("#a4").innerHTML = nightBg("d", 1080) + `<g transform="translate(860 1100) scale(1.6)">${car("c4")}<g id="dr4" transform="translate(-160 0) scale(.45 .8)">${drift("dd4")}</g></g>` +
+    person("p4", HERO) + `<g id="shv4"><path d="M0 0 L0 170" stroke="#7a5230" stroke-width="12"/><path d="M-36 170 L36 170 L28 240 Q0 256 -28 240Z" fill="#9aa3ad" stroke="#333" stroke-width="5"/></g>` +
+    [0, 1, 2, 3, 4, 5].map((i) => `<circle class="ch4" r="${12 + 10 * hash(i)}" fill="#fff"/>`).join("") + snowLayer("sn4", 60);
+  $("#a5").innerHTML = `<g transform="translate(540 1240) scale(1.1)" opacity=".5">${car("c5")}</g>` + snowLayer("sn5", 60);
+  $("#a6").innerHTML = nightBg("e") + `<rect x="0" y="380" width="1080" height="760" fill="#2b3346"/><rect x="60" y="420" width="960" height="420" rx="40" fill="#5b7aa0" opacity=".45"/>` +
+    snowLayer("sn6", 50) + person("p6", HERO) + `<rect x="0" y="980" width="1080" height="300" fill="#1c212d"/><circle cx="300" cy="1010" r="120" fill="none" stroke="#111" stroke-width="30"/>` +
+    `<g id="drop6" opacity="0"><path d="M0 -40 Q26 -4 0 20 Q-26 -4 0 -40Z" fill="#5cc8ff" stroke="#fff" stroke-width="4"/></g>`;
+}
+
+/* ---------- сцены ---------- */
+const UPD = {
+  s1(lt) {
+    $("#a1").style.transform = "";
+    updSnow("sn1", lt + 3, .9 + .5 * prog(lt, 1.6, 3.2), 1.3);
+    $("#dd1").setAttribute("transform", `scale(1 ${lerp(.7, 1.35, easeInOut(prog(lt, 2.9, 4.0)))})`);
+    const c = $("#c1"); c.querySelector(".light").setAttribute("opacity", .55 * (1 - .4 * prog(lt, 2.9, 4)));
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(lt, 3.6, 3.9); hk.style.transform = `scale(${1 + .03 * Math.sin(lt * 7)})`;
+    popIn("#temp1", lt, 1.85, 4);
+    if (lt > 3.0) { const z = easeOut(prog(lt, 3.0, 4.2)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${1 + .12 * z})`; }
+  },
+  s2(lt) {
+    updSnow("sn2", lt + 10, 1.2, 1.5);
+    // 0.3–2.3 выходит и уходит вправо; 2.3 стоп; 6.1–7.5 возвращается
+    const out = easeInOut(prog(lt, .4, 2.3)), back = easeInOut(prog(lt, 6.1, 7.4));
+    const x = lerp(lerp(560, 900, out), 560, back), moving = (lt > .4 && lt < 2.3) || (lt > 6.1 && lt < 7.4);
+    at("p2", x, 888, 1.5, lt > 7.4 ? 1 - prog(lt, 7.4, 7.7) : 1);
+    setPose("p2", moving ? walk(lt, 1, { face: "worried" }) : { la: 25, ra: 25, face: lt > 2.3 && lt < 6.1 ? "panic" : "worried", look: lt > 2.3 && lt < 6.1 ? -1 : 0 });
+    $("#wo2").setAttribute("opacity", .75 * out * (1 - back));
+    $("#dist2").setAttribute("opacity", lt > 4.5 && lt < 6.1 ? 1 : 0);
+    popIn("#no2", lt, 2.3, 0, 6.0); popIn("#m2", lt, 4.55, -2, 6.0);
+    popIn("#ok2", lt, 6.15, -2, 7.4); popIn("#find2", lt, 7.6, 2);
+    const bm = $("#beam2"); bm.setAttribute("opacity", lt > 7.5 ? .35 * prog(lt, 7.5, 7.9) : 0);
+    bm.setAttribute("transform", `rotate(${lerp(18, 0, easeOut(prog(lt, 7.5, 8.4)))} 1100 120)`);
+    $("#c2").querySelector(".inhead").setAttribute("opacity", lt < .4 || lt > 7.4 ? 1 : 0);
+  },
+  s3(lt) {
+    updSnow("sn3", lt + 20, .8, 1.2);
+    const on = lt > 4.1, shake = on ? Math.sin(lt * 60) * 2 : 0;
+    $("#c3").setAttribute("transform", `translate(${shake} 0)`);
+    // газ: из трубы под сугробом — вдоль кузова — в салон
+    $$("#g3 .gp").forEach((g, i) => {
+      const k = (((lt - 4.2) * .35 + i / 14) % 1 + 1) % 1;
+      const x = 760 + 1.6 * lerp(-282, 60, k), y = 1100 + 1.6 * lerp(-14, -150, Math.pow(k, 1.6));
+      g.setAttribute("transform", `translate(${x + 20 * Math.sin(lt * 2 + i)} ${y}) scale(${.6 + .8 * k})`);
+      g.setAttribute("opacity", on ? prog(lt, 4.2 + i * .12, 4.6 + i * .12) * (.4 + .6 * Math.sin(k * Math.PI)) : 0);
+    });
+    $("#c3").querySelector(".cabin").setAttribute("opacity", .5 * prog(lt, 5.5, 8));
+    $("#cozz3").setAttribute("opacity", prog(lt, 7, 7.4)); $("#cozz3").setAttribute("transform", `translate(0 ${-20 * ((lt * .7) % 1)})`);
+    popIn("#know3", lt, .9, 0, 2.2); popIn("#pipe3", lt, 2.35, -2); popIn("#co3", lt, 5.25, 3); popIn("#inv3", lt, 6.85, -2);
+  },
+  s4(lt) {
+    updSnow("sn4", lt + 30, .7, 1);
+    const dig = Math.sin(lt * 7), cleared = prog(lt, .3, 2.4);
+    at("p4", 440, 1100, 1.15); setPose("p4", { la: 120 + 30 * dig, ra: 100 + 30 * dig, ll: 10, rl: 10, face: "focus", tilt: 8 });
+    $("#shv4").setAttribute("transform", `translate(${470 + 40 * dig} ${930}) rotate(${-40 + 30 * dig})`);
+    $("#dr4").setAttribute("transform", `translate(-160 0) scale(${.45} ${.8 * (1 - .9 * cleared)})`);
+    $$(".ch4").forEach((c, i) => { const k = ((lt * 1.4 + i / 6) % 1), on = lt > .3 && lt < 2.6;
+      c.setAttribute("cx", 520 - 200 * k - 40 * hash(i)); c.setAttribute("cy", 1060 - 260 * Math.sin(k * Math.PI)); c.setAttribute("opacity", on ? 1 : 0); });
+    popIn("#ok4", lt, 2.45);
+  },
+  s5(lt) {
+    updSnow("sn5", lt + 40, .6, .8);
+    popIn("#r51", lt, .15, -1); popIn("#r52", lt, 2.85, 1); popIn("#r53", lt, 4.55, -1); popIn("#r54", lt, 6.35, 1);
+    const c = $("#c5"); c.querySelector(".flag").setAttribute("opacity", prog(lt, 4.6, 4.9));
+    c.querySelector(".flag").setAttribute("transform", `skewY(${6 * Math.sin(lt * 6)})`);
+  },
+  s6(lt) {
+    updSnow("sn6", lt + 50, .7, 1);
+    const ph = lt > 2.85, w = Math.sin(lt * 6);
+    at("p6", 540, 1010, 1.6, ph ? 1 - prog(lt, 2.85, 3.1) : 1);
+    setPose("p6", { la: 60 + 60 * w, ra: 60 - 60 * w, face: "focus", tilt: 4 * w });
+    const d = $("#drop6"); d.setAttribute("opacity", lt > 1.6 && lt < 2.9 ? 1 : 0); d.setAttribute("transform", `translate(${620} ${640 + 60 * prog(lt, 1.6, 2.6)}) scale(2)`);
+    popIn("#sweat6", lt, 1.65, 3, 2.85);
+    const p = $("#phone6"); show(p, lt, 2.9, .35, 80); if (lt < 2.9) p.style.opacity = 0;
+    $("#st6").textContent = lt > 4.6 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(lt * 3) % 3);
+  },
+  s7(lt) {
+    show($("#q7"), lt, .1);
+    ["#i1", "#i2", "#i3", "#i4", "#i5", "#i6"].forEach((id, i) => popIn(id, lt, .6 + i * .22, (i % 2 ? 2 : -2)));
+    popIn("#c71", lt, 2.6, -2); popIn("#c72", lt, 3.3, 2);
+  },
+  s8(lt) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0);
+    const z = easeInOut(prog(lt, 0, 2.8));
+    $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.6, 1, z)})`; $("#a1").style.filter = `brightness(${lerp(.6, 1, z)})`;
+    updSnow("sn1", 3 - (1 - z) * .01, 1, 1.3);
+    $("#hook1").style.opacity = prog(lt, 2.7, 3.3);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0); $("#a1").style.filter = ""; },
+};
+
+/* ---------- звук ---------- */
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.wind(a, 52, 1.4));
+  add(1.85, sfx.pop); add(3.0, sfx.whoosh);
+  add(4.8, (a) => sfx.noise(a, .15, "lowpass", 800, 1, .4, .005)); // дверь
+  for (let t = 4.85; t < 6.7; t += .38) add(t, (a) => sfx.noise(a, .08, "bandpass", 1500, 1, .22, .005));
+  add(6.7, sfx.no); add(6.7, sfx.boom); add(8.95, sfx.pop);
+  for (let t = 10.5; t < 11.8; t += .38) add(t, (a) => sfx.noise(a, .08, "bandpass", 1500, 1, .22, .005));
+  add(10.6, sfx.ok); add(11.9, sfx.whoosh); add(12.0, sfx.ding);
+  add(14.4, sfx.pop); add(15.85, sfx.pop);
+  add(17.6, (a) => { sfx.noise(a, .4, "bandpass", 300, 1, .4, .05); }); add(17.7, (a) => sfx.engine(a, 5.2, 1));
+  add(18.75, sfx.boom); add(20.35, sfx.pop);
+  for (let t = 23.3; t < 25.4; t += .45) add(t, sfx.shovel); add(25.5, sfx.ok);
+  add(26.65, sfx.pop); add(26.7, (a) => sfx.engine(a, 1.6, .7)); add(29.35, sfx.pop); add(31.05, sfx.pop); add(32.85, sfx.pop);
+  add(38.2, sfx.no); add(39.4, sfx.whoosh);
+  for (let t = 39.6; t < 41.2; t += .5) add(t, sfx.beep); add(41.2, sfx.ok);
+  add(43.1, sfx.whoosh); [43.7, 43.9, 44.1, 44.3, 44.6, 44.8].forEach((t) => add(t, sfx.pop)); add(45.7, sfx.pop); add(46.4, sfx.pop);
+  add(48.5, sfx.whooshDown); add(51.2, (a) => sfx.riser(a, .8));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>

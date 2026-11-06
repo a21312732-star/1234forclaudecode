@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #1 — Провалился под лёд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#0b2a3d}
+.night{position:absolute;inset:0;background:linear-gradient(180deg,#0e2235,#123a52 60%,#0a1e2c)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+
+  <!-- S1: хук — идёшь по льду и проваливаешься -->
+  <div class="scene" id="s1">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1">Провалился <b>под лёд</b>? <span class="em">🧊</span></div>
+  </div>
+
+  <!-- S2: холодовой шок -->
+  <div class="scene" id="s2">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="badge b-blu" id="shock2" style="left:70px;top:200px"><span class="em">🥶</span> ХОЛОДОВОЙ ШОК</div>
+    <div class="badge b-grn" id="calm2" style="left:70px;top:200px"><span class="em">😮‍💨</span> НЕ ПАНИКУЙ</div>
+    <div class="badge b-yel ctr" id="head2" style="top:1120px">ГОЛОВА НАД ВОДОЙ <span class="em">✅</span></div>
+    <div class="abs em" id="heart2" style="left:880px;top:320px;font-size:100px">❤️</div>
+  </div>
+
+  <!-- S3: правило 1-10-1 -->
+  <div class="scene" id="s3">
+    <div class="night"></div>
+    <div class="big" id="t3" style="top:150px;color:var(--yellow)">1 · 10 · 1</div>
+    <div class="rule" id="r31" style="top:360px;background:var(--blue)"><div class="ic">🫁</div><div class="n">1 МИН</div><div class="tx">восстанови дыхание</div></div>
+    <div class="rule" id="r32" style="top:590px;background:var(--yellow)"><div class="ic">💪</div><div class="n">10 МИН</div><div class="tx">руки ещё слушаются</div></div>
+    <div class="rule" id="r33" style="top:820px;background:var(--red);color:#fff"><div class="ic">⏳</div><div class="n">~1 ЧАС</div><div class="tx">до потери сознания</div></div>
+    <div class="badge b-grn ctr" id="ok3" style="top:1080px">ВРЕМЯ ЕСТЬ <span class="em">✅</span></div>
+  </div>
+
+  <!-- S4: разворот к своим следам (вид сверху) -->
+  <div class="scene" id="s4">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="badge b-red" id="thin4" style="left:560px;top:200px">ТОНКИЙ ЛЁД <span class="em">❌</span></div>
+    <div class="badge b-yel" id="back4" style="left:80px;top:1010px">ОТКУДА ПРИШЁЛ <span class="em">👣</span></div>
+    <div class="badge b-grn" id="held4" style="left:560px;top:880px">ТУТ ДЕРЖАЛ <span class="em">✅</span></div>
+  </div>
+
+  <!-- S5: выбираемся: локти, ноги, как тюлень -->
+  <div class="scene" id="s5">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="badge b-yel" id="elb5" style="left:80px;top:220px">ЛОКТИ — НА КРАЙ</div>
+    <div class="badge b-blu" id="kick5" style="left:520px;top:1130px">НОГИ РАБОТАЮТ <span class="em">🦵</span></div>
+    <div class="badge b-wht" id="seal5" style="left:80px;top:220px"><span class="em">🦭</span> КАК ТЮЛЕНЬ</div>
+  </div>
+
+  <!-- S6: не вставай, откатывайся -->
+  <div class="scene" id="s6">
+    <svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="badge b-red ctr" id="no6" style="top:220px;font-size:64px"><span class="em">🚫</span> НЕ ВСТАВАЙ</div>
+    <div class="badge b-grn" id="trk6" style="left:470px;top:1000px">ПО СВОИМ СЛЕДАМ <span class="em">👣</span></div>
+  </div>
+
+  <!-- S7: вопрос в комменты -->
+  <div class="scene" id="s7">
+    <div class="night"></div>
+    <div class="big" style="top:170px;font-size:84px;line-height:1.05" id="q7">ЧТО ДЕЛАТЬ<br>НА БЕРЕГУ<br>ПЕРВЫМ? <span class="em">🤔</span></div>
+    <div class="opt" id="o71" style="top:560px"><span class="em">🔥</span>ГРЕТЬСЯ<span class="k">A</span></div>
+    <div class="opt" id="o72" style="top:730px"><span class="em">📞</span>ЗВОНИТЬ 112<span class="k">B</span></div>
+    <div class="opt" id="o73" style="top:900px"><span class="em">🏃</span>БЕЖАТЬ ДОМОЙ<span class="k">C</span></div>
+    <div class="cmt" id="c71" style="left:120px;top:1080px">B, без вариантов</div>
+    <div class="cmt" id="c72" style="left:560px;top:1140px">снять мокрое!! <span class="em">🧥</span></div>
+  </div>
+
+  <!-- S8–S9: петля к первому кадру -->
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 50.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.9, 1.35], [3.9, 3.00], [6.3, 5.58], [7.6, 6.74], [10.9, 10.33], [12.6, 12.64], [14.8, 15.28], [16.9, 18.06], [18.7, 20.12], [20.1, 21.76], [22.3, 23.90], [25.1, 25.52], [27, 27.17], [29.8, 30.25], [33.6, 32.81], [34.8, 33.64], [40.1, 37.00], [41.3, 38.01], [44, 40.19], [46.6, 41.49], [48.4, 43.18], [50, 44.59], [50.3, 44.89]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.8 }, { id: "s2", s: 3.8, e: 10.8 }, { id: "s3", s: 10.8, e: 20 }, { id: "s4", s: 20, e: 25 },
+  { id: "s5", s: 25, e: 33.5 }, { id: "s6", s: 33.5, e: 40 }, { id: "s7", s: 40, e: 46.5 },
+  { id: "s8", s: 46.5, e: 50 }, { id: "s9", s: 50, e: 50.3 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [["1 — 10 — 1", "один, десять, один"]];
+const DROP = ["подписывайся"];
+const SHAKES = [1.5, 33.6];
+const FLASHES = [1.5];
+const clockText = (t) => (t >= 3.8 && t < 46.5 ? "ВЫЖИВИ #1 · ЛЁД" : null);
+const CAPS = [
+  [0.1, "Ты {r:провалился под лёд.}"], [1.9, "Вода — {b:ноль градусов.}"],
+  [3.9, "Первые секунды тело само"], [5.15, "делает {r:резкий вдох.}"], [6.3, "Это {r:холодовой шок.}"],
+  [7.6, "Главное сейчас — {y:не паниковать}"], [9.19, "и держать {y:голову над водой.}"],
+  [10.9, "Есть правило: {y:1 — 10 — 1.}"], [12.6, "{y:Одна минута,} чтобы восстановить дыхание."],
+  [14.8, "{y:Десять минут,} пока руки ещё слушаются."], [16.9, "И около {r:часа} до потери сознания."], [18.7, "Значит, {g:время есть.}"],
+  [20.1, "Развернись туда, {y:откуда пришёл} —"], [22.3, "там лёд тебя {g:уже держал.}"],
+  [25.1, "Положи руки и локти {y:на край.}"], [27, "Работай ногами, чтобы тело"], [28.49, "легло {y:горизонтально.}"],
+  [29.8, "И выползай на лёд животом,"], [32.12, "{y:как тюлень.}"],
+  [33.6, "{r:Не вставай!}"], [34.8, "Откатывайся от полыньи"], [36.75, "и ползи к берегу {g:по своим следам.}"],
+  [40.1, "А теперь вопрос:"], [41.3, "что ты сделаешь {y:первым делом}"], [43.11, "на берегу?"], [44, "{y:Пиши в комменты.}"],
+  [46.6, "А пока проверь {y:лёд под ногами.}"], [48.4, "{r:Слышишь этот треск?}"],
+  [50, ""],
+];
+const MUSIC = { bpm: 96, root: 55, parts: [[0, 10.8, "pulse", .8], [10.8, 20, "pad", .7], [20, 40, "drive", .6], [40, 46.5, "pad", .6], [46.5, 50.3, "pulse", .7]] };
+
+/* ---------- рисовка ---------- */
+const HERO = { coat: "#e8553d", coat2: "#b83a26", hat: "#2f6fd6", hat2: "#fff", scarf: "#ffd23f", gloves: "#2f6fd6" };
+// разрез: небо, дальний берег, вода; лёд рисуется отдельно
+function sideBg(p, horizon) {
+  let trees = ""; for (let i = 0; i < 16; i++) { const x = i * 72 + 20 * hash(i), h = 90 + 70 * hash(i + 5);
+    trees += `<path d="M${x} ${horizon - 4} L${x + 34} ${horizon - 4 - h} L${x + 68} ${horizon - 4}Z" fill="#1d4a3a"/>`; }
+  return `<defs><linearGradient id="${p}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fc4f0"/><stop offset="1" stop-color="#e3f4ff"/></linearGradient>
+    <linearGradient id="${p}wat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b6f8f"/><stop offset="1" stop-color="#06202e"/></linearGradient>
+    <linearGradient id="${p}ice" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4fbff"/><stop offset=".35" stop-color="#bfe6f7"/><stop offset="1" stop-color="#7cc3e0"/></linearGradient></defs>
+    <rect width="1080" height="${horizon}" fill="url(#${p}sky)"/><circle cx="190" cy="${horizon - 330}" r="60" fill="#fff6c8" opacity=".9"/>${trees}
+    <rect y="${horizon - 6}" width="1080" height="12" fill="#e9f5fb"/>
+    <rect y="${horizon + 20}" width="1080" height="${1920 - horizon}" fill="url(#${p}wat)"/>
+    ${[0, 1, 2, 3, 4, 5].map((i) => `<path d="M${-100 + i * 230} ${horizon + 300 + 160 * hash(i)} q60 -14 120 0" stroke="#3a9bbd" stroke-width="5" fill="none" opacity=".4"/>`).join("")}`;
+}
+const iceSlab = (p, x0, x1, y, th = 44, id = "") => `<g ${id ? `id="${id}"` : ""}><rect x="${x0}" y="${y}" width="${x1 - x0}" height="${th}" fill="url(#${p}ice)" stroke="#5aa9cc" stroke-width="4"/>
+  <rect x="${x0}" y="${y - 10}" width="${x1 - x0}" height="12" rx="4" fill="#fff"/></g>`;
+// передний слой воды (тело под водой видно сквозь неё)
+const waterFront = (p, y, x0 = 0, x1 = 1080) => `<rect x="${x0}" y="${y}" width="${x1 - x0}" height="${1920 - y}" fill="url(#${p}wat)" opacity=".82"/><path d="M${x0} ${y} H${x1}" stroke="#9fe3ff" stroke-width="5" opacity=".7"/>`;
+// вид сверху: лёд, полынья, берег, следы
+function topBg(p, hole = [540, 560]) {
+  let prints = ""; for (let i = 0; i < 9; i++) { const y = 1180 - i * 62, x = hole[0] + (i % 2 ? 16 : -16) - (8 - i) * 2;
+    prints += `<ellipse class="${p}pr" cx="${x}" cy="${y}" rx="13" ry="20" fill="#8ab8cf" opacity=".9"/>`; }
+  let cracks = ""; [[-1, -1], [1, -1], [0, -1.3], [-1.3, -.2], [1.3, -.3]].forEach(([dx, dy], i) =>
+    cracks += `<path d="M${hole[0] + dx * 130} ${hole[1] + dy * 90} l${dx * 90 + 20 * hash(i)} ${dy * 100} l${dx * 30} ${dy * 60}" stroke="#ff5a6a" stroke-width="6" fill="none" stroke-dasharray="14 10" class="${p}ck" opacity="0"/>`);
+  return `<rect width="1080" height="1920" fill="#cfeaf6"/>
+    ${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<path d="M${hash(i) * 1080} ${hash(i + 3) * 1200} l${120 + 80 * hash(i + 1)} ${30 * hash(i + 2)}" stroke="#a7d4e8" stroke-width="5"/>`).join("")}
+    <rect y="1220" width="1080" height="700" fill="#f2f7fa"/><path d="M0 1220 Q270 1190 540 1225 T1080 1215 V1250 H0Z" fill="#e2edf2"/>
+    ${[0, 1, 2, 3, 4, 5, 6].map((i) => `<g transform="translate(${80 + i * 150 + 30 * hash(i)} ${1300 + 60 * hash(i + 4)})"><circle r="56" fill="#1d5a40"/><circle r="34" fill="#2c7a55"/></g>`).join("")}
+    ${prints}${cracks}
+    <ellipse cx="${hole[0]}" cy="${hole[1]}" rx="150" ry="110" fill="#0c3a52" stroke="#e8f6ff" stroke-width="14"/>
+    <ellipse cx="${hole[0] - 30}" cy="${hole[1] - 30}" rx="60" ry="18" fill="#2a7aa0" opacity=".5"/>`;
+}
+// человек сверху: стоит в воде (плечи + голова) или лежит
+const topSwim = (id) => `<g id="${id}"><ellipse cx="-60" cy="10" rx="20" ry="44" fill="${HERO.coat}" class="armL"/><ellipse cx="60" cy="10" rx="20" ry="44" fill="${HERO.coat}" class="armR"/>
+  <ellipse rx="66" ry="40" fill="${HERO.coat}"/><circle r="38" fill="${HERO.hat}"/><circle cy="-6" r="12" fill="#fff"/><path d="M-10 -36 L0 -52 L10 -36" fill="${HERO.scarf}"/></g>`;
+const topLie = (id) => `<g id="${id}"><rect x="-26" y="40" width="22" height="110" rx="11" fill="#2d3a4f"/><rect x="4" y="40" width="22" height="110" rx="11" fill="#2d3a4f"/>
+  <rect x="-48" y="-50" width="96" height="110" rx="34" fill="${HERO.coat}"/><rect x="-82" y="-60" width="26" height="90" rx="13" fill="${HERO.coat}"/><rect x="56" y="-60" width="26" height="90" rx="13" fill="${HERO.coat}"/>
+  <circle cy="-82" r="38" fill="${HERO.hat}"/><circle cy="-92" r="12" fill="#fff"/></g>`;
+const puff = (id) => `<g id="${id}" opacity="0"><circle r="26" fill="#fff"/><circle cx="26" cy="-8" r="20" fill="#fff"/><circle cx="-22" cy="-6" r="18" fill="#fff"/></g>`;
+
+function build() {
+  // S1: широкий разрез, лёд по горизонту y=860
+  $("#a1").innerHTML = sideBg("a", 860) + `<g id="body1">${person("p1", HERO)}</g>` + waterFront("a", 882, 380, 700) +
+    iceSlab("a", 0, 380, 860) + iceSlab("a", 700, 1080, 860) +
+    `<g id="mid1">${iceSlab("a", 380, 540, 860)}</g><g id="mid1b">${iceSlab("a", 540, 700, 860)}</g>` +
+    `<path id="ck1" d="M400 858 L450 845 L490 862 L548 842 L600 860 L680 846" stroke="#173f55" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>` +
+    [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `<circle class="dr1" r="${8 + 10 * hash(i)}" fill="#bfeaff"/>`).join("");
+  // S2: крупный план, полынья 300..780
+  $("#a2").innerHTML = sideBg("b", 900) + `<g id="body2">${person("p2", HERO)}</g>` + waterFront("b", 922, 300, 780) +
+    iceSlab("b", 0, 300, 900, 56) + iceSlab("b", 780, 1080, 900, 56) + puff("bp1") + puff("bp2") +
+    `<path id="lvl2" d="M200 922 H880" stroke="#ffd23f" stroke-width="8" stroke-dasharray="26 16" opacity="0"/>` +
+    [0, 1, 2, 3, 4, 5].map((i) => `<circle class="bb2" r="${6 + 6 * hash(i)}" fill="none" stroke="#bfeaff" stroke-width="3"/>`).join("");
+  $("#a4").innerHTML = topBg("c") + topSwim("p4") + `<path id="arr4" d="M540 720 V1150" stroke="#ffd23f" stroke-width="22" stroke-linecap="round" marker-end="url(#ah4)" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    <defs><marker id="ah4" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ffd23f"/></marker></defs>
+    <rect id="glow4" x="470" y="660" width="140" height="560" rx="60" fill="#4dff8a" opacity="0"/>`;
+  // S5: край льда слева (x<420)
+  $("#a5").innerHTML = sideBg("d", 860) + `<g id="body5">${person("p5", HERO)}</g>` + waterFront("d", 884, 420, 1080) + iceSlab("d", 0, 420, 860, 50) +
+    [0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<circle class="sp5" r="${8 + 9 * hash(i + 2)}" fill="#bfeaff"/>`).join("");
+  $("#a6").innerHTML = topBg("e") + topLie("p6") + `<rect id="glow6" x="470" y="700" width="140" height="520" rx="60" fill="#4dff8a" opacity="0"/>` +
+    `<g id="ghost6" opacity="0"><circle cx="0" cy="-150" r="40" fill="#fff" opacity=".6"/><rect x="-40" y="-110" width="80" height="150" rx="30" fill="#fff" opacity=".6"/>
+     <path d="M-90 -200 L90 60 M90 -200 L-90 60" stroke="#ff3b47" stroke-width="22" stroke-linecap="round"/></g>`;
+}
+
+/* ---------- сцены ---------- */
+const UPD = {
+  s1(lt) {
+    $("#s1").style.transform = ""; $("#s1").style.filter = ""; $("#a1").style.transform = "";
+    const brk = 1.4, S = 1.9, wx = lerp(170, 540, easeOut(prog(lt, 0, 1.05)));
+    // падение: таз 746 → 1030, всплытие до 1010
+    const fall = easeInOut(prog(lt, brk, brk + .3)), bob = lt > brk + .3 ? Math.sin((lt - brk) * 5) * 8 * Math.exp(-(lt - brk - .3) * 1.5) : 0;
+    const hy = lerp(860 - 88 * S, 1180, fall) - 80 * prog(lt, brk + .3, brk + .9) + bob;
+    at("p1", wx, hy, S);
+    setPose("p1", lt < brk ? (lt < 1.05 ? walk(lt, 1, { face: "calm" }) : { la: 10, ra: 10, face: lt > 1.0 ? "worried" : "calm", look: 0 })
+      : { la: 140 + 30 * Math.sin(lt * 14), ra: 140 + 30 * Math.cos(lt * 13), ll: 20 * Math.sin(lt * 9), rl: 20 * Math.sin(lt * 9 + 2), face: "panic" });
+    $("#ck1").setAttribute("stroke-dashoffset", 1 - prog(lt, 1.0, 1.35));
+    const sink = easeInOut(prog(lt, brk, brk + .6));
+    $("#mid1").setAttribute("transform", `translate(${-20 * sink} ${140 * sink}) rotate(${-35 * sink} 460 880)`); $("#mid1").setAttribute("opacity", 1 - prog(lt, brk + .3, brk + .7));
+    $("#mid1b").setAttribute("transform", `translate(${20 * sink} ${160 * sink}) rotate(${40 * sink} 620 880)`); $("#mid1b").setAttribute("opacity", 1 - prog(lt, brk + .3, brk + .7));
+    $$(".dr1").forEach((d, i) => { const p = prog(lt, brk + .05, brk + .9), a = -Math.PI * (.15 + .7 * hash(i + 1)), v = 300 + 250 * hash(i + 4);
+      d.setAttribute("cx", 540 + Math.cos(a) * v * p); d.setAttribute("cy", 870 + Math.sin(a) * v * p + 900 * p * p); d.setAttribute("opacity", p > 0 && p < 1 ? 1 : 0); });
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(lt, 3.1, 3.4); hk.style.transform = `scale(${1 + .03 * Math.sin(lt * 7)})`;
+    if (lt > brk + .4) { const z = easeOut(prog(lt, brk + .4, brk + 1.2)); $("#a1").style.transformOrigin = "540px 1000px"; $("#a1").style.transform = `scale(${1 + .15 * z})`; }
+  },
+  s2(lt) {
+    const calm = lt > 3.8, S = 2.2, hy = 1160 + 6 * Math.sin(lt * 3);
+    at("p2", 540, hy, S);
+    setPose("p2", calm ? { la: 70 + 15 * Math.sin(lt * 4), ra: 70 + 15 * Math.cos(lt * 4), ll: 15 * Math.sin(lt * 4), rl: 15 * Math.cos(lt * 4), face: lt > 5.3 ? "focus" : "worried" }
+      : { la: 140 + 30 * Math.sin(lt * 12), ra: 140 + 30 * Math.cos(lt * 11), ll: 25 * Math.sin(lt * 10), rl: 25 * Math.cos(lt * 10), face: "panic", blink: lt > 1.1 && lt < 1.25 });
+    [["bp1", 1.2], ["bp2", 1.7]].forEach(([id, a]) => { const p = prog(lt, a, a + .9); at(id, 600 + 120 * p, 860 - 160 * p, .6 + 1.2 * p, p > 0 && p < 1 ? 1 - p : 0); });
+    $$(".bb2").forEach((b, i) => { const k = ((lt * .8 + hash(i)) % 1); b.setAttribute("cx", 420 + 240 * hash(i + 2)); b.setAttribute("cy", 1500 - 560 * k); b.setAttribute("opacity", calm ? 0 : .8 * (1 - k)); });
+    popIn("#shock2", lt, 2.5, -3, 3.7); popIn("#calm2", lt, 3.85, 2);
+    const h = $("#heart2"), bpm = calm ? 3.5 : 9; h.style.transform = `scale(${1 + .18 * Math.pow(Math.max(0, Math.sin(lt * bpm)), 8)})`; h.style.opacity = prog(lt, 1.8, 2.1);
+    popIn("#head2", lt, 5.35); $("#lvl2").setAttribute("opacity", prog(lt, 5.3, 5.5));
+  },
+  s3(lt) {
+    show($("#t3"), lt, 0.05);
+    popIn("#r31", lt, 1.75, -1); popIn("#r32", lt, 3.95, 1); popIn("#r33", lt, 6.05, -1);
+    const r = $("#r33"); if (lt > 6.4) r.style.transform += ` scale(${1 + .02 * Math.sin(lt * 10)})`;
+    popIn("#ok3", lt, 7.95);
+  },
+  s4(lt) {
+    const turn = easeInOut(prog(lt, .4, 1.4));
+    at("p4", 540, 560 + 4 * Math.sin(lt * 4), 1.15, 1, 180 * turn);
+    $$("#a4 .cck").forEach((c, i) => c.setAttribute("opacity", prog(lt, .2 + i * .1, .4 + i * .1)));
+    $("#arr4").setAttribute("stroke-dashoffset", 1 - easeOut(prog(lt, 1.0, 1.8)));
+    popIn("#thin4", lt, .5, 3); popIn("#back4", lt, 1.4, -3);
+    $("#glow4").setAttribute("opacity", .35 * prog(lt, 2.2, 2.6) * (.7 + .3 * Math.sin(lt * 6)));
+    popIn("#held4", lt, 2.3, 2);
+  },
+  s5(lt) {
+    // 0–1.9 локти на край; 1.9–4.7 ноги работают, тело ложится; 4.7–8.5 выползаешь на лёд
+    const lie = easeInOut(prog(lt, 1.9, 4.4)), out = easeInOut(prog(lt, 4.8, 7.6)), S = 1.9;
+    const x = lerp(lerp(600, 560, lie), 260, out), y = lerp(lerp(1130, 1010, lie), 860 - 72, out);
+    at("p5", x, y, S, 1, lerp(-15, -90, lie));
+    const kick = lt > 1.9 && lt < 7.4 ? Math.sin(lt * 16) * 28 : 0;
+    setPose("p5", { la: 165, ra: 165, ll: kick, rl: -kick, face: lt < 1.9 ? "worried" : "focus" });
+    $$(".sp5").forEach((d, i) => { const k = ((lt * 2.2 + hash(i)) % 1); const on = lt > 1.9 && lt < 6.5;
+      d.setAttribute("cx", lerp(700, 860, hash(i + 1)) + 60 * k * (hash(i) - .5)); d.setAttribute("cy", 884 - 70 * Math.sin(k * Math.PI)); d.setAttribute("opacity", on ? 1 - k : 0); });
+    popIn("#elb5", lt, .35, -2, 4.6); popIn("#kick5", lt, 2.1, 2, 4.6); popIn("#seal5", lt, 6.6, -3);
+  },
+  s6(lt) {
+    // лежишь у полыньи, откатываешься вдоль следов к берегу
+    const roll = easeInOut(prog(lt, 1.3, 5.6));
+    at("p6", 540 + 20 * Math.sin(roll * 18), lerp(560, 1060, roll), 1, 1, lt < 1.3 ? 180 : 180 + 0 * roll);
+    $("#p6").setAttribute("transform", `translate(${540 + 18 * Math.sin(roll * 20)} ${lerp(600, 1080, roll)}) rotate(180) scale(${1 - .08 * Math.abs(Math.sin(roll * 20))} 1)`);
+    const g = $("#ghost6"); g.setAttribute("transform", `translate(800 620) scale(${.6 + .4 * easeOut(prog(lt, .1, .4))})`); g.setAttribute("opacity", lt < 1.2 ? prog(lt, .1, .3) : 1 - prog(lt, 1.2, 1.5));
+    popIn("#no6", lt, .1, 0, 1.3);
+    $("#glow6").setAttribute("opacity", .3 * prog(lt, 2.8, 3.2));
+    popIn("#trk6", lt, 2.9, 3);
+  },
+  s7(lt) {
+    show($("#q7"), lt, .1);
+    popIn("#o71", lt, 1.25, -1); popIn("#o72", lt, 1.6, 1); popIn("#o73", lt, 1.95, -1);
+    popIn("#c71", lt, 4.2, -2); popIn("#c72", lt, 4.8, 3);
+  },
+  // петля: камера отъезжает к первому кадру
+  s8(lt) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0);
+    const z = easeInOut(prog(lt, 0, 2.8));
+    s1.style.transformOrigin = "540px 1000px"; s1.style.transform = `scale(${lerp(1.6, 1, z)})`; s1.style.filter = `brightness(${lerp(.7, 1, z)})`;
+    $("#hook1").style.opacity = prog(lt, 2.7, 3.3);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; UPD.s1(0); },
+};
+
+/* ---------- звук ---------- */
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.wind(a, 50, 1));
+  for (let t = 0.05; t < 1.05; t += .3) add(t, (a) => sfx.noise(a, .07, "bandpass", 1800, 1, .25, .005)); // хруст шагов
+  add(1.0, sfx.crack); add(1.3, sfx.crack); add(1.45, sfx.boom); add(1.5, sfx.splash); add(1.9, (a) => sfx.bubbles(a, 6));
+  add(4.9, (a) => sfx.breath(a, .5)); add(5.4, (a) => sfx.breath(a, .5)); add(6.3, sfx.whoosh);
+  for (let t = 6.4; t < 10.6; t += .45) add(t, (a) => sfx.heart(a, .8));
+  add(7.65, sfx.pop); add(9.15, sfx.ding);
+  [12.55, 14.75, 16.85].forEach((t) => add(t, sfx.pop)); for (let t = 17; t < 18.6; t += .5) add(t, sfx.tick); add(18.75, sfx.ok);
+  add(20.4, sfx.whoosh); add(20.5, sfx.pop); add(21.4, sfx.pop); add(22.3, sfx.ok);
+  add(25.35, sfx.pop); for (let t = 27; t < 29.6; t += .32) add(t, (a) => sfx.noise(a, .12, "lowpass", 1500, 1, .3, .01)); add(27.1, sfx.pop);
+  add(29.8, sfx.whoosh); add(31.6, sfx.ok);
+  add(33.6, sfx.no); add(33.6, sfx.boom); for (let t = 34.8; t < 39; t += .42) add(t, (a) => sfx.noise(a, .1, "lowpass", 500, 1, .35, .005)); add(36.5, sfx.ok);
+  [41.25, 41.6, 41.95].forEach((t) => add(t, sfx.pop)); [44.2, 44.8].forEach((t) => add(t, sfx.pop));
+  add(46.5, sfx.whooshDown); add(48.4, sfx.crack); add(49.3, (a) => sfx.riser(a, .7));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>
