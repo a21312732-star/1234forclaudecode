@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #4 — Гроза в поле</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#1a1d28}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 36px var(--head);display:block;margin-top:8px;padding:0 8px}
+.cnt{position:absolute;left:0;right:0;text-align:center;font:900 190px var(--mono);color:#fff;z-index:6;text-shadow:0 0 40px rgba(255,210,63,.6),6px 6px 0 #000}
+.opt{left:110px;right:110px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1">Гроза <b>в поле</b>? <span class="em">⚡</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg><div class="cnt" id="c2" style="top:420px"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg><div class="cnt" id="c6" style="top:330px;font-size:220px">?</div></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 40.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [40.3, 40.30]];
+const SCENES = [
+  { id: "s1", s: 0, e: 5 }, { id: "s2", s: 5, e: 11 }, { id: "s3", s: 11, e: 19 }, { id: "s4", s: 19, e: 25.5 },
+  { id: "s5", s: 25.5, e: 31 }, { id: "s6", s: 31, e: 37 }, { id: "s7", s: 37, e: 40 }, { id: "s8", s: 40, e: 40.3 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [1.0, 5.2, 16.0, 23.9, 32.2];
+const FLASHES = [1.0, 5.2, 16.0, 23.9, 32.2];
+const clockText = (t) => (t >= 5 && t < 37 ? "ВЫЖИВИ #4 · ГРОЗА" : null);
+const CAPS = [
+  [0.1, "Ты в поле, и {r:начинается гроза.}"], [2, "Если ты слышишь гром,"], [3.1, "молния {r:уже может ударить в тебя.}"],
+  [5.1, "Посчитай секунды между {y:вспышкой и громом}"], [7.6, "и {y:раздели на три:}"], [8.9, "это расстояние до грозы {y:в километрах.}"],
+  [11.1, "Беги {g:в здание}"], [12.2, "или в машину {g:с металлической крышей.}"], [14.3, "Кстати, в машине тебя спасают"], [15.9, "{r:не шины,} а {g:металлический кузов.}"],
+  [19.1, "Укрыться негде —"], [20.1, "уходи {y:с холма} и {y:подальше от воды.}"], [22.2, "Не стой {r:под одиноким деревом:}"], [23.9, "молния бьёт {r:в самое высокое.}"],
+  [25.6, "И {r:не ложись на землю,}"], [27.2, "а если вас несколько,"], [28.4, "{y:разойдитесь на несколько метров.}"],
+  [31.1, "А теперь вопрос:"], [32.2, "бьёт ли молния {y:дважды в одно место?}"], [34.5, "{y:Пиши в комменты.}"],
+  [37.1, "А пока {y:считай секунды после вспышки...}"],
+  [40, ""],
+];
+const MUSIC = { bpm: 92, root: 49, parts: [[0, 11, "pulse", .8], [11, 31, "drive", .55], [31, 37, "pad", .6], [37, 40.3, "pulse", .7]] };
+
+/* ---------- плашки: [сцена, id, класс, x|"c", y, html, появление, исчезновение, наклон, стиль] ---------- */
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 820, "СЕКУНДЫ ÷ 3 = КМ", 7.6, 99, -2, "font-size:58px"],
+  ["s3", "e3a", "tile", 170, 300, ["🏠", "ЗДАНИЕ"], 11.2, 14.2, -3],
+  ["s3", "e3b", "tile", 610, 300, ["🚗", "МАШИНА С КРЫШЕЙ"], 12.3, 14.2, 3],
+  ["s3", "e3c", "badge b-red", 90, 250, "❌ НЕ ШИНЫ", 15.9, 99, -3],
+  ["s3", "e3d", "badge b-grn", 470, 370, "✅ МЕТАЛЛ. КУЗОВ", 16.6, 99, 2],
+  ["s4", "e4a", "tile", 170, 260, ["⛰️", "ХОЛМ"], 20.2, 22.1, -3],
+  ["s4", "e4b", "tile", 610, 260, ["🌊", "ВОДА"], 20.9, 22.1, 3],
+  ["s4", "e4c", "badge b-red", "c", 260, "🌳 НЕ ПОД ДЕРЕВОМ", 22.2, 99, 0, "font-size:56px"],
+  ["s5", "e5a", "badge b-red", "c", 260, "🚫 НЕ ЛОЖИСЬ", 25.6, 27.1, 0, "font-size:60px"],
+  ["s5", "e5b", "badge b-yel", "c", 260, "↔ РАЗОЙДИТЕСЬ", 28.4, 99, 0, "font-size:60px"],
+  ["s6", "e6a", "opt", 0, 760, ["✅", "ДА, БЬЁТ", "A"], 33.0],
+  ["s6", "e6b", "opt", 0, 930, ["❌", "НЕТ, НИКОГДА", "B"], 33.4],
+];
+const W = 1080, H = 1920, GR = 1150;
+function storm(p, ground = GR) {
+  let cl = ""; for (let i = 0; i < 10; i++) cl += `<ellipse cx="${i * 130 + 50 * hash(i)}" cy="${150 + 90 * hash(i + 2)}" rx="${190 + 60 * hash(i + 1)}" ry="${100 + 30 * hash(i + 3)}" fill="${i % 2 ? "#2b3040" : "#363c50"}"/>`;
+  return `<defs><linearGradient id="${p}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151822"/><stop offset="1" stop-color="#4a5266"/></linearGradient></defs>
+    <rect width="${W}" height="${ground}" fill="url(#${p}sky)"/>${cl}<path d="M0 ${ground} Q270 ${ground - 70} 540 ${ground - 10} T${W} ${ground - 30} V${H} H0Z" fill="#3f6b3a"/>
+    <rect y="${ground + 10}" width="${W}" height="${H - ground}" fill="#2f5229"/><g id="${p}rain">${Array.from({ length: 110 }, () => `<path d="M0 0 l-14 50" stroke="#9fb6d6" stroke-width="3" opacity=".55"/>`).join("")}</g>`;
+}
+function updRain(id, t) { document.querySelectorAll(`#${id} path`).forEach((r, i) => { const y = ((hash(i + 2) * H + t * 1500) % H), x = ((hash(i + 4) * 1200 - t * 300) % 1200 + 1200) % 1200 - 40; r.setAttribute("transform", `translate(${x} ${y})`); }); }
+const bolt = (id, x, y0, y1) => { let d = `M${x} ${y0}`, cx = x; for (let i = 1; i <= 7; i++) { cx += (hash(i + x) - .5) * 120; d += ` L${cx} ${y0 + (y1 - y0) * i / 7}`; }
+  return `<path id="${id}" d="${d}" stroke="#fffbe0" stroke-width="13" fill="none" stroke-linejoin="round" opacity="0" style="filter:drop-shadow(0 0 20px #ffe97a)"/>`; };
+function car(id) {
+  return `<g id="${id}"><path d="M-260 -40 Q-262 -110 -200 -118 L-120 -124 Q-70 -200 20 -205 L110 -205 Q160 -200 200 -130 L240 -122 Q268 -116 266 -60 L262 -30 Q262 -10 240 -10 L-240 -10 Q-262 -10 -260 -40Z" fill="#3a7bd5" stroke="#173a6a" stroke-width="6"/>
+    <path d="M-100 -128 Q-60 -186 10 -188 L10 -128Z" fill="#5a7aa0"/><path d="M30 -188 L100 -188 Q140 -184 176 -128 L30 -128Z" fill="#5a7aa0"/>
+    <circle cx="-160" cy="-10" r="52" fill="#1d1d1d"/><circle cx="160" cy="-10" r="52" fill="#1d1d1d"/><circle cx="-160" cy="-10" r="22" fill="#888"/><circle cx="160" cy="-10" r="22" fill="#888"/>
+    <path id="${id}cur" d="M-200 -118 L-120 -124 Q-70 -200 20 -205 L110 -205 Q160 -200 200 -130 L240 -122 Q268 -116 266 -60 L262 -30 L240 -10 L250 40" stroke="#ffe74a" stroke-width="10" fill="none" stroke-dasharray="18 12" style="filter:drop-shadow(0 0 10px #ffe74a)"/>
+    <g id="${id}x"><path d="M-220 -50 L-100 30 M-100 -50 L-220 30 M100 -50 L220 30 M220 -50 L100 30" stroke="#ff3b47" stroke-width="16" stroke-linecap="round"/></g></g>`;
+}
+const HERO = { coat: "#ffb300", coat2: "#c78500", hat: "#5a3fd6", hat2: "#fff", pants: "#2d3a4f" };
+const HERO2 = { coat: "#4caf50", coat2: "#2e7d32", hat: "#ff5a5a", hat2: "#fff", pants: "#3b3f58" };
+const HERO3 = { coat: "#3a7bd5", coat2: "#24539a", hat: "#ff8a3d", hat2: "#fff" };
+
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k === "tile") html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = storm("r1") + bolt("b1", 260, 220, 1130) + person("p1", HERO);
+  $("#a2").innerHTML = storm("r2") + bolt("b2", 800, 220, 1120) + person("p2", HERO);
+  $("#a3").innerHTML = storm("r3") + `<g id="cg3" transform="translate(540 1180) scale(1.5)">${car("c3")}</g>` + bolt("b3", 560, 0, 880);
+  $("#a4").innerHTML = storm("r4") + `<g id="tr4" opacity="0"><rect x="680" y="760" width="50" height="380" fill="#4a2d1e"/><circle cx="705" cy="740" r="150" fill="#2f6b3c"/></g>` + bolt("b4", 720, 0, 600) + person("p4", HERO);
+  $("#a5").innerHTML = storm("r5") + person("p5a", HERO) + person("p5b", HERO2) + person("p5c", HERO3) +
+    `<g id="ar5" opacity="0"><path d="M300 1240 H450 M630 1240 H780" stroke="#ffd23f" stroke-width="10" stroke-dasharray="18 10"/></g>`;
+  $("#a6").innerHTML = storm("r6") + `<g transform="translate(540 1150)"><rect x="-80" y="-640" width="160" height="640" fill="#5a6070" stroke="#2a2e38" stroke-width="8"/>
+    ${Array.from({ length: 14 }, (_, i) => `<rect x="${-56 + (i % 2) * 70}" y="${-600 + Math.floor(i / 2) * 85}" width="42" height="50" fill="#ffe7a0" opacity=".7"/>`).join("")}<path d="M0 -640 V-720" stroke="#ccc" stroke-width="10"/></g>` + bolt("b6", 540, 0, 430);
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const P = (id, x, y, s, pose, r = 0, o = 1) => { at(id, x, y, s, o, r); setPose(id, pose); };
+const hip = (s) => GR - 88 * s;
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; updRain("r1rain", t);
+    $("#b1").setAttribute("opacity", pulse(t, 1.0, 1.3, .04));
+    P("p1", 540, hip(2), 2, { la: 20, ra: 20 + 110 * prog(t, 2.0, 2.4), face: t > 1.0 ? "worried" : "calm", look: t > 1.0 ? -1 : 0 });
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 4.3, 4.6); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+    if (t > 3.1) { const z = easeOut(prog(t, 3.1, 4.6)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${1 + .12 * z})`; }
+  },
+  s2(lt, t) {
+    updRain("r2rain", t); $("#b2").setAttribute("opacity", pulse(t, 5.2, 5.5, .04));
+    P("p2", 300, hip(1.4), 1.4, { la: 20, ra: 90, face: "focus" });
+    const c = $("#c2"), n = Math.min(9, Math.max(0, Math.floor((t - 5.3) / .25) + 1));
+    c.textContent = t < 5.3 ? "" : t < 8.9 ? `${n} сек` : "9 ÷ 3 = 3 км"; c.style.color = t > 8.9 ? "#ffd23f" : "#fff"; c.style.fontSize = t > 8.9 ? "130px" : "190px";
+  },
+  s3(lt, t) {
+    updRain("r3rain", t);
+    $("#cg3").setAttribute("opacity", prog(t, 14.2, 14.5)); $("#b3").setAttribute("opacity", pulse(t, 16.0, 16.35, .04));
+    $("#c3cur").setAttribute("stroke-dashoffset", -t * 120); $("#c3cur").setAttribute("opacity", t > 16.0 ? 1 : 0);
+    $("#c3x").setAttribute("opacity", t > 15.9 ? 1 : 0);
+  },
+  s4(lt, t) {
+    updRain("r4rain", t); $("#tr4").setAttribute("opacity", prog(t, 22.2, 22.5)); $("#b4").setAttribute("opacity", pulse(t, 23.9, 24.25, .04));
+    P("p4", 330, hip(1.5), 1.5, { la: 15, ra: 15, face: t > 23.9 ? "panic" : "worried", look: 1 }, 0, t > 22.2 ? 1 : 0);
+  },
+  s5(lt, t) {
+    updRain("r5rain", t);
+    const lying = t < 27.1, sp = easeInOut(prog(t, 28.4, 30.2));
+    if (lying) P("p5a", 540, GR - 60, 1.6, { la: 170, ra: 170, face: "worried" }, -90, .6);
+    else P("p5a", 540, hip(1.4), 1.4, { la: 20, ra: 20, face: "focus" });
+    P("p5b", lerp(420, 220, sp), hip(1.4), 1.4, { la: 20, ra: 20, face: "focus" }, 0, lying ? 0 : 1);
+    P("p5c", lerp(660, 860, sp), hip(1.4), 1.4, { la: 20, ra: 20, face: "focus" }, 0, lying ? 0 : 1);
+    $("#ar5").setAttribute("opacity", prog(t, 29.8, 30.2));
+  },
+  s6(lt, t) {
+    updRain("r6rain", t);
+    $("#b6").setAttribute("opacity", pulse(t, 32.2, 32.5, .04)); // один удар — ответ не подсказываем
+    $("#c6").textContent = "?"; $("#c6").style.transform = `scale(${1 + .08 * Math.sin(t * 6)})`;
+  },
+  s7(lt, t) { // петля к первому кадру
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0);
+    const z = easeInOut(prog(t, 37, 39.8));
+    $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.5, 1, z)})`; $("#a1").style.filter = `brightness(${lerp(.6, 1, z)})`;
+    $("#hook1").style.opacity = prog(t, 39.2, 39.8);
+  },
+  s8() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); $("#a1").style.filter = ""; },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+
+function SOUND(sfx, add) {
+  const thunder = (a, v = 1) => { sfx.noise(a, .15, "highpass", 2000, 1, .5 * v, .002); sfx.noise(a + .05, 2.5, "lowpass", 300, 1, .7 * v, .05, 60); sfx.osc("sine", 60, a, .01, .6 * v, 1.5, 30); };
+  add(0, (a) => sfx.noise(a, 40.3, "bandpass", 3000, .5, .12, .5)); // дождь
+  [[1.0, 1], [5.2, .9], [16.0, 1], [23.9, 1], [32.2, .9]].forEach(([t, v]) => add(t, (a) => thunder(a, v)));
+  for (let k = 0; k < 9; k++) add(5.3 + k * .25, sfx.tick); add(8.9, sfx.ding);
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(16.7, sfx.ok); add(37, sfx.whooshDown); add(39.3, (a) => sfx.riser(a, .7));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
