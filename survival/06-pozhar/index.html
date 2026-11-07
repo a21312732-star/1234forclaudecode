@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #6 — Пожар в квартире</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#1c1828}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 36px var(--head);display:block;margin-top:8px;padding:0 8px}
+.tile.x::after{content:"";position:absolute;inset:-10px;background:linear-gradient(45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%),linear-gradient(-45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%)}
+.opt{left:110px;right:110px}
+.phone{position:absolute;left:600px;top:420px;width:380px;height:640px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:110px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 32px var(--mono);margin-top:14px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:86px">Пожар <b>ночью</b>? <span class="em">🔥</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="phone" id="ph5"><div class="num">112</div><div class="st" id="st5">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="big" style="top:200px;font-size:84px;line-height:1.05" id="q7">ЧТО СХВАТИШЬ<br>ПЕРВЫМ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 44.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.4, 2.20], [3.8, 3.79], [6.1, 6.58], [8.6, 9.08], [10.6, 10.76], [14, 14.30], [17.1, 17.11], [20.6, 20.73], [24.1, 23.95], [32.1, 31.14], [35.1, 33.57], [37.8, 36.64], [41.1, 38.29], [42.3, 39.60], [44, 41.89], [44.3, 42.19]];
+const SCENES = [
+  { id: "s1", s: 0, e: 6 }, { id: "s2", s: 6, e: 10.5 }, { id: "s3", s: 10.5, e: 17 }, { id: "s4", s: 17, e: 24 },
+  { id: "s5", s: 24, e: 32 }, { id: "s6", s: 32, e: 35 }, { id: "s7", s: 35, e: 41 }, { id: "s8", s: 41, e: 44 }, { id: "s9", s: 44, e: 44.3 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [14.0];
+const FLASHES = [];
+const clockText = (t) => (t >= 6 && t < 41 ? "ВЫЖИВИ #6 · ПОЖАР" : null);
+const CAPS = [
+  [0.1, "Ты просыпаешься, а {r:в квартире дым.}"], [2.4, "Главное, что надо знать:"], [3.8, "убивает чаще всего {r:не огонь, а дым.}"],
+  [6.1, "Пригнись и {y:двигайся к выходу ползком:}"], [8.6, "{g:у пола воздух чище.}"],
+  [10.6, "Прежде чем открыть дверь,"], [11.94, "потрогай её {y:тыльной стороной ладони.}"], [14, "{r:Горячая — не открывай,}"], [15.72, "{r:за ней огонь.}"],
+  [17.1, "Выходишь — {y:закрывай за собой двери,}"], [19.15, "чтобы задержать пламя."], [20.6, "На лестнице {r:не садись в лифт,}"], [22.72, "{g:только пешком.}"],
+  [24.1, "Если выйти нельзя,"], [25.54, "{y:закрой дверь,}"], [26.6, "заткни щели {y:мокрыми полотенцами,}"], [29.11, "иди к окну"], [29.94, "и звони {g:сто двенадцать.}"],
+  [32.1, "И {r:никогда не возвращайся за вещами.}"],
+  [35.1, "А что ты схватишь первым,"], [36.52, "если начнётся пожар?"], [37.8, "{y:Пиши в комменты.}"],
+  [41.1, "А пока принюхайся:"], [42.3, "ты точно {r:не чувствуешь запах дыма...}"],
+  [44, ""],
+];
+const MUSIC = { bpm: 96, root: 46, parts: [[0, 10.5, "pulse", .8], [10.5, 17, "pad", .7], [17, 32, "drive", .5], [32, 41, "pad", .6], [41, 44.3, "pulse", .7]] };
+
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 330, "☠️ ДЫМ ОПАСНЕЕ ОГНЯ", 3.8, 99, -2, "font-size:54px"],
+  ["s2", "e2a", "badge b-grn", 600, 1060, "⬇ У ПОЛА ЧИЩЕ", 8.6, 99, 2],
+  ["s3", "e3a", "badge b-yel", 70, 200, "✋ ТЫЛЬНОЙ СТОРОНОЙ", 11.9, 13.9, -2],
+  ["s3", "e3b", "badge b-red", 70, 200, "🔥 ГОРЯЧАЯ — НЕ ОТКРЫВАЙ", 14.0, 99, -2, "font-size:42px"],
+  ["s4", "e4a", "badge b-yel", 70, 200, "🚪 ЗАКРОЙ ДВЕРЬ", 17.2, 99, -2],
+  ["s4", "e4b", "tile x", 150, 520, ["🛗", "ЛИФТ"], 20.6, 99, -3],
+  ["s4", "e4c", "tile", 630, 520, ["🚶", "ЛЕСТНИЦА"], 22.3, 99, 3],
+  ["s5", "e5a", "badge b-yel", 70, 200, "🚪 ЗАКРОЙ ДВЕРЬ", 25.2, 99, -2],
+  ["s5", "e5b", "badge b-blu", 70, 320, "🧻 ЩЕЛИ — МОКРЫМ ПОЛОТЕНЦЕМ", 26.2, 99, 2, "font-size:38px"],
+  ["s6", "e6a", "tile x", 90, 420, ["💻", "НОУТБУК"], 32.3, 99, -3],
+  ["s6", "e6b", "tile x", 690, 420, ["👜", "СУМКА"], 32.6, 99, 3],
+  ["s6", "e6c", "badge b-red", "c", 820, "🚫 НЕ ВОЗВРАЩАЙСЯ", 32.9, 99, 0, "font-size:58px"],
+  ["s7", "e7a", "opt", 0, 560, ["📱", "ТЕЛЕФОН", "A"], 35.4],
+  ["s7", "e7b", "opt", 0, 730, ["🐱", "КОТА", "B"], 35.8],
+  ["s7", "e7c", "opt", 0, 900, ["📄", "ДОКУМЕНТЫ", "C"], 36.2],
+];
+const W = 1080, H = 1920, FL = 1150, CEIL = 280;
+const HERO = { coat: "#5b6ee1", coat2: "#3c4cb0", hat: "#5b6ee1", hair: "#3b2a1e", pants: "#2d3a4f" };
+const HERO_P = { coat: "#5b6ee1", coat2: "#3c4cb0", pants: "#2d3a4f" }; // пижама, без шапки
+// комната в разрезе: окно слева, кровать, дверь справа, дым под потолком
+function room(p, opt = {}) {
+  let stars = ""; for (let i = 0; i < 12; i++) stars += `<circle cx="${100 + 220 * hash(i)}" cy="${560 + 300 * hash(i + 3)}" r="3" fill="#fff"/>`;
+  return `<defs><linearGradient id="${p}wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2640"/><stop offset="1" stop-color="#3d3756"/></linearGradient>
+      <linearGradient id="${p}smk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4d57"/><stop offset="1" stop-color="#7a7e8a"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#${p}wall)"/>
+    <rect x="80" y="${CEIL + 240}" width="260" height="380" fill="#0d1530" stroke="#c9b48a" stroke-width="14"/>${stars}<path d="M210 ${CEIL + 240} V${CEIL + 620} M80 ${CEIL + 430} H340" stroke="#c9b48a" stroke-width="10"/>
+    <g id="${p}win" opacity="0"><rect x="80" y="${CEIL + 240}" width="260" height="380" fill="#25325c"/></g>
+    <rect x="800" y="${FL - 470}" width="210" height="470" fill="#7a4e2c" stroke="#3a2412" stroke-width="10"/><circle cx="830" cy="${FL - 230}" r="13" fill="#e8c26a" stroke="#3a2412" stroke-width="4"/>
+    <rect id="${p}glow" x="800" y="${FL - 10}" width="210" height="14" fill="#ff7a1a" opacity="0" style="filter:drop-shadow(0 0 14px #ff7a1a)"/>
+    <rect id="${p}towel" x="790" y="${FL - 34}" width="230" height="34" rx="8" fill="#4dbbff" stroke="#1d5a88" stroke-width="5" opacity="0"/>
+    <rect y="${FL}" width="${W}" height="${H - FL}" fill="#5a4030"/>${Array.from({ length: 8 }, (_, i) => `<path d="M0 ${FL + 40 + i * 80} H${W}" stroke="#4a3426" stroke-width="5"/>`).join("")}
+    <rect y="${FL - 18}" width="${W}" height="20" fill="#2a2234"/>
+    ${opt.bed ? `<g><rect x="110" y="${FL - 150}" width="470" height="110" rx="20" fill="#8a6a4a" stroke="#3a2412" stroke-width="8"/><rect x="120" y="${FL - 190}" width="450" height="60" rx="24" fill="#e9e4f2"/>
+      <rect x="130" y="${FL - 230}" width="130" height="60" rx="26" fill="#fff" stroke="#bbb" stroke-width="4"/><rect x="100" y="${FL - 200}" width="24" height="200" fill="#6a4a2a"/></g>` : ""}`;
+}
+const smoke = (id) => `<path id="${id}" fill="#7a7e8a" opacity=".88"/>`;
+function updSmoke(id, t, depth) { // волнистый нижний край дыма на глубине depth от потолка
+  let d = `M0 0 H${W} V${CEIL + depth}`; for (let x = W; x >= 0; x -= 60) d += ` L${x} ${CEIL + depth + 22 * Math.sin(x * .02 + t * 2)}`; d += " Z";
+  $("#" + id).setAttribute("d", d);
+}
+const blanket = (id) => `<path id="${id}" d="M260 ${FL - 200} H570 V${FL - 120} H260Z" fill="#c0392b" stroke="#7a1f14" stroke-width="6"/>`;
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k.startsWith("tile")) html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = room("r1", { bed: true }) + person("p1", HERO_P) + blanket("bl1") + smoke("sm1");
+  $("#a2").innerHTML = room("r2") + person("p2", HERO_P) + smoke("sm2") + `<rect id="air2" y="${FL - 220}" width="${W}" height="200" fill="#4dff8a" opacity="0"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2b2640"/><rect id="door3" x="240" y="200" width="620" height="1000" fill="#7a4e2c" stroke="#3a2412" stroke-width="14"/>
+    <circle cx="320" cy="720" r="26" fill="#e8c26a" stroke="#3a2412" stroke-width="6"/><rect id="hot3" x="240" y="200" width="620" height="1000" fill="#ff4a1a" opacity="0"/>
+    <g id="hw3" opacity="0">${[0, 1, 2, 3].map((i) => `<path d="M${330 + i * 130} 1080 q20 -40 0 -80 q-20 -40 0 -80 q20 -40 0 -80" stroke="#ffb36a" stroke-width="10" fill="none"/>`).join("")}</g>
+    <rect id="gap3" x="240" y="1190" width="620" height="18" fill="#ff7a1a" opacity="0" style="filter:drop-shadow(0 0 20px #ff7a1a)"/>
+    <g id="hand3"><rect x="-300" y="-40" width="300" height="80" rx="40" fill="${HERO_P.coat}" stroke="#2a2a55" stroke-width="6"/><ellipse cx="20" cy="0" rx="60" ry="46" fill="#f4c7a1" stroke="#7a5a3a" stroke-width="5"/></g>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#3d4256"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#4a4f60"/>
+    <rect x="60" y="${FL - 470}" width="210" height="470" fill="#2a2234"/><g id="dr4"><rect x="60" y="${FL - 470}" width="210" height="470" fill="#7a4e2c" stroke="#3a2412" stroke-width="10"/></g>` + smoke("sm4") + person("p4", HERO_P);
+  $("#a5").innerHTML = room("r5") + person("p5", HERO_P) + smoke("sm5");
+  $("#a6").innerHTML = room("r6") + smoke("sm6");
+  $("#a7").innerHTML = room("r7") + smoke("sm7");
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const P = (id, x, y, s, pose, r = 0, o = 1) => { at(id, x, y, s, o, r); setPose(id, pose); };
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; updSmoke("sm1", t, lerp(40, 420, prog(t, 0, 6)));
+    const up = easeInOut(prog(t, 1.0, 1.8));
+    P("p1", lerp(330, 380, up), lerp(FL - 215, FL - 250, up), 1.15, { la: 20, ra: 20, face: t < 0.8 ? "calm" : "panic", blink: t < 0.8, look: t > 2 ? 1 : 0 }, lerp(-90, -10, up));
+    $("#bl1").setAttribute("opacity", 1 - .3 * up);
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 3.4, 3.7); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    updSmoke("sm2", t, 560 + 20 * Math.sin(t)); const k = prog(t, 6.2, 10.4), w = Math.sin(t * 9);
+    P("p2", lerp(200, 720, k), FL - 62, 1.15, { la: 160 + 25 * w, ra: 160 - 25 * w, ll: 40 + 25 * w, rl: 40 - 25 * w, face: "focus", tilt: -20 }, 78);
+    $("#air2").setAttribute("opacity", t > 8.6 ? .1 + .04 * Math.sin(t * 4) : 0);
+  },
+  s3(lt, t) {
+    const touch = easeOut(prog(t, 11.9, 12.6)); $("#hand3").setAttribute("transform", `translate(${lerp(-100, 300, touch)} 760)`);
+    const hot = prog(t, 13.3, 14.0); $("#hot3").setAttribute("opacity", .45 * hot); $("#hw3").setAttribute("opacity", hot * (.6 + .4 * Math.sin(t * 6)));
+    $("#hw3").setAttribute("transform", `translate(0 ${-30 * ((t * 1.2) % 1)})`);
+    if (t > 14.0) $("#hand3").setAttribute("transform", `translate(${lerp(300, -60, easeOut(prog(t, 14.0, 14.4)))} 760)`);
+    $("#gap3").setAttribute("opacity", t > 15.6 ? .7 + .3 * Math.sin(t * 9) : 0);
+  },
+  s4(lt, t) {
+    updSmoke("sm4", t, 300); const k = easeInOut(prog(t, 17.2, 19.0));
+    P("p4", lerp(170, 640, k), FL - 88 * 1.1 * .85, 1.1, { ...walkCr(t, k), face: "focus" }, 12);
+    const cl = easeInOut(prog(t, 18.8, 19.6)); $("#dr4").setAttribute("transform", `translate(${60 + 210 * (1 - cl) * 0} 0)`);
+    $("#dr4").setAttribute("opacity", cl); $("#dr4").setAttribute("transform", `translate(${(1 - cl) * 165} 0) scale(${Math.max(.05, cl)} 1)`);
+  },
+  s5(lt, t) {
+    updSmoke("sm5", t, 520);
+    $("#r5towel").setAttribute("opacity", prog(t, 26.2, 26.6));
+    const go = easeInOut(prog(t, 28.1, 29.2));
+    P("p5", lerp(640, 300, go), FL - 88 * 1.2, 1.2, go > 0 && go < 1 ? walkCr(t, 1) : { la: t > 29.2 ? 150 + 20 * Math.sin(t * 8) : 20, ra: 30, face: "focus", look: -1 });
+    $("#r5win").setAttribute("opacity", prog(t, 29.0, 29.3));
+    const ph = $("#ph5"); show(ph, t, 29.1, .35, 60); if (t < 29.1) ph.style.opacity = 0; $("#st5").textContent = t > 30.6 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3);
+  },
+  s6(lt, t) { updSmoke("sm6", t, 500); },
+  s7(lt, t) { updSmoke("sm7", t, 260); show($("#q7"), t, 35.2); },
+  s8(lt, t) { // петля к первому кадру
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0);
+    const z = easeInOut(prog(t, 41, 43.8)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.4, 1, z)})`;
+    $("#a1").style.filter = `brightness(${lerp(.6, 1, z)})`; $("#hook1").style.opacity = prog(t, 43.3, 43.9);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0); $("#a1").style.filter = ""; },
+};
+const walkCr = (t, k) => { const w = Math.sin(t * 8); return { la: 40 + 20 * w, ra: 40 - 20 * w, ll: 22 * w, rl: -22 * w, sq: .85 }; };
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.fire(a, 44.3)); add(0.1, (a) => sfx.noise(a, 44, "lowpass", 300, 1, .08, 1));
+  add(0.8, sfx.boom); add(1.2, (a) => sfx.breath(a, .6)); for (let t = 2.4; t < 5.8; t += .5) add(t, (a) => sfx.heart(a, .7));
+  for (let t = 6.3; t < 10.3; t += .35) add(t, (a) => sfx.noise(a, .1, "lowpass", 600, 1, .25, .01));
+  add(12.5, (a) => sfx.noise(a, .1, "lowpass", 500, 1, .4, .005)); add(14.0, sfx.no); add(14.0, sfx.boom);
+  add(19.4, (a) => sfx.noise(a, .2, "lowpass", 400, 1, .6, .005)); // хлопок двери
+  for (let t = 17.3; t < 19; t += .38) add(t, (a) => sfx.noise(a, .08, "bandpass", 900, 1, .2, .005));
+  add(29.1, sfx.whoosh); for (let t = 29.4; t < 30.6; t += .4) add(t, sfx.beep); add(30.6, sfx.ok);
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(41, sfx.whooshDown); add(43.3, (a) => sfx.riser(a, .6));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
