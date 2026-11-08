@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #8 — Клещ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#2f5a3a}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 34px var(--head);display:block;margin-top:8px;padding:0 8px}
+.opt{left:110px;right:110px}
+#stamp1{position:absolute;left:0;right:0;top:520px;text-align:center;z-index:8}
+#stamp1 span{display:inline-block;font:900 200px/1 var(--head);color:var(--red);border:18px solid var(--red);padding:0 36px;border-radius:30px;background:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">Нашёл <b>клеща</b>? <span class="em">😨</span></div><div id="stamp1"><span>МИФ</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="big" style="top:200px;font-size:84px;line-height:1.05" id="q7">СНИМАЛ<br>С СЕБЯ КЛЕЩА? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 38.4;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.55, 1.55], [3.15, 3.15], [3.9, 4.05], [8.79, 9.09], [10.12, 10.42], [14.78, 15.23], [15.88, 16.33], [18.1, 18.70], [23.59, 24.19], [26.24, 26.99], [28.39, 29.14], [31.32, 32.07], [32.46, 33.36], [35.78, 36.83], [38.1, 39.17], [38.4, 39.47]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.9 }, { id: "s2", s: 3.9, e: 8.79 }, { id: "s3", s: 8.79, e: 14.78 }, { id: "s4", s: 14.78, e: 18.1 },
+  { id: "s5", s: 18.1, e: 26.24 }, { id: "s6", s: 26.24, e: 32.46 }, { id: "s7", s: 32.46, e: 35.78 }, { id: "s8", s: 35.78, e: 38.1 }, { id: "s9", s: 38.1, e: 38.4 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [3.15];
+const FLASHES = [];
+const clockText = (t) => (t >= 3.9 && t < 35.78 ? "ВЫЖИВИ #8 · КЛЕЩ" : null);
+const CAPS = [
+  [0.1, "Нашёл на себе клеща?"],
+  [1.55, "Только {r:не мажь его маслом} —"],
+  [3.15, "{r:это миф.}"],
+  [3.9, "Ты просто теряешь время,"],
+  [5.39, "а чем дольше клещ в коже,"],
+  [6.95, "{r:тем выше риск заразиться.}"],
+  [8.79, "Вытащи его сразу:"],
+  [10.12, "{y:пинцетом или ниткой}"],
+  [11.27, "захвати {y:как можно ближе к коже}"],
+  [13.05, "и {y:выкручивай, не дёргая.}"],
+  [14.78, "{r:Не раздави его:}"],
+  [15.88, "содержимое клеща может быть заразным."],
+  [18.1, "Место укуса {g:обработай антисептиком,}"],
+  [20.36, "а клеща {y:положи в баночку}"],
+  [21.93, "и отнеси {g:в лабораторию:}"],
+  [23.59, "его проверят на {y:энцефалит и боррелиоз.}"],
+  [26.24, "И {y:в течение месяца} следи за собой:"],
+  [28.39, "{r:температура или красное кольцо} вокруг укуса —"],
+  [31.32, "{g:сразу к врачу.}"],
+  [32.46, "Пиши в комменты: {y:ты когда-нибудь снимал с себя клеща?}"],
+  [35.78, "А пока {y:проверь кожу за ушами...}"],
+  [38.1, ""]
+];
+const MUSIC = { bpm: 100, root: 52, parts: [[0, 8.79, "pulse", .8], [8.79, 32.46, "drive", .5], [32.46, 35.78, "pad", .6], [35.78, 38.4, "pulse", .7]] };
+
+const E = [
+  ["s2", "e2a", "badge b-red", "c", 1080, "⬆ РИСК ЗАРАЗИТЬСЯ", 7.04, 99, -2, "font-size:54px"],
+  ["s3", "e3a", "badge b-yel", 70, 200, "🧵 ИЛИ НИТКОЙ", 10.12, 99, -2],
+  ["s3", "e3b", "badge b-yel", 70, 320, "📏 БЛИЖЕ К КОЖЕ", 11.31, 99, 2],
+  ["s3", "e3c", "badge b-grn", 70, 440, "🔄 ВЫКРУЧИВАЙ", 13.15, 99, -2],
+  ["s4", "e4a", "badge b-red", "c", 260, "❌ НЕ ДАВИ", 14.8, 99, 0, "font-size:66px"],
+  ["s5", "e5a", "badge b-grn", 70, 200, "🧴 АНТИСЕПТИК", 18.1, 99, -2],
+  ["s5", "e5b", "tile", 610, 520, ["🧪", "ЛАБОРАТОРИЯ"], 21.93, 99, 3],
+  ["s5", "e5c", "badge b-wht", "c", 1080, "ЭНЦЕФАЛИТ · БОРРЕЛИОЗ", 23.59, 99, -2, "font-size:44px"],
+  ["s6", "e6a", "tile", 660, 560, ["🌡️", "ТЕМПЕРАТУРА"], 28.39, 99, 3],
+  ["s6", "e6b", "badge b-grn", "c", 1080, "🩺 СРАЗУ К ВРАЧУ", 31.32, 99, -2, "font-size:58px"],
+  ["s7", "e7a", "opt", 0, 600, ["✅", "ДА, БЫЛО", "A"], 32.9],
+  ["s7", "e7b", "opt", 0, 770, ["🍀", "НИ РАЗУ", "B"], 33.3],
+];
+const W = 1080, H = 1920;
+// кожа крупным планом (рука), клещ, инструменты
+const skin = (p) => `<defs><radialGradient id="${p}sk" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#ffd9bf"/><stop offset="1" stop-color="#e8a888"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" fill="#2f5a3a"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${hash(i) * W} ${hash(i + 4) * H} q20 -60 40 0 q20 -80 40 0" fill="#3d7a4a"/>`).join("")}
+  <path d="M-100 520 Q540 380 1180 560 L1180 1250 Q540 1380 -100 1220Z" fill="url(#${p}sk)" stroke="#b77a5a" stroke-width="8"/>
+  ${Array.from({ length: 18 }, (_, i) => `<path d="M${100 + 50 * i} ${700 + 380 * hash(i + 7)} l6 -18" stroke="#c9967a" stroke-width="3"/>`).join("")}`;
+const tick = (id) => `<g id="${id}"><g class="lg">${[-1, 1].map((sd) => [0, 1, 2, 3].map((k) => `<path d="M${sd * 18} ${-14 + k * 12} q${sd * 30} ${-6 + k * 4} ${sd * 46} ${-14 + k * 14}" stroke="#2a160c" stroke-width="7" fill="none" stroke-linecap="round"/>`).join("")).join("")}</g>
+  <ellipse cy="10" rx="30" ry="40" fill="#5a2e14" stroke="#2a160c" stroke-width="5"/><ellipse cy="-6" rx="22" ry="20" fill="#2a160c"/><path d="M-8 -36 L0 -50 L8 -36Z" fill="#2a160c"/></g>`;
+const oil = (id) => `<g id="${id}"><rect x="-60" y="-160" width="120" height="220" rx="30" fill="#f2c94c" stroke="#7a5a10" stroke-width="7"/><rect x="-24" y="-200" width="48" height="50" fill="#7a5a10"/>
+  <text y="-30" font-size="44" text-anchor="middle" fill="#7a5a10">МАСЛО</text></g>`;
+const tweezers = (id) => `<g id="${id}"><path d="M-14 0 L-60 -520 L-30 -520 L0 -20Z" fill="#c8d0d8" stroke="#55606a" stroke-width="6"/><path d="M14 0 L60 -520 L30 -520 L0 -20Z" fill="#dfe6ee" stroke="#55606a" stroke-width="6"/></g>`;
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k.startsWith("tile")) html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = skin("k1") + tick("t1") + `<g id="o1">${oil("oil1")}<g id="drip1">${[0, 1, 2].map(() => `<ellipse rx="10" ry="16" fill="#f2c94c" stroke="#7a5a10" stroke-width="3"/>`).join("")}</g></g>`;
+  $("#a2").innerHTML = skin("k2") + tick("t2") + `<g transform="translate(540 1500)"><rect x="-380" y="-40" width="760" height="80" rx="40" fill="#1d2a20" stroke="#000" stroke-width="6"/><rect id="rk2" x="-372" y="-32" width="0" height="64" rx="32" fill="#ff3b47"/></g>
+    <g id="clk2" transform="translate(540 330)"><circle r="150" fill="#fff" stroke="#000" stroke-width="10"/><path id="hm2" d="M0 0 V-110" stroke="#000" stroke-width="12" stroke-linecap="round"/><path id="hh2" d="M0 0 V-70" stroke="#ff3b47" stroke-width="16" stroke-linecap="round"/><circle r="14"/></g>`;
+  $("#a3").innerHTML = skin("k3") + tick("t3") + tweezers("tw3") + `<g id="rot3" opacity="0"><path d="M450 760 A120 60 0 1 1 630 760" stroke="#4dff8a" stroke-width="12" fill="none"/><path d="M610 730 L640 770 L590 780Z" fill="#4dff8a"/></g>`;
+  $("#a4").innerHTML = skin("k4") + tick("t4") + `<g id="fg4"><rect x="-70" y="-600" width="140" height="600" rx="70" fill="#ffcfb0" stroke="#b77a5a" stroke-width="8"/><ellipse cy="-30" rx="46" ry="40" fill="#fff1e6" opacity=".7"/></g>
+    <g id="x4"><path d="M330 600 L750 1100 M750 600 L330 1100" stroke="#ff3b47" stroke-width="30" stroke-linecap="round"/></g>`;
+  $("#a5").innerHTML = skin("k5") + `<circle id="bt5" cx="540" cy="900" r="14" fill="#c0392b"/><circle id="as5" cx="540" cy="900" r="60" fill="#4dff8a" opacity="0"/>
+    <g id="jar5" transform="translate(280 700)"><rect x="-120" y="-150" width="240" height="300" rx="30" fill="#d8f0ff" fill-opacity=".6" stroke="#5a8aa8" stroke-width="8"/><rect x="-130" y="-190" width="260" height="50" rx="12" fill="#ff8a3d" stroke="#7a3a10" stroke-width="6"/>
+      <g transform="translate(0 40) scale(.9)">${tick("t5")}</g></g>`;
+  $("#a6").innerHTML = skin("k6") + `<circle cx="300" cy="900" r="14" fill="#c0392b"/><circle id="ring6" cx="300" cy="900" r="110" fill="none" stroke="#e8424f" stroke-width="26" opacity="0"/>
+    <g transform="translate(540 330)"><rect x="-200" y="-150" width="400" height="300" rx="30" fill="#fff" stroke="#000" stroke-width="8"/><rect x="-200" y="-150" width="400" height="80" rx="30" fill="#ff3b47"/>
+      <text id="cal6" y="80" font-size="130" text-anchor="middle" fill="#111">1</text><text y="-92" font-size="44" text-anchor="middle" fill="#fff">ДЕНЬ</text></g>`;
+  $("#a7").innerHTML = skin("k7");
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const crawl = (id, x, y, t, r = -20, s = 2.2) => { at(id, x, y, s, 1, r); $(`#${id} .lg`).setAttribute("transform", `skewX(${8 * Math.sin(t * 14)})`); };
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = "";
+    crawl("t1", lerp(380, 560, prog(t, 0, 3.9)), lerp(1000, 880, prog(t, 0, 3.9)), t);
+    const pour = easeOut(prog(t, 1.55, 2.0)); at("o1", lerp(1000, 760, pour), lerp(300, 560, pour), 1, t > 1.55 ? 1 : 0, lerp(0, -120, pour));
+    $$("#drip1 ellipse").forEach((d, i) => { const k = ((t - 1.9) * 1.6 + i / 3) % 1; d.setAttribute("cx", -60 - 40 * k); d.setAttribute("cy", -200 - 10 * i); d.setAttribute("opacity", t > 1.9 && t < 3.15 ? 1 : 0);
+      d.setAttribute("transform", `translate(${-200 * k} ${-10 + 300 * k * k})`); });
+    const st = $("#stamp1"), sp = prog(t, 3.15, 3.35); st.style.opacity = sp > 0 ? 1 : 0; st.style.transform = `rotate(-12deg) scale(${lerp(3, 1, easeOut(sp))})`;
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 3.0, 3.3); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    crawl("t2", 540, 880, t, -10);
+    $("#hm2").setAttribute("transform", `rotate(${t * 720})`); $("#hh2").setAttribute("transform", `rotate(${t * 60})`);
+    $("#rk2").setAttribute("width", 744 * easeInOut(prog(t, 5.4, 8.6)));
+  },
+  s3(lt, t) {
+    const down = easeOut(prog(t, 10.12, 11.0)), grip = prog(t, 11.31, 11.6), turn = prog(t, 13.15, 14.0), lift = easeIn(prog(t, 14.0, 14.7));
+    crawl("t3", 540, 880 - 300 * lift, t * (1 - grip), -10 + 360 * turn * 2, 2.2);
+    at("tw3", 540, lerp(400, 860, down) - 300 * lift, 1, t > 10.12 ? 1 : 0, 360 * turn * 2 * 0);
+    $("#tw3").setAttribute("transform", `translate(540 ${lerp(400, 860, down) - 300 * lift}) rotate(${40 * Math.sin(turn * Math.PI * 4)}) scale(${1 - .1 * grip} 1)`);
+    $("#rot3").setAttribute("opacity", t > 13.15 && t < 14.6 ? 1 : 0);
+  },
+  s4(lt, t) {
+    crawl("t4", 540, 880, t, -10); const pr = easeInOut(prog(t, 14.9, 15.6));
+    at("fg4", 540, lerp(500, 860, pr), 1); $("#x4").setAttribute("opacity", t > 15.4 ? 1 : 0);
+  },
+  s5(lt, t) {
+    $("#as5").setAttribute("opacity", t > 18.2 && t < 20.3 ? .5 + .2 * Math.sin(t * 6) : 0);
+    $("#jar5").setAttribute("opacity", prog(t, 20.36, 20.7)); $("#jar5").setAttribute("transform", `translate(280 ${lerp(500, 700, easeOut(prog(t, 20.36, 20.9)))})`);
+  },
+  s6(lt, t) {
+    $("#cal6").textContent = Math.max(1, Math.min(30, Math.floor((t - 26.3) * 14) + 1));
+    $("#ring6").setAttribute("opacity", t > 28.39 ? .7 + .3 * Math.sin(t * 5) : 0);
+  },
+  s7() {},
+  s8(lt, t) { // петля к первому кадру
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0);
+    const z = easeInOut(prog(t, 35.9, 37.9)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.5, 1, z)})`;
+    $("#hook1").style.opacity = prog(t, 37.4, 38.0);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const easeIn = (x) => x * x;
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(0, (a) => { for (let k = 0; k < 38; k += 2.3) sfx.noise(a + k, 1.8, "bandpass", 2400, 2, .03, .8); }); // лес
+  for (let t = .1; t < 3.9; t += .25) add(t, (a) => sfx.noise(a, .02, "highpass", 5000, 1, .05, .002)); // лапки
+  add(1.6, (a) => sfx.noise(a, 1.2, "lowpass", 700, 1, .2, .1)); add(3.15, sfx.boom); add(3.15, sfx.no);
+  for (let t = 4; t < 8.7; t += .5) add(t, sfx.tick); add(7.04, sfx.no);
+  add(10.2, sfx.whoosh); add(11.4, (a) => sfx.noise(a, .05, "highpass", 3000, 1, .3, .002)); add(13.2, (a) => sfx.osc("sine", 300, a, .05, .1, .8, 600)); add(14.4, sfx.pop); add(14.5, sfx.ok);
+  add(15.4, sfx.no); add(18.2, (a) => sfx.noise(a, .4, "highpass", 2000, 1, .2, .05)); add(20.7, (a) => sfx.noise(a, .1, "lowpass", 800, 1, .3, .005));
+  for (let k = 0; k < 18; k++) add(26.3 + k * .07, sfx.tick); add(28.4, sfx.no); add(31.3, sfx.ok);
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(35.78, sfx.whooshDown); add(37.3, (a) => sfx.riser(a, .6));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
