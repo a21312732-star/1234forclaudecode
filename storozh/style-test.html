@@ -100,8 +100,10 @@ function guardBack() {
     <text x="0" y="-284" font-family="Montserrat" font-weight="900" font-size="36" text-anchor="middle" fill="#23324d" stroke="none">ОХРАНА</text>
     <path d="M-104 -350 Q-150 -260 -132 -160" fill="none" stroke-width="0"/>
     <rect x="-150" y="-370" width="48" height="190" rx="22" fill="#1f2c45" transform="rotate(8 -126 -370)"/>
-    <g transform="rotate(-135 104 -360)"><rect x="80" y="-372" width="48" height="190" rx="22" fill="#23324d"/><circle cx="104" cy="-186" r="26" fill="#e9b48f"/>
-      <rect x="86" y="-176" width="36" height="70" rx="8" fill="#3a3a3a"/><rect x="80" y="-112" width="48" height="26" rx="6" fill="#555"/></g>
+    <g><rect x="80" y="-372" width="48" height="150" rx="22" fill="#23324d" transform="rotate(-14 104 -360)"/>
+      <rect x="112" y="-262" width="46" height="80" rx="20" fill="#1f2c45" transform="rotate(-150 135 -240)"/>
+      <g transform="translate(168 -292) rotate(28)"><path d="M-14 0 L14 0 L20 -46 L-20 -46 Z" fill="#3a3a3a"/><rect x="-24" y="-60" width="48" height="16" rx="5" fill="#555"/></g>
+      <circle cx="160" cy="-276" r="24" fill="#e9b48f"/></g>
     <circle cx="0" cy="-500" r="118" fill="#e9b48f"/>
     <ellipse cx="-118" cy="-490" rx="18" ry="28" fill="#e9b48f"/><ellipse cx="118" cy="-490" rx="18" ry="28" fill="#e9b48f"/>
     <path d="M-120 -470 Q-130 -600 -60 -625 L-70 -660 L-20 -632 L0 -672 L24 -632 L72 -656 L62 -620 Q132 -590 120 -470 Q60 -430 0 -436 Q-60 -430 -120 -470 Z" fill="#3a2a20"/>
@@ -111,7 +113,7 @@ function guardBack() {
 // ---------- кадр 1: коридор, вид из-за спины, луч фонаря ----------
 {
   let s = corridor({ figure: true });
-  const tip = [806, 1354], [a1x, a1y] = P(-.4, 0, 6.5), [a2x, a2y] = P(1.2, 0, 4.2), [a3x, a3y] = P(1.2, .9, 9), [a4x, a4y] = P(-.2, .9, 12);
+  const tip = [652, 1712], [a1x, a1y] = P(-.4, 0, 6.5), [a2x, a2y] = P(1.2, 0, 4.2), [a3x, a3y] = P(1.2, .9, 9), [a4x, a4y] = P(-.2, .9, 12);
   s += `<polygon points="${tip} ${a1x},${a1y} ${a4x},${a4y} ${a3x},${a3y} ${a2x},${a2y}" fill="url(#beam)" style="mix-blend-mode:screen"/>`;
   const sp = Array.from({ length: 28 }, (_, i) => P(.55 + .75 * Math.cos(i / 28 * 6.283), 0, 7.5 + 1.6 * Math.sin(i / 28 * 6.283)));
   s += `<polygon points="${sp.map((p) => p.join(",")).join(" ")}" fill="#fff4cc" opacity=".22" style="mix-blend-mode:screen"/>`;
