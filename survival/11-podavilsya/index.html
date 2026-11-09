@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #11 — Подавился</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#f2e6d8}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 32px var(--head);display:block;margin-top:8px;padding:0 8px}
+.tile.x::after{content:"";position:absolute;inset:-10px;background:linear-gradient(45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%),linear-gradient(-45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%)}
+.opt{left:110px;right:110px}
+.cnt{position:absolute;left:0;right:0;text-align:center;font:900 200px var(--mono);color:#ff3b47;z-index:6;text-shadow:6px 6px 0 #000}
+.phone{position:absolute;left:340px;top:330px;width:400px;height:680px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">Подавился? <span class="em">😨</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg><div class="cnt" id="c3" style="top:200px">⏱</div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg><div class="cnt" id="c7" style="top:180px;font-size:150px;color:#111"></div></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg><div class="phone" id="ph8"><div class="num">112</div><div class="st" id="st8">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s9"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a9"></svg>
+    <div class="big" style="top:200px;font-size:84px;line-height:1.05;color:#111;text-shadow:none" id="q9">ТЫ ЗНАЛ<br>ЭТОТ ПРИЁМ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s10"></div>
+  <div class="scene" id="s11"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 42.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [42.7, 42.70]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.69 }, { id: "s2", s: 2.69, e: 6.93 }, { id: "s3", s: 6.93, e: 11.5 }, { id: "s4", s: 11.5, e: 15.18 },
+  { id: "s5", s: 15.18, e: 21.58 }, { id: "s6", s: 21.58, e: 25.53 }, { id: "s7", s: 25.53, e: 34.27 }, { id: "s8", s: 34.27, e: 36.52 },
+  { id: "s9", s: 36.52, e: 39.26 }, { id: "s10", s: 39.26, e: 42.4 }, { id: "s11", s: 42.4, e: 42.7 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [9.87];
+const FLASHES = [];
+const clockText = (t) => (t >= 2.69 && t < 39.26 ? "ВЫЖИВИ #11 · ПОДАВИЛСЯ" : null);
+const CAPS = [
+  [0.1, "Ты {r:подавился} и не можешь вдохнуть."],
+  [2.69, "Если ты кашляешь —"],
+  [3.99, "{g:кашляй изо всех сил,} это лучший способ."],
+  [6.93, "Но если не можешь {r:ни кашлять, ни говорить,}"],
+  [9.87, "{r:счёт идёт на минуты.}"],
+  [11.5, "{r:Не пей воду}"],
+  [12.31, "и не стучи себя по спине со всей дури."],
+  [15.18, "{y:Сожми кулак,}"],
+  [16.06, "приложи его {y:чуть выше пупка,}"],
+  [18.04, "накрой второй рукой"],
+  [19.4, "и {g:резко дави внутрь и вверх.}"],
+  [21.58, "Рядом никого нет?"],
+  [23, "{g:Навались животом на спинку стула.}"],
+  [25.53, "А если подавился другой —"],
+  [27.3, "встань сзади, {y:наклони его вперёд}"],
+  [29.56, "и сделай {y:пять ударов между лопаток,}"],
+  [32.02, "а потом {y:пять толчков в живот.}"],
+  [34.27, "И сразу звони {g:сто двенадцать.}"],
+  [36.52, "Пиши в комменты: {y:ты знал этот приём?}"],
+  [39.26, "И помни: у тебя есть всего {r:пара минут, если...}"],
+  [42.4, ""]
+];
+const MUSIC = { bpm: 104, root: 52, parts: [[0, 11.5, "pulse", .8], [11.5, 36.52, "drive", .5], [36.52, 39.26, "pad", .6], [39.26, 42.7, "pulse", .8]] };
+
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 330, "🚫 НЕ МОЖЕТ ВДОХНУТЬ", 0.0, 99, -2, "font-size:50px"],
+  ["s2", "e2a", "badge b-grn", "c", 250, "✅ КАШЛЯЙ ИЗО ВСЕХ СИЛ", 3.99, 99, 2, "font-size:46px"],
+  ["s3", "e3a", "badge b-red", "c", 520, "НИ КАШЛЯТЬ, НИ ГОВОРИТЬ", 6.93, 99, -2, "font-size:44px"],
+  ["s4", "e4a", "tile x", 150, 420, ["💧", "ПИТЬ ВОДУ"], 11.5, 99, -3],
+  ["s4", "e4b", "tile x", 630, 420, ["✋", "СТУЧАТЬ СО ВСЕЙ ДУРИ"], 12.31, 99, 3],
+  ["s5", "e5a", "badge b-yel", 70, 200, "✊ КУЛАК ВЫШЕ ПУПКА", 16.06, 99, -2],
+  ["s5", "e5b", "badge b-grn", 70, 320, "⬆ ВНУТРЬ И ВВЕРХ", 19.4, 99, 2],
+  ["s6", "e6a", "badge b-grn", "c", 220, "🪑 ЖИВОТОМ НА СПИНКУ СТУЛА", 23.0, 99, -2, "font-size:42px"],
+  ["s7", "e7a", "badge b-yel", 70, 380, "5 УДАРОВ МЕЖДУ ЛОПАТОК", 29.56, 32.0, -2, "font-size:40px"],
+  ["s7", "e7b", "badge b-grn", 70, 380, "5 ТОЛЧКОВ В ЖИВОТ", 32.02, 99, 2, "font-size:40px"],
+  ["s9", "e9a", "opt", 0, 640, ["✅", "ЗНАЛ", "A"], 37.0], ["s9", "e9b", "opt", 0, 810, ["😳", "ВПЕРВЫЕ ВИЖУ", "B"], 37.4],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" }, HELP = { coat: "#3a7bd5", coat2: "#24539a", hair: "#6b3e1f", pants: "#2d3a4f" };
+const W = 1080, H = 1920, FL = 1150;
+function kitchen(p) {
+  return `<rect width="${W}" height="${H}" fill="#f2e6d8"/>${Array.from({ length: 10 }, (_, i) => `<path d="M0 ${300 + i * 85} H${W}" stroke="#e6d6c2" stroke-width="4"/>`).join("")}
+    <rect x="620" y="360" width="380" height="300" rx="10" fill="#cfe8f5" stroke="#8a6a4a" stroke-width="12"/><path d="M810 360 V660" stroke="#8a6a4a" stroke-width="8"/>
+    <rect y="${FL}" width="${W}" height="${H - FL}" fill="#c9a87a"/><rect x="60" y="${FL - 240}" width="560" height="30" fill="#8a5a3a"/><rect x="90" y="${FL - 210}" width="24" height="210" fill="#6a4a2a"/><rect x="570" y="${FL - 210}" width="24" height="210" fill="#6a4a2a"/>
+    <ellipse cx="240" cy="${FL - 248}" rx="90" ry="20" fill="#fff" stroke="#999" stroke-width="4"/><circle cx="240" cy="${FL - 262}" r="26" fill="#d99a5a"/>`;
+}
+// схема торса: место кулака
+function torso() {
+  return `<g transform="translate(540 820)"><rect x="-230" y="-380" width="460" height="640" rx="140" fill="#4caf50" stroke="#000" stroke-width="10"/><circle cy="-480" r="120" fill="#f4c7a1" stroke="#000" stroke-width="10"/>
+    <circle cx="0" cy="120" r="14" fill="#2e7d32"/><text x="60" y="132" font-size="36" fill="#fff" font-family="Montserrat">пупок</text>
+    <g id="fs5" opacity="0"><circle cx="0" cy="20" r="80" fill="#f4c7a1" stroke="#000" stroke-width="8"/><path d="M-50 0 H50 M-50 30 H50" stroke="#c98a5e" stroke-width="6"/></g>
+    <g id="hd5" opacity="0"><ellipse cx="0" cy="20" rx="110" ry="70" fill="#e8b48e" stroke="#000" stroke-width="8" opacity=".9"/></g>
+    <g id="ar5" opacity="0"><path d="M0 -40 L0 -230" stroke="#ff3b47" stroke-width="26" stroke-linecap="round"/><path d="M-50 -190 L0 -250 L50 -190" stroke="#ff3b47" stroke-width="26" fill="none" stroke-linecap="round"/></g></g>`;
+}
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k.startsWith("tile")) html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = kitchen("k1") + person("p1", HERO);
+  $("#a2").innerHTML = kitchen("k2") + person("p2", HERO) + `<g id="cf2">${[0, 1, 2].map(() => `<g><circle r="26" fill="#fff" stroke="#bbb" stroke-width="4"/><circle cx="24" cy="-8" r="18" fill="#fff" stroke="#bbb" stroke-width="4"/></g>`).join("")}</g>`;
+  $("#a3").innerHTML = kitchen("k3") + person("p3", HERO) + `<circle id="rg3" cx="540" cy="330" r="150" fill="none" stroke="#ff3b47" stroke-width="20" pathLength="1" stroke-dasharray="1" transform="rotate(-90 540 330)"/>`;
+  $("#a4").innerHTML = kitchen("k4") + `<rect width="${W}" height="${H}" fill="#000" opacity=".25"/>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#e9f3e9"/>` + torso();
+  $("#a6").innerHTML = kitchen("k6") + `<g transform="translate(700 ${FL})"><rect x="-120" y="-420" width="30" height="420" fill="#6a4a2a"/><rect x="-120" y="-420" width="200" height="40" rx="10" fill="#8a5a3a"/><rect x="-120" y="-200" width="240" height="30" fill="#8a5a3a"/><rect x="90" y="-200" width="30" height="200" fill="#6a4a2a"/></g>` + person("p6", HERO) +
+    `<g id="ar6" opacity="0"><path d="M420 600 L520 560" stroke="#ff3b47" stroke-width="20" stroke-linecap="round"/></g>`;
+  $("#a7").innerHTML = kitchen("k7") + person("v7", HERO) + person("h7", HELP);
+  $("#a8").innerHTML = kitchen("k8") + `<rect width="${W}" height="${H}" fill="#000" opacity=".3"/>`;
+  $("#a9").innerHTML = kitchen("k9");
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a && a > 0) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const P = (id, x, y, s, pose, r = 0, o = 1) => { at(id, x, y, s, o, r); setPose(id, pose); };
+const hip = (s) => FL - 88 * s;
+const choke = (t) => ({ la: -108 + 4 * Math.sin(t * 14), ra: -108 + 4 * Math.cos(t * 13), face: "panic", tilt: 6 * Math.sin(t * 10), sq: .97 }); // ладони у горла
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; P("p1", 380 + 5 * Math.sin(t * 20), hip(1.6), 1.6, choke(t));
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 2.2, 2.6); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    const c = Math.max(0, Math.sin(t * 6)); P("p2", 380, hip(1.6), 1.6, { la: 30, ra: 150, face: c > .5 ? "panic" : "worried", tilt: 12 * c, sq: 1 - .06 * c }, 10 * c);
+    $$("#cf2 g").forEach((g, i) => { const k = ((t * 1.2 + i / 3) % 1); g.setAttribute("transform", `translate(${470 + 200 * k} ${hip(1.6) - 230 - 40 * k}) scale(${.6 + k})`); g.setAttribute("opacity", 1 - k); });
+  },
+  s3(lt, t) {
+    P("p3", 540, hip(1.6), 1.6, { ...choke(t), face: "panic" }); $("#rg3").setAttribute("stroke-dashoffset", prog(t, 7.0, 11.4));
+    const c = $("#c3"); c.textContent = t > 9.87 ? "⏱" : ""; c.style.opacity = t > 9.87 ? 1 : 0;
+  },
+  s4() {},
+  s5(lt, t) {
+    $("#fs5").setAttribute("opacity", prog(t, 15.2, 15.5)); $("#hd5").setAttribute("opacity", prog(t, 18.04, 18.4) * .9);
+    const push = t > 19.4 ? Math.max(0, Math.sin((t - 19.4) * 5)) : 0; $("#ar5").setAttribute("opacity", t > 19.4 ? 1 : 0);
+    $("#fs5").setAttribute("transform", `translate(0 ${-30 * push})`); $("#ar5").setAttribute("transform", `translate(0 ${-20 * push})`);
+  },
+  s6(lt, t) {
+    const lean = t > 23 ? .5 + .5 * Math.sin((t - 23) * 5) : 0;
+    P("p6", 560 - 30 * lean, hip(1.6), 1.6, { la: 30, ra: 30, face: "focus" }, -18 * lean - 6);
+    $("#ar6").setAttribute("opacity", t > 23 ? 1 : 0);
+  },
+  s7(lt, t) {
+    const backs = t > 29.56 && t < 32.02, thr = t > 32.02;
+    P("v7", 520, hip(1.5), 1.5, { la: 20, ra: 20, face: "panic" }, t > 27.3 ? 28 : 0);
+    const hit = backs ? Math.max(0, Math.sin((t - 29.56) * 10)) : 0, th = thr ? Math.max(0, Math.sin((t - 32.02) * 10)) : 0;
+    P("h7", 720, hip(1.55), 1.55, { la: thr ? 100 + 20 * th : 30, ra: backs ? 120 + 40 * hit : thr ? 100 + 20 * th : 30, face: "focus", look: -1 });
+    const c = $("#c7"), n = backs ? Math.min(5, Math.floor((t - 29.56) / ((32.02 - 29.56) / 5)) + 1) : thr ? Math.min(5, Math.floor((t - 32.02) / ((34.2 - 32.02) / 5)) + 1) : 0;
+    c.textContent = n ? n : ""; c.style.color = thr ? "#1a9a4a" : "#111";
+  },
+  s8(lt, t) { show($("#ph8"), t, 34.3, .35, 60); $("#st8").textContent = t > 35.7 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3); },
+  s9(lt, t) { show($("#q9"), t, 36.6); },
+  s10(lt, t) { // петля к первому кадру
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0);
+    const z = easeInOut(prog(t, 39.3, 42.2)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.4, 1, z)})`;
+    $("#hook1").style.opacity = prog(t, 41.8, 42.35);
+  },
+  s11() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  for (let t = 0; t < 2.6; t += .5) add(t, (a) => sfx.noise(a, .25, "bandpass", 900, 2, .2, .05)); // хрип
+  for (let t = 3; t < 6.9; t += .6) add(t, (a) => sfx.noise(a, .2, "bandpass", 600, 1, .45, .01, 300)); // кашель
+  for (let t = 7.0; t < 11.4; t += .5) add(t, (a) => sfx.heart(a, .7)); add(9.87, sfx.boom);
+  for (let k = 0; k < 5; k++) { add(29.56 + k * .49, (a) => sfx.noise(a, .08, "lowpass", 500, 1, .5, .005)); add(32.02 + k * .44, (a) => sfx.noise(a, .1, "lowpass", 300, 1, .5, .005)); }
+  for (let t = 34.5; t < 35.7; t += .4) add(t, sfx.beep); add(35.7, sfx.ok);
+  E.forEach((e) => add(Math.max(0, e[6] - .02), sfx.pop)); add(39.3, sfx.whooshDown); add(41.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

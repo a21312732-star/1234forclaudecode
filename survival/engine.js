@@ -61,6 +61,8 @@ const FACES = {
   worried: ["M-10 22 Q0 14 10 22", "#7a2c1e", "none", "M-22 -10 L-6 -16 M6 -16 L22 -10"],
   focus: ["M-9 19 L9 19", "#7a2c1e", "none", "M-22 -9 L-6 -6 M6 -6 L22 -9"],
   cold: ["M-12 20 L-6 16 L0 20 L6 16 L12 20", "#5a7aa0", "none", "M-22 -10 L-6 -14 M6 -14 L22 -10"],
+  shock: ["M-7 22 a7 9 0 1 0 14 0 a7 9 0 1 0 -14 0", "#5a1a12", "#5a1a12", "M-22 -20 L-6 -18 M6 -18 L22 -20"],
+  smug: ["M-10 20 Q2 26 14 16", "#7a2c1e", "none", "M-22 -14 L-6 -10 M6 -14 L22 -20"],
 };
 function setPose(id, p = {}) {
   const g = document.getElementById(id);

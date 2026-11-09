@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проснулся в 2017-м</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+#stage{background:#3a2f5e}
+.el{position:absolute;z-index:7}
+.cnt{position:absolute;left:0;right:0;text-align:center;font:900 180px var(--mono);color:#fff;z-index:6;text-shadow:6px 6px 0 #000}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">Проснулся <b>в 2017</b>? <span class="em">📅</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg><div class="cnt" id="c5" style="top:170px">1 СЛОЙ</div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 40;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [40, 40.00]];
+const SCENES = [
+  { id: "s1", s: 0, e: 5.92 }, { id: "s2", s: 5.92, e: 10.01 }, { id: "s3", s: 10.01, e: 13.14 }, { id: "s4", s: 13.14, e: 18.11 },
+  { id: "s5", s: 18.11, e: 22.4 }, { id: "s6", s: 22.4, e: 27.81 }, { id: "s7", s: 27.81, e: 33.81 }, { id: "s8", s: 33.81, e: 37.63 },
+  { id: "s9", s: 37.63, e: 39.7 }, { id: "s10", s: 39.7, e: 40 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [25.0];
+const FLASHES = [4.9, 10.01];
+const clockText = () => null;
+const CAPS = [
+  [0.1, "А теперь представь, что ты просыпаешься,"],
+  [2.91, "а на календаре — {y:две тысячи семнадцатый.}"],
+  [5.92, "Тебе {y:девять,}"],
+  [6.79, "и самое ценное, что у тебя есть, — {g:спиннер.}"],
+  [10.01, "Если он ещё и {y:светится} —"],
+  [11.72, "ты {y:легенда двора.}"],
+  [13.14, "В кармане {g:лизун,}"],
+  [14.29, "который прилипает ко всему,"],
+  [16.2, "{r:кроме того, к чему надо.}"],
+  [18.11, "После школы — {y:ютуб:}"],
+  [19.67, "{y:челленджи на сто слоёв} всего подряд."],
+  [22.4, "А вечером ты строишь дом {g:в Майнкрафте}"],
+  [25, "и боишься {r:крипера} больше, чем двойки."],
+  [27.81, "В каждой машине играет {y:«Деспасито»,}"],
+  [30.27, "и ты поёшь её наизусть,"],
+  [31.91, "хотя {r:не знаешь ни слова.}"],
+  [33.81, "Вспомнил? Пиши в комменты,"],
+  [35.65, "какой у тебя был {y:спиннер.}"],
+  [37.63, "А теперь {y:закрой глаза и...}"],
+  [39.7, ""]
+];
+const MUSIC = { bpm: 104, root: 55, parts: [[0, 5.92, "pulse", .7], [5.92, 33.81, "drive", .5], [33.81, 40, "pad", .6]] };
+
+const E = [
+  ["s3", "e3a", "badge b-yel", "c", 220, "👑 ЛЕГЕНДА ДВОРА", 11.72, 99, -2, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "😩 НЕ ТУДА", 16.2, 99, 2, "font-size:60px"],
+  ["s6", "e6a", "badge b-red", "c", 220, "😱 СТРАШНЕЕ ДВОЙКИ", 25.0, 99, -2, "font-size:54px"],
+  ["s7", "e7a", "badge b-yel", "c", 220, "🎤 НИ СЛОВА, НО НАИЗУСТЬ", 31.91, 99, 2, "font-size:46px"],
+  ["s8", "e8a", "badge b-yel", "c", 220, "💬 ПИШИ В КОММЕНТЫ", 33.9, 99, 0, "font-size:56px"],
+  ["s8", "e8b", "cmt", 90, 420, "у меня был со светодиодами 😎", 34.6, 99, -2],
+  ["s8", "e8c", "cmt", 300, 560, "лизун в волосах — классика", 35.3, 99, 2],
+  ["s8", "e8d", "cmt", 120, 700, "100 слоёв лака смотрел каждый день", 36.0, 99, -1],
+];
+const elUpd = makeElUpd(E);
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = bedroom("r1") + person("p1", TEEN) + blanket("bl1") + `<g id="cal1" opacity="0" transform="translate(540 760)">${calendar("c1")}</g>`;
+  $("#a2").innerHTML = bedroom("r2") + `<rect width="${W}" height="${H}" fill="#000" opacity=".3"/><g transform="translate(540 760) scale(1.6)">${spinner("sp2")}</g>`;
+  const yard = `<rect width="${W}" height="${H}" fill="#8fd0f2"/><rect y="${FL - 100}" width="${W}" height="${H}" fill="#7ab86a"/><rect x="60" y="500" width="300" height="${FL - 600}" fill="#c9a87a" stroke="#6a4a2a" stroke-width="8"/>
+    <rect x="720" y="560" width="300" height="${FL - 660}" fill="#d9b88a" stroke="#6a4a2a" stroke-width="8"/>`;
+  $("#a3").innerHTML = yard + person("k31", FRIEND) + person("k32", TEEN) + person("k33", FRIEND2) + `<g id="sg3">${spinner("sp3")}</g>`;
+  $("#a4").innerHTML = bedroom("r4") + person("p4", TEEN) + slime("sl4") + `<g id="hs4" opacity="0"><path id="sh4"/></g>` + slime("sl4b");
+  $("#a5").innerHTML = bedroom("r5") + `<g transform="translate(540 880)">${laptop("lp5", `<g id="ly5"></g><rect x="-280" y="-185" width="70" height="44" rx="10" fill="#ff2a2a"/><path d="M-255 -175 L-235 -163 L-255 -151Z" fill="#fff"/>`)}</g>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#7ad0ff"/><rect id="nt6" width="${W}" height="${H}" fill="#0a0820" opacity="0"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#4dd16a"/>
+    <g transform="translate(540 ${FL})">${voxelHouse("vh6")}</g><g id="ey6" opacity="0"><ellipse cx="880" cy="${FL - 120}" rx="22" ry="14" fill="#7aff6a"/><ellipse cx="950" cy="${FL - 120}" rx="22" ry="14" fill="#7aff6a"/></g>` + person("p6", TEEN);
+  $("#a7").innerHTML = `<rect width="${W}" height="${H}" fill="#8fd0f2"/><rect y="${FL - 60}" width="${W}" height="${H}" fill="#5a5f6a"/><path d="M0 ${FL + 60} H${W}" stroke="#fff" stroke-width="12" stroke-dasharray="70 50"/>
+    <g id="car7" transform="translate(540 ${FL - 30})"><path d="M-330 -40 Q-330 -120 -250 -130 L-150 -140 Q-90 -230 30 -235 L130 -235 Q200 -230 250 -140 L300 -130 Q340 -120 340 -60 L335 -20 Q330 0 300 0 L-300 0 Q-330 0 -330 -40Z" fill="#ff8a3d" stroke="#7a3a10" stroke-width="8"/>
+    <path d="M-120 -142 Q-70 -210 20 -212 L20 -142Z M40 -212 L120 -212 Q170 -208 210 -142 L40 -142Z" fill="#cfeaff"/><circle cx="-200" cy="0" r="62" fill="#222"/><circle cx="200" cy="0" r="62" fill="#222"/>
+    <g transform="translate(80 -175)"><circle r="34" fill="#f4c7a1"/><path d="M-34 -6 Q-34 -40 0 -42 Q34 -40 34 -6 Q20 -24 0 -24 Q-20 -24 -34 -6Z" fill="${TEEN.hair}"/><ellipse id="mo7" cy="16" rx="10" ry="12" fill="#7a1f1f"/></g></g>` + notes("nt7");
+  $("#a8").innerHTML = bedroom("r8") + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; const op = prog(t, .5, 1.4);
+    sleeper("p1", t, op); $("#bl1").setAttribute("opacity", 1 - .5 * op);
+    $("#r1sky").setAttribute("opacity", .7 * prog(t, .3, 1.5)); $("#r1dark").setAttribute("opacity", .55 * (1 - prog(t, .3, 1.2)));
+    $$(".r1gl").forEach((g, i) => g.setAttribute("opacity", .5 + .5 * Math.sin(t * 4 + i)));
+    const c = $("#cal1"); c.setAttribute("opacity", prog(t, 2.8, 3.1)); c.setAttribute("transform", `translate(540 760) scale(${.6 + .4 * easeOut(prog(t, 2.8, 3.2))})`);
+    updCalendar("c1", t, 3.0, 4.9, 2017);
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 2.5, 2.8); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { $("#sp2 .sp").setAttribute("transform", `rotate(${t * 900})`); },
+  s3(lt, t) {
+    [["k31", 200], ["k32", 540], ["k33", 880]].forEach(([id, x], i) => P(id, x, hip(1.2), 1.2, { la: i === 1 ? 100 : 20, ra: 20, face: i === 1 ? "smug" : "shock", look: i === 0 ? 1 : i === 2 ? -1 : 0 }));
+    $("#sg3").setAttribute("transform", `translate(${540 - 100} ${hip(1.2) - 150}) scale(.5)`);
+    $("#sp3 .sp").setAttribute("transform", `rotate(${t * 900})`); $("#sp3 .glow").setAttribute("opacity", t > 10.01 ? .6 + .4 * Math.sin(t * 12) : 0);
+    $("#sp3 .glow").setAttribute("stroke", ["#5cf0ff", "#ff5a8a", "#ffd23f", "#4dff8a"][Math.floor(t * 4) % 4]);
+  },
+  s4(lt, t) {
+    P("p4", 540, hip(1.6), 1.6, { la: 70, ra: 70, face: t > 16.2 ? "worried" : "happy" });
+    const st = 60 * (.5 + .5 * Math.sin(t * 3)); updSlime("sl4", t, 540, hip(1.6) - 40, t < 16.2 ? st : 0, 55);
+    $("#sl4").setAttribute("opacity", t < 16.2 ? .9 : 0);
+    updSlime("sl4b", t, 540, hip(1.6) - 136 * 1.6 - 45, 10, 60); $("#sl4b").setAttribute("opacity", t > 16.2 ? .9 : 0); // прилип к волосам
+  },
+  s5(lt, t) {
+    const n = Math.max(1, Math.min(100, Math.floor(prog(t, 19.67, 22.2) * 100))); $("#c5").textContent = n === 100 ? "100 СЛОЁВ!" : `${n} СЛОЁВ`;
+    $("#ly5").innerHTML = Array.from({ length: Math.min(30, Math.ceil(n / 3.4)) }, (_, i) => `<rect x="-90" y="${120 - i * 9}" width="180" height="9" fill="${["#ff4d4d", "#ffd23f", "#4d9aff", "#4dd16a", "#c77dff"][i % 5]}"/>`).join("");
+  },
+  s6(lt, t) {
+    $$("#vh6 .vx").forEach((v) => { const k = +v.dataset.k; v.setAttribute("opacity", t > 22.5 + k * .09 ? 1 : 0); });
+    $("#nt6").setAttribute("opacity", .85 * prog(t, 24.6, 25.0)); $("#ey6").setAttribute("opacity", t > 25.0 ? (Math.floor(t * 3) % 5 ? 1 : .1) : 0);
+    P("p6", 220, hip(1.3), 1.3, { la: t > 25 ? 150 : 20, ra: t > 25 ? 150 : 80 + 15 * Math.sin(t * 6), face: t > 25 ? "panic" : "focus", look: t > 25 ? 1 : 0 });
+  },
+  s7(lt, t) { $("#car7").setAttribute("transform", `translate(${540 + 4 * Math.sin(t * 20)} ${FL - 30})`); $("#mo7").setAttribute("ry", 6 + 8 * Math.abs(Math.sin(t * 7))); updNotes("nt7", t, 620, 900); },
+  s8() {},
+  s9(lt, t) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0);
+    const k = prog(t, 37.63, 39.4); $("#hook1").style.opacity = prog(t, 39.1, 39.6);
+    sleeper("p1", t, 1 - k); $("#bl1").setAttribute("opacity", .5 + .5 * k); $("#r1dark").setAttribute("opacity", .55 * k); $("#r1sky").setAttribute("opacity", .7 * (1 - k));
+  },
+  s10() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(.5, (a) => { [523, 659, 784].forEach((f, i) => sfx.osc("sine", f, a + i * .12, .01, .2, .3)); });
+  for (let k = 0; k < 14; k++) add(3.0 + k * .135, sfx.tick); add(4.9, sfx.ding);
+  add(6.0, (a) => sfx.noise(a, 4, "bandpass", 1200, 4, .08, .2)); add(10.01, sfx.ding);
+  add(16.2, (a) => sfx.noise(a, .3, "lowpass", 500, 1, .3, .02)); for (let k = 0; k < 16; k++) add(19.7 + k * .16, sfx.tick); add(22.2, sfx.ok);
+  for (let k = 0; k < 24; k++) add(22.5 + k * .09, (a) => sfx.noise(a, .04, "lowpass", 700, 1, .25, .002)); add(25.0, sfx.boom);
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(37.7, (a) => sfx.osc("sine", 600, a, .2, .1, 1.5, 200));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проснулся в 2019-м</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+#stage{background:#3a2f5e}
+.el{position:absolute;z-index:7}
+.bub{position:absolute;padding:18px 34px;border-radius:40px;border:7px solid #000;box-shadow:0 10px 0 #000;font:900 60px var(--head);z-index:7;background:#fff;color:#111}
+.big2{position:absolute;left:0;right:0;text-align:center;font:900 260px/1 var(--head);color:#ffd23f;z-index:8;text-shadow:10px 10px 0 #000}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">Проснулся <b>в 2019</b>? <span class="em">📅</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="bub" id="b31" style="left:60px;top:330px">МОЙ СИЛЬНЕЕ!</div><div class="bub" id="b32" style="left:560px;top:450px">НЕТ, МОЙ!</div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg><div class="big2" id="auf5" style="top:200px">АУФ</div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 38.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [38.7, 38.70]];
+const SCENES = [
+  { id: "s1", s: 0, e: 6.06 }, { id: "s2", s: 6.06, e: 10.42 }, { id: "s3", s: 10.42, e: 15.69 }, { id: "s4", s: 15.69, e: 20.96 },
+  { id: "s5", s: 20.96, e: 26.89 }, { id: "s6", s: 26.89, e: 32.29 }, { id: "s7", s: 32.29, e: 36.39 }, { id: "s8", s: 36.39, e: 38.4 }, { id: "s9", s: 38.4, e: 38.7 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [24.92];
+const FLASHES = [4.9, 24.92];
+const clockText = () => null;
+const CAPS = [
+  [0.1, "А теперь представь, что ты просыпаешься,"],
+  [2.91, "а на календаре — {y:две тысячи девятнадцатый.}"],
+  [6.06, "Тебе {y:одиннадцать,}"],
+  [7.28, "и на каждой перемене {y:кто-то танцует флосс.}"],
+  [10.42, "Все пацаны в классе только что {g:скачали Бравл Старс}"],
+  [13.92, "и спорят, {y:кто сильнее.}"],
+  [15.69, "У тебя в телефоне {g:появился тикток,}"],
+  [18.08, "и ты впервые снимаешь {y:видео под тренд.}"],
+  [20.96, "Каждый второй мем — {y:с волком,}"],
+  [23.01, "а на любую фразу кто-нибудь"],
+  [24.92, "обязательно кричит {r:«ауф».}"],
+  [26.89, "Дома ты снова строишь {g:в Майнкрафте,}"],
+  [29.36, "потому что он {y:внезапно вернулся в моду.}"],
+  [32.29, "Вспомнил? Пиши в комменты,"],
+  [34.14, "что ты делал {y:в девятнадцатом.}"],
+  [36.39, "А теперь {y:закрой глаза и...}"],
+  [38.4, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 6.06, "pulse", .7], [6.06, 32.29, "drive", .5], [32.29, 38.7, "pad", .6]] };
+
+const E = [
+  ["s4", "e4a", "badge b-red", 70, 200, "⏺ REC · ПЕРВОЕ ВИДЕО", 16.0, 99, -2, "font-size:44px"],
+  ["s6", "e6a", "badge b-yel", "c", 220, "🔥 СНОВА В МОДЕ", 29.36, 99, -2, "font-size:58px"],
+  ["s7", "e7a", "badge b-yel", "c", 220, "💬 ПИШИ В КОММЕНТЫ", 32.4, 99, 0, "font-size:56px"],
+  ["s7", "e7b", "cmt", 90, 420, "флосс умел танцевать весь класс 😂", 33.1, 99, -2],
+  ["s7", "e7c", "cmt", 300, 560, "ауф на каждой перемене", 33.8, 99, 2],
+  ["s7", "e7d", "cmt", 120, 700, "первый тикток стыдно пересматривать", 34.5, 99, -1],
+];
+const elUpd = makeElUpd(E);
+const wolf = (id) => `<g id="${id}"><path d="M-170 160 L-120 -60 L-150 -200 L-60 -110 L0 -130 L60 -110 L150 -200 L120 -60 L170 160 Q0 240 -170 160Z" fill="#7a808c" stroke="#000" stroke-width="8"/>
+  <path d="M-40 60 L0 140 L40 60Z" fill="#2a2a2a"/><ellipse cx="-60" cy="-10" rx="22" ry="14" fill="#ffd23f"/><ellipse cx="60" cy="-10" rx="22" ry="14" fill="#ffd23f"/><circle cx="-60" cy="-10" r="7"/><circle cx="60" cy="-10" r="7"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = bedroom("r1") + person("p1", TEEN) + blanket("bl1") + `<g id="cal1" opacity="0" transform="translate(540 760)">${calendar("c1")}</g>`;
+  const cls = `<rect width="${W}" height="${H}" fill="#cfe3d0"/><rect x="60" y="300" width="960" height="380" fill="#2a5a3a" stroke="#6a4a2a" stroke-width="20"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#b89a6a"/>`;
+  $("#a2").innerHTML = cls + `<text x="540" y="520" font-size="80" text-anchor="middle" fill="#fff" opacity=".8">перемена!</text>` + person("k21", FRIEND) + person("k22", TEEN) + person("k23", FRIEND2);
+  $("#a3").innerHTML = cls + person("k31", FRIEND) + person("k32", FRIEND2) +
+    `<g id="ph31" transform="translate(290 900) scale(.3)">${phone("q1", `<path d="M0 -80 l26 52 l58 8 l-42 40 l10 58 l-52 -28 l-52 28 l10 -58 l-42 -40 l58 -8z" fill="#ffd23f" stroke="#000" stroke-width="6"/>`)}</g>
+     <g id="ph32" transform="translate(790 900) scale(.3)">${phone("q2", `<path d="M0 -80 l26 52 l58 8 l-42 40 l10 58 l-52 -28 l-52 28 l10 -58 l-42 -40 l58 -8z" fill="#ffd23f" stroke="#000" stroke-width="6"/>`)}</g>`;
+  $("#a4").innerHTML = bedroom("r4") + `<g transform="translate(540 860)">${phone("ph4", `<rect x="-185" y="-360" width="370" height="720" rx="30" fill="#2a2240"/><g id="mini4"></g>
+    <circle cx="0" cy="300" r="40" fill="#ff2a2a" stroke="#fff" stroke-width="8"/><g id="ht4">${[0, 1, 2, 3].map(() => `<text font-size="60" font-family="Noto Color Emoji">❤️</text>`).join("")}</g>`)}</g>`;
+  $("#mini4").outerHTML = person("m4", TEEN);
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#1a1a24"/><rect x="140" y="560" width="800" height="640" fill="#2a2a34" stroke="#fff" stroke-width="10"/><g transform="translate(540 880)">${wolf("wf5")}</g>
+    <text x="540" y="1160" font-size="44" text-anchor="middle" fill="#fff" font-family="Montserrat">ЦИТАТА ДНЯ</text>`;
+  $("#a6").innerHTML = bedroom("r6") + `<g transform="translate(540 800)">${laptop("lp6", `<rect x="-305" y="-205" width="610" height="370" fill="#7ad0ff"/><rect x="-305" y="60" width="610" height="105" fill="#4dd16a"/><g transform="translate(0 60) scale(.62)">${voxelHouse("vh6")}</g>`)}</g>` + person("p6", TEEN);
+  $("#a7").innerHTML = bedroom("r7") + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; const op = prog(t, .5, 1.4);
+    sleeper("p1", t, op); $("#bl1").setAttribute("opacity", 1 - .5 * op);
+    $("#r1sky").setAttribute("opacity", .7 * prog(t, .3, 1.5)); $("#r1dark").setAttribute("opacity", .55 * (1 - prog(t, .3, 1.2)));
+    $$(".r1gl").forEach((g, i) => g.setAttribute("opacity", .5 + .5 * Math.sin(t * 4 + i)));
+    const c = $("#cal1"); c.setAttribute("opacity", prog(t, 2.8, 3.1)); c.setAttribute("transform", `translate(540 760) scale(${.6 + .4 * easeOut(prog(t, 2.8, 3.2))})`);
+    updCalendar("c1", t, 3.0, 4.9, 2019);
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 2.5, 2.8); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { // флосс: руки и бёдра в противофазе
+    const f = Math.sin(t * 9);
+    P("k22", 540 + 30 * f, hip(1.5), 1.5, { la: 40 + 30 * f, ra: 40 - 30 * f, face: "happy", tilt: -6 * f }, 6 * f);
+    P("k21", 200, hip(1.2), 1.2, { la: 20, ra: 20, face: "happy", look: 1 }); P("k23", 880, hip(1.2), 1.2, { la: 20, ra: 20, face: "happy", look: -1 });
+  },
+  s3(lt, t) {
+    P("k31", 290, hip(1.3), 1.3, { la: 90, ra: 30, face: t > 13.9 ? "worried" : "happy", look: 1 }); P("k32", 790, hip(1.3), 1.3, { la: 30, ra: 90, face: t > 13.9 ? "smug" : "happy", look: -1 });
+    $("#ph31").setAttribute("transform", `translate(380 ${hip(1.3) - 60}) scale(.3)`); $("#ph32").setAttribute("transform", `translate(700 ${hip(1.3) - 60}) scale(.3)`);
+    pop($("#b31"), t, 13.92, -4); pop($("#b32"), t, 14.6, 4); if (t < 13.92) $("#b31").style.opacity = 0; if (t < 14.6) $("#b32").style.opacity = 0;
+  },
+  s4(lt, t) {
+    $("#r4dark").setAttribute("opacity", .4); const f = Math.sin(t * 8);
+    P("m4", 0, 180, 1.0, { la: 120 + 40 * f, ra: 120 - 40 * f, face: "happy", tilt: 8 * f }, 0);
+    $$("#ht4 text").forEach((h, i) => { const k = ((t * .7 + i / 4) % 1); h.setAttribute("x", 110 + 30 * Math.sin(t * 3 + i)); h.setAttribute("y", 200 - 400 * k); h.setAttribute("opacity", t > 18.08 ? 1 - k : 0); });
+  },
+  s5(lt, t) {
+    $("#wf5").setAttribute("transform", `scale(${1 + .03 * Math.sin(t * 3)})`);
+    const a = $("#auf5"); a.style.opacity = t > 24.92 ? 1 : 0; a.style.transform = `rotate(-6deg) scale(${1 + .5 * (1 - prog(t, 24.92, 25.2))})`;
+  },
+  s6(lt, t) {
+    P("p6", 220, hip(1.4), 1.4, { la: 20, ra: 80 + 15 * Math.sin(t * 6), face: "focus", look: 1 });
+    $$("#vh6 .vx").forEach((v) => { const k = +v.dataset.k; v.setAttribute("opacity", t > 27 + k * .09 ? 1 : 0); });
+  },
+  s7() {},
+  s8(lt, t) {
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0);
+    const k = prog(t, 36.39, 38.1); $("#hook1").style.opacity = prog(t, 37.8, 38.3);
+    sleeper("p1", t, 1 - k); $("#bl1").setAttribute("opacity", .5 + .5 * k); $("#r1dark").setAttribute("opacity", .55 * k); $("#r1sky").setAttribute("opacity", .7 * (1 - k));
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(.5, (a) => { [523, 659, 784].forEach((f, i) => sfx.osc("sine", f, a + i * .12, .01, .2, .3)); });
+  for (let k = 0; k < 14; k++) add(3.0 + k * .135, sfx.tick); add(4.9, sfx.ding);
+  add(13.92, sfx.pop); add(14.6, sfx.pop); add(16.0, sfx.beep); add(24.92, sfx.boom);
+  for (let k = 0; k < 24; k++) add(27 + k * .09, (a) => sfx.noise(a, .04, "lowpass", 700, 1, .25, .002));
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(36.5, (a) => sfx.osc("sine", 600, a, .2, .1, 1.5, 200));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
