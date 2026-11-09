@@ -164,6 +164,7 @@ function scheduleAudio(ctx, out, from) {
     whistle: (a, d = .35) => { const o = osc("sine", 2900, a, .02, .2, d); const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 38; lg.gain.value = 140; l.connect(lg).connect(o.frequency); l.start(a); l.stop(a + d + .1); },
     fire: (a, d) => { noise(a, d, "lowpass", 600, 1, .12, .3); for (let k = 0; k < d * 8; k++) noise(a + k / 8 + hash(k) * .1, .01, "highpass", 3000, 1, .3 * hash(k + 7), .001); },
     beep: (a) => osc("square", 1000, a, .003, .08, .12),
+    hit: (a) => { noise(a, .18, "lowpass", 1800, 1, .6, .002); osc("sine", 90, a, .002, .6, .25, 40); },
     ring: (a) => { for (let i = 0; i < 2; i++) { osc("sine", 425, a + i * 1.1, .02, .12, .9); } },
     riser: (a, d = 1) => noise(a, d, "bandpass", 300, 3, .3, d * .9, 5000),
   };

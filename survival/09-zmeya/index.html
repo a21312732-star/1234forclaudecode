@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #9 — Укус змеи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#3b5a2a}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 34px var(--head);display:block;margin-top:8px;padding:0 8px}
+.tile.x::after{content:"";position:absolute;inset:-10px;background:linear-gradient(45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%),linear-gradient(-45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%)}
+.opt{left:110px;right:110px}
+.stamp{position:absolute;left:0;right:0;top:300px;text-align:center;z-index:8}
+.stamp span{display:inline-block;font:900 200px/1 var(--head);color:var(--red);border:18px solid var(--red);padding:0 36px;border-radius:30px;background:rgba(255,255,255,.85)}
+.phone{position:absolute;left:600px;top:380px;width:360px;height:600px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:110px;color:#fff}
+.phone .num{font:900 120px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:86px">Укусила <b>змея</b>? <span class="em">🐍</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg><div class="stamp" id="st2"><span>МИФ</span></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="phone" id="ph6"><div class="num">112</div><div class="st" id="st6">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 36.8;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.51, 1.51], [3.74, 3.89], [4.8, 4.95], [7.9, 8.20], [9.31, 9.61], [12.11, 12.41], [14.13, 14.58], [16.13, 16.58], [20.14, 20.74], [21.73, 22.33], [23.01, 23.61], [26.51, 27.26], [28.38, 29.13], [30.47, 31.37], [33.87, 34.77], [34.98, 36.03], [36.54, 37.59], [36.8, 37.85]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.74 }, { id: "s2", s: 3.74, e: 7.9 }, { id: "s3", s: 7.9, e: 14.13 }, { id: "s4", s: 14.13, e: 20.14 },
+  { id: "s5", s: 20.14, e: 26.51 }, { id: "s6", s: 26.51, e: 30.47 }, { id: "s7", s: 30.47, e: 34.98 }, { id: "s8", s: 34.98, e: 36.54 }, { id: "s9", s: 36.54, e: 36.8 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.25, 3.74];
+const FLASHES = [0.25];
+const clockText = (t) => (t >= 3.74 && t < 34.98 ? "ВЫЖИВИ #9 · ЗМЕЯ" : null);
+const CAPS = [
+  [0.1, "Тебя {r:укусила змея.}"],
+  [1.51, "Первое желание — {y:высосать яд.}"],
+  [3.74, "{r:Не делай этого:}"],
+  [4.8, "яд ты почти не достанешь,"],
+  [6.36, "а {r:инфекцию занесёшь.}"],
+  [7.9, "{r:Жгут тоже нельзя:}"],
+  [9.31, "можно {r:потерять руку,}"],
+  [10.55, "а яд никуда не денется."],
+  [12.11, "И никаких {r:надрезов и алкоголя.}"],
+  [14.13, "Главное — {g:меньше двигаться:}"],
+  [16.13, "чем активнее ты двигаешься,"],
+  [17.78, "тем {r:быстрее яд расходится} по телу."],
+  [20.14, "{y:Сними кольца и часы} —"],
+  [21.73, "рука будет отекать."],
+  [23.01, "{g:Зафиксируй её,} как при переломе,"],
+  [25.05, "и {g:пей больше воды.}"],
+  [26.51, "И сразу звони {g:сто двенадцать:}"],
+  [28.38, "противоядие есть {y:только в больнице.}"],
+  [30.47, "А ты знал, что гадюка"],
+  [31.75, "{y:почти никогда не нападает первой?}"],
+  [33.87, "Пиши в комменты."],
+  [34.98, "А пока {y:смотри под ноги...}"],
+  [36.54, ""]
+];
+const MUSIC = { bpm: 98, root: 49, parts: [[0, 7.9, "pulse", .8], [7.9, 30.47, "drive", .5], [30.47, 34.98, "pad", .6], [34.98, 36.8, "pulse", .7]] };
+
+const E = [
+  ["s1", "e1a", "badge b-yel", "c", 330, "🤔 ВЫСОСАТЬ ЯД?", 1.51, 99, -2, "font-size:56px"],
+  ["s2", "e2a", "badge b-red", "c", 620, "❌ ЯД НЕ ДОСТАНЕШЬ", 4.8, 99, 2, "font-size:50px"],
+  ["s2", "e2b", "badge b-red", "c", 740, "🦠 ЗАНЕСЁШЬ ИНФЕКЦИЮ", 6.43, 99, -2, "font-size:46px"],
+  ["s3", "e3a", "tile x", 390, 280, ["🪢", "ЖГУТ"], 7.9, 99, -3],
+  ["s3", "e3b", "badge b-red", "c", 620, "МОЖНО ПОТЕРЯТЬ РУКУ", 9.31, 12.0, 2, "font-size:46px"],
+  ["s3", "e3c", "tile x", 150, 640, ["🔪", "НАДРЕЗЫ"], 12.11, 99, 3],
+  ["s3", "e3d", "tile x", 630, 640, ["🍺", "АЛКОГОЛЬ"], 12.6, 99, -3],
+  ["s4", "e4a", "badge b-grn", "c", 200, "🧘 МЕНЬШЕ ДВИГАЙСЯ", 14.13, 99, -2, "font-size:54px"],
+  ["s5", "e5a", "badge b-yel", 70, 200, "💍 СНИМИ КОЛЬЦА И ЧАСЫ", 20.14, 99, -2, "font-size:42px"],
+  ["s5", "e5b", "badge b-grn", 70, 320, "🩹 ЗАФИКСИРУЙ", 23.01, 99, 2],
+  ["s5", "e5c", "badge b-blu", 70, 440, "💧 ПЕЙ ВОДУ", 25.14, 99, -2],
+  ["s6", "e6a", "tile", 120, 420, ["🏥", "ПРОТИВОЯДИЕ — В БОЛЬНИЦЕ"], 28.38, 99, -3, "height:320px"],
+  ["s7", "e7a", "badge b-wht", "c", 220, "🐍 ГАДЮКА ЗАЩИЩАЕТСЯ, А НЕ НАПАДАЕТ", 31.75, 99, 0, "font-size:34px"],
+  ["s7", "e7b", "opt", 0, 640, ["✅", "ЗНАЛ", "A"], 33.0],
+  ["s7", "e7c", "opt", 0, 810, ["😳", "ВПЕРВЫЕ СЛЫШУ", "B"], 33.4],
+];
+const W = 1080, H = 1920, GR = 1150;
+const HERO = { coat: "#ff8a3d", coat2: "#c75f15", hat: "#2f6b4f", hat2: "#fff", pants: "#3b3f58" };
+function forest(p) {
+  let tr = ""; for (let i = 0; i < 8; i++) { const x = i * 150 + 40 * hash(i), h = 500 + 200 * hash(i + 3); tr += `<path d="M${x} ${GR - 120} L${x + 75} ${GR - 120 - h} L${x + 150} ${GR - 120}Z" fill="${i % 2 ? "#2f5a2a" : "#3a6a32"}"/>`; }
+  let gr = ""; for (let i = 0; i < 40; i++) { const x = hash(i + 2) * W, y = GR + 20 + hash(i + 5) * 700; gr += `<path d="M${x} ${y} l-10 -40 M${x} ${y} l4 -50 M${x} ${y} l16 -36" stroke="#5a8a3a" stroke-width="6"/>`; }
+  return `<rect width="${W}" height="${H}" fill="#9fd0c0"/>${tr}<rect y="${GR - 140}" width="${W}" height="${H}" fill="#4a7a32"/>
+    <path d="M300 ${H} Q480 ${GR + 200} 520 ${GR - 140} H620 Q640 ${GR + 200} 880 ${H}Z" fill="#b89a6a"/>${gr}`;
+}
+// змея (гадюка): тело — толстая линия с зигзагом
+const snake = (id) => `<g id="${id}"><path class="sb" stroke="#7a6a4a" stroke-width="74" fill="none" stroke-linecap="round"/><path class="sz" stroke="#2a2014" stroke-width="20" fill="none" stroke-dasharray="40 28"/>
+  <g class="sh"><ellipse rx="44" ry="32" fill="#7a6a4a" stroke="#2a2014" stroke-width="6"/><circle cx="18" cy="-12" r="7" fill="#ffd23f"/><circle cx="20" cy="-12" r="3" fill="#000"/>
+  <path class="tg" d="M40 6 l30 0 l10 -8 M70 6 l10 8" stroke="#e8424f" stroke-width="5" fill="none"/></g></g>`;
+function updSnake(id, t, x0, y0, len = 420, strike = 0, ang = 0) {
+  const pts = []; for (let i = 0; i <= 20; i++) { const k = i / 20; pts.push([x0 - len * (1 - k) * Math.cos(ang), y0 + 40 * Math.sin(k * 9 + t * 5) * (1 - k * .6) * (1 - strike) - len * (1 - k) * Math.sin(ang)]); }
+  const hx = pts[20][0] + 120 * strike * Math.cos(ang), hy = pts[20][1] - 90 * strike; pts.push([hx, hy]);
+  const d = "M" + pts.map((p) => p.join(" ")).join(" L"); $(`#${id} .sb`).setAttribute("d", d); $(`#${id} .sz`).setAttribute("d", d);
+  $(`#${id} .sh`).setAttribute("transform", `translate(${hx} ${hy}) rotate(${-30 * strike}) scale(1.7)`); $(`#${id} .tg`).setAttribute("opacity", Math.sin(t * 9) > 0 ? 1 : 0);
+}
+// силуэт с ядом: показывает, как быстро яд поднимается
+const venomBody = (id) => `<g id="${id}"><defs><clipPath id="${id}c"><circle cx="0" cy="-330" r="60"/><rect x="-70" y="-270" width="140" height="230" rx="40"/><rect x="-60" y="-50" width="50" height="260" rx="25"/><rect x="10" y="-50" width="50" height="260" rx="25"/>
+  <rect x="-120" y="-260" width="44" height="210" rx="22"/><rect x="76" y="-260" width="44" height="210" rx="22"/></clipPath></defs>
+  <g clip-path="url(#${id}c)"><rect x="-130" y="-400" width="260" height="620" fill="#e8d8c8"/><rect class="vn" x="-130" y="210" width="260" height="0" fill="#8e44ad"/></g>
+  <g fill="none" stroke="#000" stroke-width="5"><circle cx="0" cy="-330" r="60"/><rect x="-70" y="-270" width="140" height="230" rx="40"/></g></g>`;
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k.startsWith("tile")) html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = forest("f1") + person("p1", HERO) + snake("sn1") + `<g id="bt1" opacity="0">${[0, 1, 2, 3, 4, 5].map((i) => `<path d="M0 0 l${Math.cos(i) * 60} ${Math.sin(i) * 60}" stroke="#fff" stroke-width="8"/>`).join("")}</g>`;
+  $("#a2").innerHTML = forest("f2") + `<g transform="translate(540 1250)"><ellipse rx="300" ry="160" fill="#ffd9bf" stroke="#b77a5a" stroke-width="8"/><circle cx="-30" r="12" fill="#8a1a1a"/><circle cx="30" r="12" fill="#8a1a1a"/>
+    <g id="mb2">${Array.from({ length: 10 }, (_, i) => `<g class="m"><circle r="16" fill="#6ad16a" stroke="#2a6a2a" stroke-width="4"/><circle cx="-5" cy="-4" r="3"/><circle cx="5" cy="-4" r="3"/></g>`).join("")}</g></g>`;
+  $("#a3").innerHTML = forest("f3") + `<rect width="${W}" height="${H}" fill="#000" opacity=".25"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#2a2440"/>` + venomBody("vb1") + venomBody("vb2") +
+    `<text x="290" y="1180" font-size="54" text-anchor="middle" fill="#ff8a8a" stroke="#000" stroke-width="8" paint-order="stroke">БЕГАЕШЬ</text><text x="790" y="1180" font-size="54" text-anchor="middle" fill="#8aff9a" stroke="#000" stroke-width="8" paint-order="stroke">ЛЕЖИШЬ</text>`;
+  $("#a5").innerHTML = forest("f5") + `<g transform="translate(540 1000)"><rect id="arm5" x="-360" y="-90" width="720" height="180" rx="90" fill="#ffd9bf" stroke="#b77a5a" stroke-width="8"/>
+    <circle cx="-120" cy="0" r="14" fill="#8a1a1a"/><circle cx="-90" cy="0" r="14" fill="#8a1a1a"/>
+    <g id="rg5"><rect x="230" y="-100" width="40" height="200" rx="10" fill="#e8c26a" stroke="#7a5a10" stroke-width="5"/></g>
+    <g id="wt5"><rect x="80" y="-110" width="80" height="220" rx="16" fill="#333"/><circle cx="120" cy="0" r="50" fill="#ddd" stroke="#333" stroke-width="8"/></g>
+    <g id="sp5" opacity="0"><rect x="-380" y="-130" width="760" height="40" rx="10" fill="#c49a5a" stroke="#6a4a1a" stroke-width="5"/>${[-260, -40, 180].map((x) => `<rect x="${x}" y="-140" width="80" height="290" fill="#fff" opacity=".9" stroke="#bbb" stroke-width="4"/>`).join("")}</g>
+    <g id="wa5" opacity="0" transform="translate(-260 -380)"><rect x="-50" y="-110" width="100" height="240" rx="30" fill="#7ad0ff" fill-opacity=".7" stroke="#2a6a9a" stroke-width="7"/><rect x="-26" y="-150" width="52" height="40" fill="#2a6a9a"/></g></g>`;
+  $("#a6").innerHTML = forest("f6") + `<rect width="${W}" height="${H}" fill="#000" opacity=".3"/>`;
+  $("#a7").innerHTML = forest("f7") + snake("sn7");
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const P = (id, x, y, s, pose, r = 0, o = 1) => { at(id, x, y, s, o, r); setPose(id, pose); };
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = "";
+    const strike = t < .25 ? .6 + .4 * prog(t, 0, .25) : 1 - prog(t, .5, 1.1);
+    P("p1", 620, GR - 88 * 1.6, 1.6, { la: t > .25 ? 150 : 20, ra: t > .25 ? 150 : 20, face: t > .25 ? "panic" : "worried", look: -1, lookY: 1 });
+    updSnake("sn1", t, 470, GR + 60, 520, strike);
+    $("#bt1").setAttribute("transform", `translate(600 ${GR - 70}) scale(${.5 + prog(t, .25, .5)})`); $("#bt1").setAttribute("opacity", t > .25 && t < .7 ? 1 - prog(t, .5, .7) : 0);
+    if (t < .02) { $("#bt1").setAttribute("opacity", 0); }
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 2.6, 2.9); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    const st = $("#st2"), sp = prog(t, 3.74, 3.95); st.style.opacity = sp > 0 ? 1 - prog(t, 4.7, 5) : 0; st.style.transform = `rotate(-12deg) scale(${lerp(3, 1, easeOut(sp))})`;
+    $$("#mb2 .m").forEach((m, i) => { const a = i / 10 * Math.PI * 2 + t, r = lerp(260, 40, prog(t, 6.4, 7.8)); m.setAttribute("transform", `translate(${Math.cos(a) * r} ${Math.sin(a) * r * .5})`); m.setAttribute("opacity", t > 6.43 ? 1 : 0); });
+  },
+  s3() {},
+  s4(lt, t) {
+    const k = prog(t, 16.1, 19.9);
+    at("vb1", 290, 900, 1.3); at("vb2", 790, 900, 1.3);
+    const f = (id, v) => { const r = $(`#${id} .vn`); r.setAttribute("y", 210 - 620 * v); r.setAttribute("height", 620 * v); };
+    f("vb1", .1 + .85 * easeIn(k)); f("vb2", .1 + .18 * k);
+    $("#vb1").setAttribute("transform", `translate(${290 + 8 * Math.sin(t * 16)} ${900 + 10 * Math.abs(Math.sin(t * 16))}) scale(1.3)`);
+  },
+  s5(lt, t) {
+    const off = prog(t, 20.3, 21.0); $("#rg5").setAttribute("transform", `translate(${400 * off} ${-300 * off}) rotate(${90 * off})`); $("#rg5").setAttribute("opacity", 1 - off);
+    $("#wt5").setAttribute("transform", `translate(${300 * off} ${-400 * off})`); $("#wt5").setAttribute("opacity", 1 - off);
+    $("#arm5").setAttribute("transform", `scale(1 ${1 + .12 * prog(t, 21.7, 23)})`);
+    $("#sp5").setAttribute("opacity", prog(t, 23.0, 23.4)); $("#wa5").setAttribute("opacity", prog(t, 25.1, 25.4));
+  },
+  s6(lt, t) { const ph = $("#ph6"); show(ph, t, 26.6, .35, 60); $("#st6").textContent = t > 28.3 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3); },
+  s7(lt, t) { updSnake("sn7", t * .4, 760, 1520, 420, 0, .1); },
+  s8(lt, t) { // петля: снова тропа, змея готовится к броску (кадр = первому)
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0);
+    const z = easeInOut(prog(t, 35.0, 36.4)); $("#a1").style.transformOrigin = "540px 1200px"; $("#a1").style.transform = `scale(${lerp(1.5, 1, z)})`;
+    $("#hook1").style.opacity = prog(t, 36.0, 36.5);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); elUpd("s1", 0); },
+};
+const easeIn = (x) => x * x;
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(0, (a) => { for (let k = 0; k < 36; k += 2.3) sfx.noise(a + k, 1.8, "bandpass", 2400, 2, .03, .8); });
+  add(0, (a) => sfx.noise(a, .25, "highpass", 4000, 1, .3, .05)); add(.25, sfx.hit); add(.25, sfx.boom); add(.4, (a) => sfx.breath(a, .4));
+  add(3.74, sfx.boom); add(3.74, sfx.no); for (let t = 14.2; t < 20; t += .5) add(t, (a) => sfx.heart(a, .6));
+  add(20.3, (a) => sfx.osc("sine", 1200, a, .01, .15, .3, 2400)); add(26.6, sfx.whoosh); for (let t = 26.8; t < 28.3; t += .4) add(t, sfx.beep); add(28.4, sfx.ok);
+  add(30.5, (a) => sfx.noise(a, 1.5, "highpass", 5000, 1, .08, .3)); // шипение
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(34.98, sfx.whooshDown); add(36.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

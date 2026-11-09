@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #10 — Прыжок в падающем лифте</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css">
+<style>
+#stage{background:#22252e}
+.el{position:absolute;z-index:7}
+.tile{position:absolute;width:300px;height:280px;border-radius:34px;background:#fff;border:7px solid #000;box-shadow:0 12px 0 #000;color:#111;text-align:center;z-index:6}
+.tile .em{display:block;font-size:130px;margin-top:20px;line-height:1.1}
+.tile b{font:900 32px var(--head);display:block;margin-top:8px;padding:0 8px}
+.tile.x::after{content:"";position:absolute;inset:-10px;background:linear-gradient(45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%),linear-gradient(-45deg,transparent 46%,#ff3b47 46%,#ff3b47 54%,transparent 54%)}
+.opt{left:110px;right:110px}
+.stamp{position:absolute;left:0;right:0;top:260px;text-align:center;z-index:8}
+.stamp span{display:inline-block;font:900 120px/1 var(--head);color:var(--red);border:16px solid var(--red);padding:10px 30px;border-radius:30px;background:rgba(255,255,255,.9)}
+.bar{position:absolute;left:120px;right:120px;height:120px;border:7px solid #000;border-radius:24px;background:#1b1f2a;overflow:hidden;box-shadow:0 10px 0 #000}
+.bar .f{position:absolute;left:0;top:0;bottom:0} .bar .t{position:absolute;inset:0;display:flex;align-items:center;padding:0 26px;font:900 46px var(--head);color:#fff;text-shadow:3px 3px 0 #000}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">Прыжок <b>спасёт</b>? <span class="em">🛗</span></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg><div class="stamp" id="st2"><span>НЕ СПАСЁТ</span></div>
+    <div class="bar" id="b2a" style="top:620px"><div class="f" id="f2a" style="background:var(--red)"></div><div class="t">⬇ ПАДЕНИЕ</div></div>
+    <div class="bar" id="b2b" style="top:790px"><div class="f" id="f2b" style="background:var(--green)"></div><div class="t">⬆ ПРЫЖОК</div></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><div style="position:absolute;inset:0;background:linear-gradient(180deg,#22252e,#3a3f50)"></div></div>
+  <div class="scene" id="s7"><div style="position:absolute;inset:0;background:linear-gradient(180deg,#22252e,#3a3f50)"></div>
+    <div class="big" style="top:200px;font-size:84px;line-height:1.05" id="q7">ЗАСТРЕВАЛ<br>В ЛИФТЕ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script>
+"use strict";
+const DUR = 39.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.9, 4.05], [6.05, 6.20], [10.69, 10.99], [12.3, 12.60], [14.16, 14.46], [18.68, 19.13], [21.81, 22.26], [24.55, 25.15], [27.16, 27.76], [29.82, 30.57], [32.08, 32.83], [33.76, 34.66], [35.88, 36.78], [36.95, 38.00], [39.38, 40.43], [39.7, 40.75]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.9 }, { id: "s2", s: 3.9, e: 10.69 }, { id: "s3", s: 10.69, e: 18.68 }, { id: "s4", s: 18.68, e: 24.55 },
+  { id: "s5", s: 24.55, e: 29.82 }, { id: "s6", s: 29.82, e: 33.76 }, { id: "s7", s: 33.76, e: 36.95 }, { id: "s8", s: 36.95, e: 39.38 }, { id: "s9", s: 39.38, e: 39.7 },
+];
+// как читать субтитры вслух (для сверки с озвучкой и для синтеза)
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [3.9, 20.41];
+const FLASHES = [3.9];
+const clockText = (t) => (t >= 3.9 && t < 36.95 ? "ВЫЖИВИ #10 · ЛИФТ" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:подпрыгнуть}"],
+  [1.61, "в {r:падающем лифте}"],
+  [2.53, "прямо перед ударом?"],
+  [3.9, "Спойлер: {r:это не спасёт.}"],
+  [6.05, "Ты падаешь вместе с кабиной,"],
+  [7.69, "и прыжок погасит лишь {r:крошечную часть скорости.}"],
+  [10.69, "Но есть хорошая новость:"],
+  [12.3, "лифт {g:почти не может упасть.}"],
+  [14.16, "Кабину держат {y:несколько тросов,}"],
+  [15.99, "и {g:каждый способен удержать её} в одиночку."],
+  [18.68, "А если что-то пойдёт не так,"],
+  [20.41, "сработают {g:ловители} —"],
+  [21.81, "тормоза, которые цепляются {y:за направляющие.}"],
+  [24.55, "Поэтому если лифт застрял, {g:не паникуй:}"],
+  [27.16, "{g:нажми кнопку вызова диспетчера} и жди."],
+  [29.82, "{r:Не раздвигай двери}"],
+  [30.8, "и {r:не лезь через люк} —"],
+  [32.08, "вот это действительно опасно."],
+  [33.76, "А ты когда-нибудь {y:застревал в лифте?}"],
+  [35.88, "Пиши в комменты."],
+  [36.95, "А пока представь: {y:ты подпрыгнул...}"],
+  [39.38, ""]
+];
+const MUSIC = { bpm: 104, root: 49, parts: [[0, 10.69, "drive", .7], [10.69, 24.55, "pulse", .6], [24.55, 33.76, "drive", .5], [33.76, 36.95, "pad", .6], [36.95, 39.7, "drive", .7]] };
+
+const E = [
+  ["s3", "e3a", "badge b-grn", "c", 200, "✅ ПОЧТИ НЕ МОЖЕТ УПАСТЬ", 12.3, 99, -2, "font-size:46px"],
+  ["s3", "e3b", "badge b-yel", "c", 320, "1 ТРОС ДЕРЖИТ КАБИНУ", 16.04, 99, 2, "font-size:46px"],
+  ["s4", "e4a", "badge b-grn", "c", 200, "🛑 ЛОВИТЕЛИ", 20.41, 99, -2, "font-size:60px"],
+  ["s5", "e5a", "badge b-grn", 70, 200, "😮‍💨 НЕ ПАНИКУЙ", 24.6, 99, -2],
+  ["s5", "e5b", "badge b-yel", 70, 320, "🔔 ВЫЗОВ ДИСПЕТЧЕРА", 27.16, 99, 2, "font-size:42px"],
+  ["s6", "e6a", "tile x", 150, 460, ["🚪", "РАЗДВИГАТЬ ДВЕРИ"], 29.82, 99, -3],
+  ["s6", "e6b", "tile x", 630, 460, ["🪜", "ЛЕЗТЬ ЧЕРЕЗ ЛЮК"], 30.8, 99, 3],
+  ["s6", "e6c", "badge b-red", "c", 860, "⚠️ ВОТ ЭТО ОПАСНО", 32.08, 99, 0, "font-size:56px"],
+  ["s7", "e7a", "opt", 0, 600, ["😅", "ДА, БЫЛО", "A"], 34.1], ["s7", "e7b", "opt", 0, 770, ["🍀", "НИ РАЗУ", "B"], 34.5],
+];
+const W = 1080, H = 1920;
+const HERO = { coat: "#3a7bd5", coat2: "#24539a", hair: "#3b2a1e", pants: "#2d3a4f" };
+// шахта: стены, направляющие, кабина
+function shaft(p) {
+  return `<rect width="${W}" height="${H}" fill="#2a2d36"/><g id="${p}wl">${Array.from({ length: 14 }, (_, i) => `<rect x="0" y="${i * 160}" width="${W}" height="8" fill="#3a3e4a"/>`).join("")}</g>
+    <rect x="150" y="0" width="26" height="${H}" fill="#7a808c"/><rect x="904" y="0" width="26" height="${H}" fill="#7a808c"/>`;
+}
+const cabin = (id, extra = "") => `<g id="${id}"><rect x="-300" y="-420" width="600" height="560" rx="10" fill="#9aa3b0" stroke="#40454f" stroke-width="10"/>
+  <rect x="-270" y="-390" width="540" height="500" fill="#c8ced8"/><rect x="-270" y="80" width="540" height="30" fill="#7a808c"/>${extra}</g>`;
+const ropes = (id, n = 6) => `<g id="${id}">${Array.from({ length: n }, (_, i) => `<rect class="rp" x="${-150 + i * 60 - 6}" y="-2000" width="12" height="1580" fill="#c9c9c9"/>`).join("")}</g>`;
+function build() {
+  E.forEach(([s, id, k, x, y, c, a, o, r, st]) => {
+    let html = "", style = (x === "c" ? "left:0;right:0;margin:auto;width:max-content;" : k === "opt" ? "" : `left:${x}px;`) + `top:${y}px;` + (st || "");
+    if (k.startsWith("tile")) html = `<span class="em">${c[0]}</span><b>${c[1]}</b>`;
+    else if (k === "opt") html = `<span class="em">${c[0]}</span>${c[1]}<span class="k">${c[2]}</span>`;
+    else html = c.replace(/(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)/gu, '<span class="em">$1</span>');
+    document.getElementById(s).insertAdjacentHTML("beforeend", `<div class="${k} el" id="${id}" style="${style}">${html}</div>`);
+  });
+  $("#a1").innerHTML = shaft("h1") + `<g id="sp1">${Array.from({ length: 16 }, (_, i) => `<rect x="${60 + i * 64}" width="6" height="220" fill="#fff" opacity=".25"/>`).join("")}</g>` +
+    `<g id="cg1" transform="translate(540 900)">${cabin("cb1")}<g id="pp1">${""}</g></g><rect id="fl1" x="0" y="1700" width="${W}" height="220" fill="#1a1c22"/>`;
+  $("#cg1 #pp1").outerHTML = person("p1", HERO);
+  $("#a2").innerHTML = shaft("h2");
+  $("#a3").innerHTML = shaft("h3") + `<g transform="translate(540 1050)">${ropes("rp3")}${cabin("cb3")}</g>`;
+  $("#a4").innerHTML = shaft("h4") + `<g id="cg4" transform="translate(540 1000)">${cabin("cb4")}
+    <g id="cl4"><rect id="clL" x="-330" y="-300" width="60" height="100" rx="10" fill="#e8c26a" stroke="#5a4010" stroke-width="6"/><rect id="clR" x="270" y="-300" width="60" height="100" rx="10" fill="#e8c26a" stroke="#5a4010" stroke-width="6"/></g></g>
+    <g id="spk4">${Array.from({ length: 12 }, () => `<circle r="7" fill="#ffd23f"/>`).join("")}</g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#c8ced8"/><rect x="700" y="420" width="240" height="640" rx="20" fill="#7a808c" stroke="#40454f" stroke-width="8"/>
+    ${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${770 + (i % 2) * 100}" cy="${520 + Math.floor(i / 2) * 110}" r="34" fill="#dfe3ea" stroke="#40454f" stroke-width="5"/><text x="${770 + (i % 2) * 100}" y="${534 + Math.floor(i / 2) * 110}" font-size="36" text-anchor="middle" fill="#333">${i + 1}</text>`).join("")}
+    <circle id="bell5" cx="820" cy="900" r="62" fill="#ffd23f" stroke="#7a5a10" stroke-width="7"/><text x="820" y="932" font-size="80" text-anchor="middle" font-family="Noto Color Emoji">🔔</text>` + person("p5", HERO);
+}
+const sb = {}; E.forEach((e) => (sb[e[0]] = sb[e[0]] || []).push(e));
+const elUpd = (sid, t) => (sb[sid] || []).forEach(([, id, , , , , a, o, r]) => { const el = document.getElementById(id); pop(el, t, a, r || 0); if (t < a) el.style.opacity = 0; if (o && o !== 99) hide(el, t, o); });
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = "";
+    // кабина падает (стены и полосы скорости бегут вверх), человек в прыжке, пол шахты приближается
+    $("#h1wl").setAttribute("transform", `translate(0 ${-((t * 2600) % 160)})`);
+    $$("#sp1 rect").forEach((r, i) => r.setAttribute("y", ((hash(i + 1) * H - t * 3400) % H + H) % H));
+    const jump = Math.sin(Math.min(1, t / 3.8) * Math.PI);
+    at("p1", 0, 60 - 130 * jump, 1.25); setPose("p1", { la: 160, ra: 160, ll: 30, rl: 30, face: "panic", sq: 1 + .05 * jump });
+    $("#fl1").setAttribute("y", lerp(1920, 1500, prog(t, 1.6, 3.9)));
+    const hk = $("#hook1"); hk.style.opacity = 1 - prog(t, 2.5, 2.8); hk.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    const st = $("#st2"), sp = prog(t, 3.9, 4.1); st.style.opacity = sp; st.style.transform = `rotate(-8deg) scale(${lerp(2.5, 1, easeOut(sp))})`;
+    show($("#b2a"), t, 6.05); show($("#b2b"), t, 7.74);
+    $("#f2a").style.width = 100 * easeOut(prog(t, 6.1, 6.9)) + "%"; $("#f2b").style.width = 6 * easeOut(prog(t, 7.8, 8.3)) + "%";
+    if (t < 6.05) $("#b2a").style.opacity = 0; if (t < 7.74) $("#b2b").style.opacity = 0;
+  },
+  s3(lt, t) {
+    const rp = $$("#rp3 .rp"), cut = prog(t, 16.6, 18.0);
+    rp.forEach((r, i) => { const hl = t > 14.16 && t < 16.04 ? (Math.floor((t - 14.16) * 4) % 6 === i ? 1 : 0) : 0; r.setAttribute("fill", hl ? "#ffd23f" : i === 2 && t > 16.04 ? "#4dff8a" : "#c9c9c9");
+      r.setAttribute("opacity", i !== 2 && cut > i / 6 ? .12 : 1); });
+  },
+  s4(lt, t) {
+    const fall = t < 20.41 ? easeIn(prog(t, 18.9, 20.41)) * 260 : 260;
+    $("#cg4").setAttribute("transform", `translate(${540 + (t > 20.41 && t < 20.8 ? 6 * Math.sin(t * 90) : 0)} ${740 + fall})`);
+    const grab = prog(t, 20.41, 20.6); $("#clL").setAttribute("x", lerp(-330, -400, grab)); $("#clR").setAttribute("x", lerp(270, 340, grab));
+    $$("#spk4 circle").forEach((c, i) => { const k = ((t - 20.41) * 1.5 + i / 12) % 1, sd = i % 2 ? 1 : -1;
+      c.setAttribute("cx", 540 + sd * (380 + 140 * k)); c.setAttribute("cy", 1000 + 400 * k * k - 100 * k); c.setAttribute("opacity", t > 20.41 && t < 22.5 ? 1 - k : 0); });
+  },
+  s5(lt, t) {
+    const go = easeInOut(prog(t, 27.16, 27.8));
+    at("p5", lerp(380, 560, go), 1150 - 88 * 1.5, 1.5); setPose("p5", { la: 20, ra: lerp(20, 120, go), face: t > 24.6 ? "focus" : "worried", look: 1 });
+    $("#bell5").setAttribute("fill", t > 27.7 && Math.floor(t * 4) % 2 ? "#fff59a" : "#ffd23f");
+  },
+  s6() {}, s7(lt, t) { show($("#q7"), t, 33.8); },
+  s8(lt, t) { // петля: снова падение и прыжок
+    const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0);
+    const z = easeInOut(prog(t, 37.0, 39.2)); $("#a1").style.transformOrigin = "540px 900px"; $("#a1").style.transform = `scale(${lerp(1.4, 1, z)})`;
+    $("#hook1").style.opacity = prog(t, 38.8, 39.35);
+  },
+  s9() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const easeIn = (x) => x * x;
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => { U[id](lt, t); elUpd(id, t); }; });
+function SOUND(sfx, add) {
+  add(0, (a) => { sfx.noise(a, 3.9, "bandpass", 600, .8, .4, .1, 2400); sfx.osc("sawtooth", 80, a, .1, .12, 3.6, 200); }); // свист падения
+  add(3.9, sfx.boom); add(3.9, sfx.hit); add(6.1, sfx.whoosh); add(7.8, sfx.pop);
+  for (let k = 0; k < 6; k++) add(14.2 + k * .25, sfx.tick); for (let k = 0; k < 5; k++) add(16.7 + k * .25, (a) => sfx.noise(a, .05, "highpass", 3000, 1, .3, .002)); add(18.1, sfx.ok);
+  add(18.9, (a) => sfx.noise(a, 1.5, "bandpass", 500, .8, .3, .1, 1800)); add(20.41, sfx.hit); add(20.41, (a) => sfx.noise(a, 1.4, "highpass", 4000, 1, .3, .01)); add(21.0, sfx.ok);
+  add(27.7, (a) => { for (let i = 0; i < 3; i++) sfx.osc("sine", 1400, a + i * .35, .01, .2, .25); }); add(29.82, sfx.no);
+  E.forEach((e) => add(e[6] - .02, sfx.pop)); add(36.95, sfx.whooshDown); add(38.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
