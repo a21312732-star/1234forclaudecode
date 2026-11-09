@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правила ночного сторожа — Серия 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+#stage{background:#0b0d14}
+#clock{background:#c8242f;color:#fff;box-shadow:0 6px 0 #6a0f15;font-size:26px}
+.full{transform-origin:540px 760px}
+.ttl{position:absolute;left:30px;right:30px;text-align:center;font:900 76px/1.05 var(--head);color:#fff;z-index:6;
+  text-shadow:6px 0 0 #000,-6px 0 0 #000,0 6px 0 #000,0 -6px 0 #000,5px 5px 0 #000,-5px 5px 0 #000,5px -5px 0 #000,-5px -5px 0 #000}
+.ttl i{font-style:normal;color:#ffd23f}
+.ep{position:absolute;left:40px;top:60px;background:#c8242f;color:#fff;font:900 36px var(--head);padding:10px 26px;border-radius:14px;z-index:6}
+.card{position:absolute;left:70px;right:70px;height:180px;border-radius:30px;background:rgba(18,20,30,.92);border:3px solid #3a3f52;display:flex;align-items:center;gap:30px;padding:0 30px;z-index:6;color:#fff}
+.card .n{flex:none;width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:900 80px var(--head)}
+.card b{display:block;font:900 50px/1.05 var(--head)} .card span{display:block;font:800 34px var(--head);color:#9fb4c8;margin-top:8px}
+.note{position:absolute;left:90px;right:90px;top:250px;padding:26px 30px;background:#eadfbf;color:#1f2a44;font:700 62px/1.1 Caveat;z-index:6;box-shadow:0 14px 30px rgba(0,0,0,.6);transform:rotate(-3deg)}
+.note u{text-decoration:none;background:#ff6b6b}
+.bdg{position:absolute;left:0;right:0;margin:auto;width:max-content;padding:14px 30px;border-radius:18px;font:900 46px var(--head);z-index:7;border:5px solid #000}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">СЕРИЯ 1</div><div class="ttl" id="h1" style="top:170px">ПРАВИЛО №2:<br><i>НЕ СВЕТИ В КОНЕЦ<br>КОРИДОРА</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg></div>
+  <div class="scene" id="s9"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a9"></svg>
+    <div class="note" id="n9">2. Не свети фонарём <u>в конец коридора.</u></div></div>
+  <div class="scene" id="s10"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a10"></svg></div>
+  <div class="scene" id="s11"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a11"></svg>
+    <div class="ttl" id="q11" style="top:240px">ЧТО МНЕ <i>ДЕЛАТЬ?</i></div>
+    <div class="card" id="c11a" style="top:470px"><div class="n" style="background:#c8242f">1</div><div><b>ПОСВЕТИТЬ 🔦</b><span>и посмотреть, кто это</span></div></div>
+    <div class="card" id="c11b" style="top:690px"><div class="n" style="background:#2f6fd6">2</div><div><b>ВЫКЛЮЧИТЬ ФОНАРЬ</b><span>и тихо уйти назад</span></div></div>
+    <div class="bdg" id="b11a" style="top:930px;background:#fff;color:#111">💬 ПИШИ ЦИФРУ В КОММЕНТЫ</div>
+    <div class="bdg" id="b11b" style="top:1060px;background:#c8242f;color:#fff">СЕРИЯ 2 — РЕШАЕШЬ ТЫ</div></div>
+  <div class="scene" id="s12"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 46.8;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.6, 3.09], [8, 7.06], [12.6, 10.61], [13.7, 11.88], [16.5, 14.41], [17.6, 15.54], [20.4, 18.58], [21.8, 20.05], [24.6, 22.62], [28.6, 26.84], [32.2, 30.18], [33.8, 31.32], [35.4, 32.94], [36.6, 34.02], [39, 36.78], [41.4, 39.47], [42.8, 41.06], [46.5, 44.22], [46.8, 44.52]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.6 }, { id: "s2", s: 3.6, e: 8.0 }, { id: "s3", s: 8.0, e: 12.6 }, { id: "s4", s: 12.6, e: 20.4 },
+  { id: "s5", s: 20.4, e: 21.8 }, { id: "s6", s: 21.8, e: 24.6 }, { id: "s7", s: 24.6, e: 28.6 }, { id: "s8", s: 28.6, e: 30.2 },
+  { id: "s9", s: 30.2, e: 32.2 }, { id: "s10", s: 32.2, e: 35.4 }, { id: "s11", s: 35.4, e: 46.5 }, { id: "s12", s: 46.5, e: 46.8 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [22.6, 33.8];
+const FLASHES = [];
+const clockText = (t) => (t >= 3.6 && t < 35.4 ? "ПРАВИЛА НОЧНОГО СТОРОЖА · СЕРИЯ 1" : null);
+const CAPS = [
+  [0.1, "Меня взяли {y:ночным сторожем}"],
+  [1.67, "в {r:заброшенный санаторий.}"],
+  [3.6, "Платят {y:втрое больше} обычного,"],
+  [5.8, "и скоро я понял {r:почему.}"],
+  [8, "Сменщик сунул мне {y:лист с правилами}"],
+  [10.23, "и ушёл, {r:даже не обернувшись.}"],
+  [12.6, "Правило первое:"],
+  [13.7, "обход ровно {y:в полночь, в два и в четыре.}"],
+  [16.5, "Правило второе:"],
+  [17.6, "{r:никогда не свети фонарём} в конец коридора."],
+  [20.4, "Я посмеялся."],
+  [21.8, "Ровно {y:в полночь} я вышел на обход."],
+  [24.6, "Лампа в конце коридора {y:мигнула,}"],
+  [26.83, "и там {r:кто-то стоял.}"],
+  [28.6, "Я уже поднял фонарь"],
+  [29.87, "и вспомнил {r:правило номер два.}"],
+  [32.2, "Оно {r:не двигалось.}"],
+  [33.8, "Оно {r:ждало.}"],
+  [35.4, "Что мне делать?"],
+  [36.6, "{y:Один} — посветить и посмотреть, кто это."],
+  [39, "{y:Два} — выключить фонарь и уйти назад."],
+  [41.4, "Пиши {y:цифру} в комменты."],
+  [42.8, "Что выберет большинство,"],
+  [44.24, "то я и сделаю {r:во второй серии.}"],
+  [46.5, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 35.4, "pad", .6], [35.4, 46.8, "pad", .35]] };
+
+const GB = { label: "ОХРАНА", torch: 1 };
+const GX = 420, GY = 2060, GS = 1.25; // сторож со спины в коридоре
+const rest = (id) => setArm(id, 131, -226, 160, -276, 28);
+// конец фонаря в координатах кадра
+const tipOf = (hx, hy, ang) => { const a = ang * Math.PI / 180, lx = hx + 8 + 60 * Math.sin(a), ly = hy - 16 - 60 * Math.cos(a); return [GX + lx * GS, GY + ly * GS]; };
+const flick = (t, wins) => wins.some(([a, b]) => t >= a && t < b);
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const [FX, FY] = PP(.55, 1.9, 13.6); // голова фигуры на экране
+
+function build() {
+  const guard = (id) => `<g transform="translate(${GX} ${GY}) scale(${GS})">${personBack(id, GB)}</g>`;
+  $("#a1").innerHTML = DEFS + corridor("c1", { beam: 1 }) + `<rect width="1080" height="1920" fill="url(#gVig)"/>` + guard("g1");
+  $("#a2").innerHTML = DEFS + exterior("x2") + `<g id="w2">${personBack("g2", GB)}</g>`;
+  $("#a3").innerHTML = DEFS + lobby() + `<g id="o3w">${personBack("o3", { old: 1, coat: "#5a4636", coat2: "#45362a", hair: "#a8a8a8", pants: "#3a3530" })}</g>` +
+    `<g transform="translate(300 1640) scale(.95)">${guardFront("gf3", "f3")}</g>`;
+  $("#a4").innerHTML = DEFS + desk + `<g transform="translate(540 960) rotate(-4) scale(.88)">${paper("p4")}</g><rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a5").innerHTML = DEFS + `<g filter="url(#fBlur)">${lobby()}</g><rect width="1080" height="1920" fill="#05060a" opacity=".35"/><g id="h5" transform="translate(540 1000)">${shoulders}${face("f5")}</g>`;
+  $("#a6").innerHTML = DEFS + wallClock("k6") + `<rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a7").innerHTML = DEFS + corridor("c7", { beam: 1 }) + `<rect width="1080" height="1920" fill="url(#gVig)"/>` + guard("g7");
+  $("#a8").innerHTML = DEFS + corridor("c8", { beam: 1 }) + `<rect width="1080" height="1920" fill="url(#gVig)"/>` + guard("g8");
+  $("#a9").innerHTML = DEFS + `<g filter="url(#fBlur)">${corridor("c9")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".45"/><g id="h9" transform="translate(540 1050)">${shoulders}${face("f9")}</g>`;
+  $("#a10").innerHTML = DEFS + corridor("c10") + `<rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a11").innerHTML = DEFS + `<g filter="url(#fBlur)">${corridor("c11")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".6"/>`;
+  $("#c9F").style.display = "none";
+}
+const U = {
+  s1(lt, t) {
+    zoom("#a1", 1 + .02 * t); rest("g1"); const [tx, ty] = tipOf(160, -276, 28); setBeam("c1", tx, ty, .15);
+    $("#c1L").setAttribute("opacity", flick(t, [[1.2, 1.28], [2.5, 2.56]]) ? 0 : 1);
+    const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`;
+  },
+  s2(lt, t) {
+    zoom("#a2", 1 + .03 * lt, 540, 1000);
+    const k = prog(t, 3.6, 8.0); $("#w2").setAttribute("transform", `translate(540 ${lerp(1880, 1500, k)}) scale(${lerp(.42, .3, k)})`); stepBack("g2", t); rest("g2");
+    $("#x2W").setAttribute("opacity", t > 6.9 ? 0 : 1);
+  },
+  s3(lt, t) {
+    zoom("#a3", 1 + .02 * lt, 540, 1200); setFace("f3", t < 10.4 ? "calm" : "fear", t < 10.4 ? .3 : .8);
+    const k = easeInOut(prog(t, 10.4, 12.2)); $("#o3w").setAttribute("transform", `translate(${lerp(640, 860, k)} ${lerp(1640, 1190, k)}) scale(${lerp(.95, .55, k)})`);
+    $("#o3w").setAttribute("opacity", 1 - prog(t, 12.0, 12.4)); stepBack("o3", t, t > 10.4 ? 1 : 0); setArm("o3", 131, -226, 140, -150, 0);
+  },
+  s4(lt, t) {
+    const z = lerp(1, 1.1, prog(t, 12.6, 20.4));
+    zoom("#a4", z, 500, 600);
+    const w1 = prog(t, 13.7, 15.0), w2 = prog(t, 17.6, 19.0);
+    const h1 = $("#p4 .hl1"), h2 = $("#p4 .hl2"); h1.setAttribute("opacity", w1 ? .55 : 0); h1.setAttribute("width", 640 * w1); h2.setAttribute("opacity", w2 ? .55 : 0); h2.setAttribute("width", 640 * w2);
+  },
+  s5(lt, t) { zoom("#a5", 1 + .05 * lt); setFace("f5", "laugh"); $("#h5").setAttribute("transform", `translate(540 ${1000 + 10 * Math.abs(Math.sin(t * 12))}) rotate(${3 * Math.sin(t * 9)})`); },
+  s6(lt, t) {
+    zoom("#a6", 1 + .06 * lt); const k = prog(t, 21.8, 22.6), m = lerp(-6, 0, easeInOut(k));
+    $("#k6M").setAttribute("transform", `rotate(${m})`); $("#k6H").setAttribute("transform", `rotate(${m / 12})`); $("#k6S").setAttribute("transform", `rotate(${t < 22.6 ? (t * 360) % 360 : 0})`);
+  },
+  s7(lt, t) {
+    zoom("#a7", 1 + .04 * lt); stepBack("g7", t, t < 26.4 ? 1 : 0); rest("g7"); const [tx, ty] = tipOf(160, -276, 28); setBeam("c7", tx, ty + 6 * Math.sin(t * 7), .1);
+    const on = flick(t, [[24.9, 25.0], [25.15, 25.25], [25.6, 25.78], [26.3, 99]]) && !flick(t, [[27.4, 27.47]]);
+    $("#c7L").setAttribute("opacity", on ? 1 : 0); $("#c7F").setAttribute("opacity", on && t > 25.5 ? 1 : 0);
+  },
+  s8(lt, t) {
+    zoom("#a8", 1.08 + .03 * lt); const k = easeInOut(prog(t, 28.7, 29.9));
+    const hx = lerp(160, 150, k), hy = lerp(-276, -430, k), ang = lerp(28, 6, k); setArm("g8", lerp(131, 178, k), lerp(-226, -300, k), hx, hy, ang);
+    const [tx, ty] = tipOf(hx, hy, ang); setBeam("c8", tx, ty, lerp(.1, .5, k));
+    $("#c8L").setAttribute("opacity", flick(t, [[29.3, 29.36]]) ? 0 : 1);
+  },
+  s9(lt, t) {
+    zoom("#a9", 1 + .08 * lt, 540, 1000); setFace("f9", t < 30.4 ? "fear" : "shock", -.2); $("#h9").setAttribute("transform", `translate(${540 + 3 * Math.sin(t * 40)} 1050)`);
+    const n = $("#n9"), p = easeOut(prog(t, 30.5, 30.8)); n.style.opacity = p; n.style.transform = `rotate(-3deg) scale(${.7 + .3 * p})`;
+  },
+  s10(lt, t) {
+    zoom("#a10", lerp(3.6, 4.4, prog(t, 32.2, 35.4)), FX, FY);
+    const on = !flick(t, [[32.9, 32.96], [34.6, 34.7]]); $("#c10L").setAttribute("opacity", on ? 1 : 0); $("#c10F").setAttribute("opacity", on ? 1 : 0);
+    $("#c10F .fh").setAttribute("transform", `translate(6 -196) rotate(${24 + 14 * easeInOut(prog(t, 33.8, 35.2))})`);
+  },
+  s11(lt, t) {
+    show($("#q11"), t, 35.45); show($("#c11a"), t, 36.6, .3, 60); show($("#c11b"), t, 39.0, .3, 60); show($("#b11a"), t, 41.4); show($("#b11b"), t, 44.3);
+    if (t < 36.6) $("#c11a").style.opacity = 0; if (t < 39.0) $("#c11b").style.opacity = 0; if (t < 41.4) $("#b11a").style.opacity = 0; if (t < 44.3) $("#b11b").style.opacity = 0;
+  },
+  s12(lt, t) { const s = $("#s11"); s.style.display = "block"; s.style.opacity = 1; U.s11(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  const step = (a, v = .3) => sfx.noise(a, .07, "lowpass", 260, 1, v, .005);
+  const buzz = (a) => sfx.noise(a, .07, "highpass", 2500, 1, .12, .002);
+  add(0.05, sfx.whooshDown); [1.2, 2.5].forEach((t) => add(t, buzz));
+  add(3.6, (a) => sfx.wind(a, 4.4, .8)); add(6.9, buzz);
+  for (let t = 10.5; t < 12.2; t += .45) add(t, (a) => step(a, .25)); add(12.3, (a) => sfx.noise(a, .25, "lowpass", 180, 1, .5, .005));
+  add(12.7, (a) => sfx.noise(a, .3, "highpass", 3000, 1, .12, .05)); [13.8, 17.7].forEach((t) => add(t, (a) => sfx.noise(a, .5, "bandpass", 2500, 4, .08, .05)));
+  for (let t = 21.8; t < 22.6; t += .25) add(t, sfx.tick); add(22.6, sfx.ring); add(22.6, sfx.boom);
+  for (let t = 24.7; t < 26.4; t += .45) add(t, (a) => step(a)); [24.9, 25.15, 25.6, 26.3, 27.4].forEach((t) => add(t, buzz));
+  for (let t = 26.7; t < 32.2; t += Math.max(.42, .75 - (t - 26.7) * .05)) add(t, (a) => sfx.heart(a, .8));
+  add(29.0, (a) => sfx.breath(a, .9)); add(30.2, (a) => sfx.riser(a, 1.2)); add(30.5, sfx.hit);
+  add(32.2, sfx.whooshDown); [32.9, 34.6].forEach((t) => add(t, buzz)); add(33.8, sfx.boom); add(33.8, sfx.hit);
+  [36.6, 39.0].forEach((t) => add(t, sfx.ding)); [41.4, 44.3].forEach((t) => add(t, sfx.pop));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
