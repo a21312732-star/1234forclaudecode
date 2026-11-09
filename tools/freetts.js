@@ -19,7 +19,7 @@ const text = fs.readFileSync(textFile, 'utf8').trim();
   let ok = false;
   for (let i = 0; i < 6 && !ok; i++) {
     await p.goto('https://freetts.ru/', { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
-    ok = (await p.locator('textarea').count()) > 0;
+    ok = (await p.locator('textarea').count()) > 0 && (await p.locator('button').filter({ hasText: 'Язык' }).count()) > 0; // интерфейс загрузился полностью
     if (!ok) await p.waitForTimeout(5000 + i * 5000);
   }
   if (!ok) { console.error('freetts.ru не открылся'); process.exit(2); }
