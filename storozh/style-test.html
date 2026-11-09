@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Сторож — тест стиля</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#000}
+svg{display:block}
+.f{width:1080px;height:1920px;position:relative;overflow:hidden}
+</style>
+</head>
+<body>
+<div class="f" id="F1"><svg id="v1" width="1080" height="1920" viewBox="0 0 1080 1920"></svg></div>
+<div class="f" id="F2"><svg id="v2" width="1080" height="1920" viewBox="0 0 1080 1920"></svg></div>
+<div class="f" id="F3"><svg id="v3" width="1080" height="1920" viewBox="0 0 1080 1920"></svg></div>
+<script>
+"use strict";
+const W = 1080, H = 1920, F = 700, VY = 760, CAM = 1.6, OL = "#12131a";
+const P = (x, y, z) => [540 + x * F / z, VY + (CAM - y) * F / z];
+const pts = (a) => a.map(([x, y, z]) => P(x, y, z).map((v) => v.toFixed(1)).join(",")).join(" ");
+const poly = (a, fill, ex = "") => `<polygon points="${pts(a)}" fill="${fill}" ${ex}/>`;
+const hash = (n) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- коридор санатория (одноточечная перспектива) ----------
+function corridor(o = {}) {
+  const Z1 = 0.8, Z2 = 16, X = 1.5, Y = 3, WA = 1.25;
+  let s = `<defs>
+    <radialGradient id="lamp" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6d8" stop-opacity=".9"/><stop offset=".35" stop-color="#ffe7a8" stop-opacity=".35"/><stop offset="1" stop-color="#ffe7a8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff0c0" stop-opacity=".35"/><stop offset="1" stop-color="#fff0c0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fog" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7d8fa8" stop-opacity=".45"/><stop offset="1" stop-color="#7d8fa8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="exitg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3dff8a" stop-opacity=".55"/><stop offset="1" stop-color="#3dff8a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx=".5" cy=".45" r=".75"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>
+    <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff7d6" stop-opacity=".55"/><stop offset="1" stop-color="#fff7d6" stop-opacity=".06"/></linearGradient>
+  </defs><rect width="${W}" height="${H}" fill="#0b0d14"/>`;
+  // потолок, стены (низ — зелёная краска, верх — побелка), пол-плитка
+  s += poly([[-X, Y, Z1], [X, Y, Z1], [X, Y, Z2], [-X, Y, Z2]], "#1a1f2b");
+  for (const sx of [-1, 1]) {
+    s += poly([[sx * X, 0, Z1], [sx * X, WA, Z1], [sx * X, WA, Z2], [sx * X, 0, Z2]], "#17332c");
+    s += poly([[sx * X, WA, Z1], [sx * X, Y, Z1], [sx * X, Y, Z2], [sx * X, WA, Z2]], "#323a4a");
+    s += poly([[sx * X, WA - .03, Z1], [sx * X, WA + .03, Z1], [sx * X, WA + .03, Z2], [sx * X, WA - .03, Z2]], "#0e1f1a");
+    // плинтус
+    s += poly([[sx * X, 0, Z1], [sx * X, .12, Z1], [sx * X, .12, Z2], [sx * X, 0, Z2]], "#0d1a16");
+  }
+  for (let i = 0; i < 6; i++) for (let j = 0; j < 31; j++) {
+    const x0 = -X + i * .5, z0 = Z1 + j * .5;
+    s += poly([[x0, 0, z0], [x0 + .5, 0, z0], [x0 + .5, 0, z0 + .5], [x0, 0, z0 + .5]], (i + j) % 2 ? "#23252e" : "#1c1e26", `stroke="#121319" stroke-width="1.5"`);
+  }
+  // двери палат
+  [[-1, 2.6, 0, "12"], [1, 4.2, 0, "13"], [-1, 6.4, 1, "14"], [1, 8.6, 0, "15"], [-1, 10.8, 0, "16"], [1, 12.6, 0, "17"]].forEach(([sx, z, ajar, n]) => {
+    const x = sx * X;
+    s += poly([[x, 0, z - .08], [x, 2.18, z - .08], [x, 2.18, z + .98], [x, 0, z + .98]], "#0f1116");
+    s += poly([[x, 0, z], [x, 2.1, z], [x, 2.1, z + .9], [x, 0, z + .9]], ajar ? "#000" : "#3a2c26");
+    if (ajar) s += poly([[x, 0, z + .9], [x, 2.1, z + .9], [x - sx * .55, 2.1, z + .6], [x - sx * .55, 0, z + .6]], "#4a382f", `stroke="${OL}" stroke-width="2"`);
+    else {
+      s += poly([[x, 1.25, z + .15], [x, 1.85, z + .15], [x, 1.85, z + .75], [x, 1.25, z + .75]], "#2c211c");
+      s += poly([[x, 1.0, z + .72], [x, 1.06, z + .72], [x, 1.06, z + .8], [x, 1.0, z + .8]], "#8a7a5a");
+    }
+    s += poly([[x, 2.25, z + .3], [x, 2.45, z + .3], [x, 2.45, z + .6], [x, 2.25, z + .6]], "#c9c2a8");
+  });
+  // торцевая стена и двустворчатая дверь, табличка «ВЫХОД»
+  s += poly([[-X, 0, Z2], [X, 0, Z2], [X, Y, Z2], [-X, Y, Z2]], "#262c3a");
+  s += poly([[-X, 0, Z2], [X, 0, Z2], [X, WA, Z2], [-X, WA, Z2]], "#142a24");
+  s += poly([[-.55, 0, Z2 - .01], [.55, 0, Z2 - .01], [.55, 2.2, Z2 - .01], [-.55, 2.2, Z2 - .01]], "#3a2c26", `stroke="${OL}" stroke-width="2"`);
+  s += poly([[-.4, 1.3, Z2 - .02], [-.08, 1.3, Z2 - .02], [-.08, 1.9, Z2 - .02], [-.4, 1.9, Z2 - .02]], "#9fb4c8", `opacity=".55"`);
+  s += poly([[.08, 1.3, Z2 - .02], [.4, 1.3, Z2 - .02], [.4, 1.9, Z2 - .02], [.08, 1.9, Z2 - .02]], "#9fb4c8", `opacity=".55"`);
+  const [ex, ey] = P(0, 2.45, Z2 - .02);
+  s += `<circle cx="${ex}" cy="${ey}" r="70" fill="url(#exitg)"/><rect x="${ex - 22}" y="${ey - 7}" width="44" height="14" rx="2" fill="#1eff7a"/><text x="${ex}" y="${ey + 4}" font-size="9" font-weight="900" text-anchor="middle" font-family="Montserrat" fill="#063">ВЫХОД</text>`;
+  // туман в глубине
+  s += `<ellipse cx="540" cy="${VY + 40}" rx="420" ry="360" fill="url(#fog)"/>`;
+  // плафоны: один горит
+  [[3.2, 0], [7.2, 1], [11.2, 0], [15, 0]].forEach(([z, on]) => {
+    s += poly([[-.35, Y, z], [.35, Y, z], [.35, Y, z + .5], [-.35, Y, z + .5]], on ? "#fff3cf" : "#3b4050", `stroke="${OL}" stroke-width="2"`);
+    if (on) { const [lx, ly] = P(0, Y - .05, z + .25), r = 2.2 * F / z; s += `<circle cx="${lx}" cy="${ly}" r="${r}" fill="url(#lamp)"/>`;
+      const c = Array.from({ length: 24 }, (_, i) => [1.25 * Math.cos(i / 24 * 6.283), 0, z + .25 + 1.25 * Math.sin(i / 24 * 6.283)]); s += poly(c, "url(#pool)"); }
+  });
+  // фигура в конце коридора
+  if (o.figure) s += figure(.55, 13.6);
+  return s;
+}
+// бледная фигура: длинные руки, голова набок
+function figure(x, z) {
+  const [bx, by] = P(x, 0, z), k = F / z;
+  return `<g transform="translate(${bx} ${by}) scale(${k / 100})" opacity=".92">
+    <ellipse cx="0" cy="0" rx="40" ry="8" fill="#000" opacity=".5"/>
+    <path d="M-14 0 L-10 -95 M14 0 L10 -95" stroke="#c9cfd6" stroke-width="11" stroke-linecap="round"/>
+    <path d="M-22 -95 Q-26 -150 -16 -175 L16 -175 Q26 -150 22 -95 Z" fill="#d6dbe0"/>
+    <path d="M-17 -170 Q-40 -110 -34 -40 M17 -170 Q40 -110 34 -40" stroke="#c9cfd6" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <g transform="translate(6 -196) rotate(24)"><ellipse rx="19" ry="24" fill="#e2e6ea"/><ellipse cx="-7" cy="-3" rx="5" ry="8" fill="#000"/><ellipse cx="7" cy="-3" rx="5" ry="8" fill="#000"/></g></g>`;
+}
+// сторож со спины, с фонарём (ноги в точке 0,0)
+function guardBack() {
+  return `<g stroke="${OL}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="-62" y="-150" width="52" height="150" rx="20" fill="#2a2f3d"/><rect x="10" y="-150" width="52" height="150" rx="20" fill="#2a2f3d"/>
+    <path d="M-74 -10 h68 v22 h-74z M6 -10 h68 v22 h-74z" fill="#1a1a1f"/>
+    <path d="M-110 -170 Q-118 -370 -60 -390 L60 -390 Q118 -370 110 -170 Z" fill="#23324d"/>
+    <path d="M-110 -170 Q-118 -370 -60 -390 L-30 -390 Q-80 -360 -84 -170 Z" fill="#1a2640" stroke="none"/>
+    <rect x="-112" y="-200" width="224" height="34" rx="10" fill="#1b2335"/>
+    <rect x="-96" y="-318" width="192" height="44" rx="6" fill="#d9c25a"/>
+    <text x="0" y="-284" font-family="Montserrat" font-weight="900" font-size="36" text-anchor="middle" fill="#23324d" stroke="none">ОХРАНА</text>
+    <path d="M-104 -350 Q-150 -260 -132 -160" fill="none" stroke-width="0"/>
+    <rect x="-150" y="-370" width="48" height="190" rx="22" fill="#1f2c45" transform="rotate(8 -126 -370)"/>
+    <g transform="rotate(-135 104 -360)"><rect x="80" y="-372" width="48" height="190" rx="22" fill="#23324d"/><circle cx="104" cy="-186" r="26" fill="#e9b48f"/>
+      <rect x="86" y="-176" width="36" height="70" rx="8" fill="#3a3a3a"/><rect x="80" y="-112" width="48" height="26" rx="6" fill="#555"/></g>
+    <circle cx="0" cy="-500" r="118" fill="#e9b48f"/>
+    <ellipse cx="-118" cy="-490" rx="18" ry="28" fill="#e9b48f"/><ellipse cx="118" cy="-490" rx="18" ry="28" fill="#e9b48f"/>
+    <path d="M-120 -470 Q-130 -600 -60 -625 L-70 -660 L-20 -632 L0 -672 L24 -632 L72 -656 L62 -620 Q132 -590 120 -470 Q60 -430 0 -436 Q-60 -430 -120 -470 Z" fill="#3a2a20"/>
+    <path d="M-60 -580 Q-20 -600 30 -585" fill="none" stroke="#5a4232" stroke-width="8"/></g>`;
+}
+
+// ---------- кадр 1: коридор, вид из-за спины, луч фонаря ----------
+{
+  let s = corridor({ figure: true });
+  const tip = [806, 1354], [a1x, a1y] = P(-.4, 0, 6.5), [a2x, a2y] = P(1.2, 0, 4.2), [a3x, a3y] = P(1.2, .9, 9), [a4x, a4y] = P(-.2, .9, 12);
+  s += `<polygon points="${tip} ${a1x},${a1y} ${a4x},${a4y} ${a3x},${a3y} ${a2x},${a2y}" fill="url(#beam)" style="mix-blend-mode:screen"/>`;
+  const sp = Array.from({ length: 28 }, (_, i) => P(.55 + .75 * Math.cos(i / 28 * 6.283), 0, 7.5 + 1.6 * Math.sin(i / 28 * 6.283)));
+  s += `<polygon points="${sp.map((p) => p.join(",")).join(" ")}" fill="#fff4cc" opacity=".22" style="mix-blend-mode:screen"/>`;
+  s += `<rect width="${W}" height="${H}" fill="url(#vig)"/>`;
+  s += `<g transform="translate(420 2060) scale(1.25)">${guardBack()}</g>`;
+  s += `<g font-family="Montserrat" font-weight="900"><rect x="40" y="70" width="290" height="70" rx="14" fill="#c8242f"/><text x="185" y="118" font-size="36" text-anchor="middle" fill="#fff">СЕРИЯ 1</text>
+    <text x="540" y="250" font-size="76" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="10" paint-order="stroke">ПРАВИЛО №2:</text>
+    <text x="540" y="340" font-size="66" text-anchor="middle" fill="#ffd23f" stroke="#000" stroke-width="10" paint-order="stroke">НЕ СВЕТИ В КОНЕЦ</text>
+    <text x="540" y="420" font-size="66" text-anchor="middle" fill="#ffd23f" stroke="#000" stroke-width="10" paint-order="stroke">КОРИДОРА</text></g>`;
+  document.getElementById("v1").innerHTML = s;
+}
+// ---------- кадр 2: крупный план лица ----------
+{
+  let s = `<defs><filter id="bl"><feGaussianBlur stdDeviation="9"/></filter><radialGradient id="ul" cx=".5" cy="1" r=".9"><stop offset="0" stop-color="#fff2c8" stop-opacity=".55"/><stop offset="1" stop-color="#fff2c8" stop-opacity="0"/></radialGradient></defs>
+    <g filter="url(#bl)">${corridor({ figure: false })}</g><rect width="${W}" height="${H}" fill="#05060a" opacity=".45"/>`;
+  s += `<g stroke="${OL}" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" transform="translate(540 1000)">
+    <path d="M-420 920 Q-430 520 -260 430 L260 430 Q430 520 420 920 Z" fill="#23324d"/>
+    <path d="M-170 430 L-110 330 L110 330 L170 430 L60 520 L0 440 L-60 520 Z" fill="#1b2335"/>
+    <rect x="-330" y="560" width="190" height="64" rx="8" fill="#d9c25a"/><text x="-235" y="604" font-family="Montserrat" font-weight="900" font-size="38" text-anchor="middle" fill="#23324d" stroke="none">ОХРАНА</text>
+    <rect x="200" y="470" width="90" height="150" rx="14" fill="#2b2b2b"/><path d="M265 470 V380" stroke-width="12"/><circle cx="245" cy="510" r="10" fill="#ff3b30" stroke="none"/>
+    <rect x="-110" y="230" width="220" height="130" fill="#e3a985"/>
+    <ellipse cx="-318" cy="-20" rx="50" ry="72" fill="#e9b48f"/><ellipse cx="318" cy="-20" rx="50" ry="72" fill="#e9b48f"/>
+    <path d="M-320 -60 Q-330 280 0 330 Q330 280 320 -60 Q320 -300 0 -310 Q-320 -300 -320 -60 Z" fill="#efbd97"/>
+    <path d="M-300 120 Q-200 300 0 318 Q200 300 300 120 Q260 260 0 290 Q-260 260 -300 120Z" fill="#fff2c8" opacity=".35" stroke="none"/>
+    <path d="M-330 -40 Q-350 -330 -150 -380 L-170 -450 L-60 -395 L0 -470 L60 -392 L170 -445 L150 -375 Q345 -320 330 -40 Q300 -170 200 -200 Q80 -150 -40 -210 Q-160 -170 -250 -190 Q-310 -140 -330 -40 Z" fill="#3a2a20"/>
+    <path d="M-130 -300 Q-60 -340 40 -320 M60 -330 Q130 -330 190 -290" fill="none" stroke="#5a4232" stroke-width="10"/>
+    <ellipse cx="-125" cy="20" rx="78" ry="92" fill="#fff"/><ellipse cx="125" cy="20" rx="78" ry="92" fill="#fff"/>
+    <circle cx="-100" cy="30" r="20" fill="#14141a" stroke="none"/><circle cx="150" cy="30" r="20" fill="#14141a" stroke="none"/>
+    <circle cx="-94" cy="22" r="6" fill="#fff" stroke="none"/><circle cx="156" cy="22" r="6" fill="#fff" stroke="none"/>
+    <path d="M-205 -110 Q-140 -150 -60 -120 M60 -120 Q140 -150 205 -110" fill="none" stroke-width="16"/>
+    <path d="M-20 90 Q-30 150 10 160" fill="none" stroke="#b9805e" stroke-width="8"/>
+    <ellipse cx="10" cy="215" rx="34" ry="44" fill="#5a1a12"/>
+    <path d="M250 -150 Q275 -100 250 -80 Q225 -100 250 -150 Z" fill="#bfe3f5" stroke-width="5"/>
+    <ellipse cx="-215" cy="135" rx="38" ry="18" fill="#ff8a8a" opacity=".35" stroke="none"/><ellipse cx="225" cy="135" rx="38" ry="18" fill="#ff8a8a" opacity=".35" stroke="none"/></g>
+    <rect width="${W}" height="${H}" fill="url(#ul)" style="mix-blend-mode:soft-light"/>`;
+  s += `<g font-family="Montserrat" font-weight="900"><rect x="190" y="1560" width="700" height="110" rx="55" fill="#fff" stroke="#000" stroke-width="6"/><path d="M500 1668 L540 1720 L560 1668" fill="#fff" stroke="#000" stroke-width="6"/><rect x="497" y="1662" width="66" height="10" fill="#fff"/>
+    <text x="540" y="1634" font-size="54" text-anchor="middle" fill="#111">ТУТ <tspan fill="#c8242f">КТО-ТО</tspan> ЕСТЬ?</text></g>`;
+  document.getElementById("v2").innerHTML = s;
+}
+// ---------- кадр 3: лист с правилами на столе ----------
+{
+  const rules = ["1. Обход — ровно в 00:00, 2:00 и 4:00.", "2. Не свети фонарём в конец коридора.", "3. Если тебя зовут из подвала —", "    не отвечай. Даже если голос знакомый.", "4. В 3:15 не смотри в окна.", "5. В бассейне нет воды.", "    Если слышишь плеск — уходи.", "6. Лифт не работает с 1987 года.", "7. Если в палате 14 горит свет —"];
+  let s = `<defs><radialGradient id="torch" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#fff6dc" stop-opacity="0"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset="1" stop-color="#000" stop-opacity=".93"/></radialGradient>
+    <pattern id="wood" width="1080" height="60" patternUnits="userSpaceOnUse"><rect width="1080" height="60" fill="#4a3022"/><path d="M0 58 H1080" stroke="#2e1d14" stroke-width="4"/><path d="M0 20 Q300 30 600 18 T1080 22" stroke="#553829" stroke-width="3" fill="none"/></pattern></defs>
+    <rect width="${W}" height="${H}" fill="url(#wood)"/>
+    <g transform="translate(540 960) rotate(-4)">
+      <rect x="-410" y="-600" width="820" height="1100" fill="#000" opacity=".4" transform="translate(16 20)"/>
+      <rect x="-410" y="-600" width="820" height="1100" fill="#eadfbf"/>
+      ${Array.from({ length: 22 }, (_, i) => `<path d="M-370 ${-440 + i * 44} H370" stroke="#9cb4c9" stroke-width="2" opacity=".6"/>`).join("")}
+      <path d="M-320 -600 V500" stroke="#d98a8a" stroke-width="3"/>
+      <circle cx="40" cy="300" r="90" fill="none" stroke="#a87a4a" stroke-width="10" opacity=".35"/>
+      <text x="0" y="-500" font-family="Caveat" font-weight="700" font-size="54" text-anchor="middle" fill="#1f2a44">ПРАВИЛА ДЛЯ НОЧНОГО СТОРОЖА</text>
+      ${rules.map((r, i) => `<text x="-300" y="${-400 + i * 88}" font-family="Caveat" font-weight="600" font-size="44" fill="#1f2a44" xml:space="preserve">${r}</text>`).join("")}
+      <path d="M-300 400 Q-100 380 60 410 T380 400" stroke="#5a1a12" stroke-width="22" fill="none" opacity=".75"/>
+      <path d="M-410 440 L-330 470 L-260 430 L-180 480 L-90 440 L0 485 L90 445 L190 480 L280 440 L410 470 L410 500 L-410 500 Z" fill="#4a3022"/></g>
+    <g transform="translate(870 1480)"><ellipse cx="0" cy="10" rx="120" ry="40" fill="#000" opacity=".4"/><rect x="-90" y="-150" width="180" height="160" rx="20" fill="#e8e8e8" stroke="${OL}" stroke-width="7"/><path d="M90 -110 Q150 -100 140 -40 Q130 0 90 -20" fill="none" stroke="${OL}" stroke-width="18"/><ellipse cx="0" cy="-150" rx="90" ry="22" fill="#3a2418" stroke="${OL}" stroke-width="7"/></g>
+    <g transform="translate(190 1560) rotate(-20)" stroke="${OL}" stroke-width="6"><circle r="44" fill="none" stroke="#b9a35a" stroke-width="12"/><rect x="30" y="-12" width="150" height="24" rx="6" fill="#c9b36a"/><rect x="40" y="-18" width="110" height="36" rx="4" fill="#8a7a3a" transform="translate(70 0) scale(.4 1)"/></g>
+    <rect width="${W}" height="${H}" fill="url(#torch)"/>
+    <g font-family="Montserrat" font-weight="900"><text x="540" y="200" font-size="70" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="10" paint-order="stroke">ПЕРВАЯ НОЧЬ.</text>
+    <text x="540" y="285" font-size="58" text-anchor="middle" fill="#ffd23f" stroke="#000" stroke-width="10" paint-order="stroke">7 ПРАВИЛ. НАРУШИШЬ — …</text></g>`;
+  document.getElementById("v3").innerHTML = s;
+}
+</script>
+</body>
+</html>
