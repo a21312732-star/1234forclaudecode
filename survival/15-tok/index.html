@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #15 — Удар током</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#e9e1d3}
+.phone{position:absolute;left:340px;top:330px;width:400px;height:680px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:96px">ДРУГА <b>БЬЁТ</b><br><b>ТОКОМ</b> ⚡</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="phone" id="ph8"><div class="num">112</div><div class="st" id="st8">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s9"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a9"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q9">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s10"></div>
+  <div class="scene" id="s11"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 41.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [4.6, 4.65], [5.6, 5.70], [7.8, 7.88], [9.4, 9.73], [11.2, 11.88], [13.2, 14.23], [15, 16.00], [17.6, 18.54], [19.4, 20.13], [21.6, 22.37], [24.8, 26.40], [25.8, 27.44], [29.4, 31.25], [31, 33.04], [35, 37.05], [36.2, 38.14], [41.6, 42.15], [41.9, 42.45]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.6 }, { id: "s2", s: 4.6, e: 13.2 }, { id: "s3", s: 13.2, e: 15.0 }, { id: "s4", s: 15.0, e: 19.4 },
+  { id: "s5", s: 19.4, e: 21.6 }, { id: "s6", s: 21.6, e: 24.8 }, { id: "s7", s: 24.8, e: 29.4 }, { id: "s8", s: 29.4, e: 35.0 },
+  { id: "s9", s: 35.0, e: 38.9 }, { id: "s10", s: 38.9, e: 41.6 }, { id: "s11", s: 41.6, e: 41.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.2, 15.4];
+const FLASHES = [0.2, 13.2, 15.4];
+const clockText = (t) => (t >= 4.6 && t < 38.9 ? "ВЫЖИВИ #15 · УДАР ТОКОМ" : null);
+const CAPS = [
+  [0.1, "Твоего друга {r:бьёт током,}"],
+  [1.6, "он схватился за провод {r:и не может отпустить.}"],
+  [4.6, "Что делаешь?"],
+  [5.6, "{y:А} — хватаешь его и оттаскиваешь."],
+  [7.8, "{y:Б} — обливаешь водой."],
+  [9.4, "{y:В} — выключаешь рубильник."],
+  [11.2, "{r:Три, два, один!}"],
+  [13.2, "Правильный ответ — {g:В.}"],
+  [15, "Схватишь его, и {r:ток пойдёт через тебя:}"],
+  [17.6, "{r:пострадавших станет двое.}"],
+  [19.4, "А вода {r:проводит ток ещё лучше.}"],
+  [21.6, "Сначала {g:выключи свет на щитке}"],
+  [23.41, "или {g:выдерни вилку.}"],
+  [24.8, "Не получается?"],
+  [25.8, "Отбрось провод {y:сухой деревянной палкой,}"],
+  [28.21, "{y:стоя на сухом.}"],
+  [29.4, "И сразу звони {g:сто двенадцать:}"],
+  [31, "даже если друг пришёл в себя,"],
+  [32.76, "{r:сердце может остановиться позже.}"],
+  [35, "А ты что выбрал?"],
+  [36.2, "{y:Пиши букву в комменты}"],
+  [37.92, "и запомни это,"],
+  [39.09, "потому что {r:если однажды...}"],
+  [41.6, ""]
+];
+const MUSIC = { bpm: 116, root: 52, parts: [[0, 13.2, "pulse", .8], [13.2, 35.0, "drive", .5], [35.0, 38.9, "pad", .6], [38.9, 41.9, "pulse", .8]] };
+
+const OPTS = [["🤝", "ОТТАСКИВАЮ", "А"], ["💧", "ОБЛИВАЮ ВОДОЙ", "Б"], ["🔌", "ВЫКЛЮЧАЮ ТОК", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 1090, "⚡ 220 ВОЛЬТ", 0.4, 99, -2, "font-size:50px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [5.6, 7.8, 9.4]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ОТТАСКИВАЮ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ОБЛИВАЮ ВОДОЙ", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "ВЫКЛЮЧАЮ ТОК", "В"], 13.25, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 13.5, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "⚡ ТОК ИДЁТ ЧЕРЕЗ ТЕБЯ", 15.1, 99, -2, "font-size:46px"],
+  ["s4", "e4b", "badge b-yel", "c", 340, "😵 ПОСТРАДАВШИХ: 2", 17.6, 99, 2, "font-size:50px"],
+  ["s5", "e5a", "tile x", 390, 330, ["💧", "ВОДА — ПРОВОДНИК"], 19.4, 99, -3],
+  ["s6", "e6a", "badge b-grn", "c", 220, "🔌 ЩИТОК: ВЫКЛ", 21.7, 99, -2, "font-size:54px"],
+  ["s6", "e6b", "badge b-grn", "c", 340, "↯ ИЛИ ВЫДЕРНИ ВИЛКУ", 23.6, 99, 2, "font-size:46px"],
+  ["s7", "e7a", "badge b-yel", "c", 220, "🪵 СУХАЯ ДЕРЕВЯННАЯ ПАЛКА", 25.8, 99, -2, "font-size:42px"],
+  ["s7", "e7b", "badge b-yel", "c", 340, "👟 СТОЙ НА СУХОМ", 28.2, 99, 2, "font-size:46px"],
+  ["s8", "e8a", "badge b-red", "c", 1060, "❤ СЕРДЦЕ МОЖЕТ ОСТАНОВИТЬСЯ ПОЗЖЕ", 32.8, 99, -1, "font-size:34px"],
+  ...OPTS3("s9", ["o9a", "o9b", "o9c"], 520, OPTS, [36.2, 36.45, 36.7]),
+  ["s9", "m9a", "cmt", 110, 1060, "В, сразу щиток 😎", 37.8, 99, -3], ["s9", "m9b", "cmt", 520, 1120, "я бы схватил… 💀", 38.2, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" }, FR = { coat: "#3a7bd5", coat2: "#24539a", hair: "#6b3e1f", pants: "#2d3a4f" };
+const W = 1080, H = 1920, FL = 1150;
+const room = () => `<rect width="${W}" height="${H}" fill="#e9e1d3"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${i * 80} 0 V${FL}" stroke="#ddd3c2" stroke-width="18"/>`).join("")}
+  <rect y="${FL}" width="${W}" height="${H - FL}" fill="#b98c5e"/>${Array.from({ length: 8 }, (_, i) => `<path d="M0 ${FL + 40 + i * 95} H${W}" stroke="#a87c50" stroke-width="5"/>`).join("")}
+  <rect x="${W - 170}" y="${FL - 300}" width="110" height="150" rx="16" fill="#fff" stroke="#000" stroke-width="7"/><circle cx="${W - 133}" cy="${FL - 225}" r="9" fill="#333"/><circle cx="${W - 97}" cy="${FL - 225}" r="9" fill="#333"/>`;
+// провод от розетки к руке (x,y)
+const wire = (id) => `<path id="${id}" fill="none" stroke="#222" stroke-width="12" stroke-linecap="round"/>`;
+const setWire = (id, x, y) => $("#" + id).setAttribute("d", `M${W - 115} ${FL - 225} Q${(W - 115 + x) / 2} ${FL - 60} ${x} ${y}`);
+// молнии вокруг области
+function zap(id, t, cx, cy, rw, rh, n = 5, on = 1) {
+  const g = $("#" + id); if (!on) { g.innerHTML = ""; return; }
+  const f = Math.floor(t * 18); let s = "";
+  for (let i = 0; i < n; i++) { let x = cx + (hash(f * 7 + i) - .5) * rw, y = cy + (hash(f * 13 + i) - .5) * rh, d = `M${x} ${y}`;
+    for (let k = 0; k < 4; k++) { x += (hash(f + i * 5 + k) - .5) * 70; y += 28 + hash(f * 3 + k + i) * 20; d += ` L${x.toFixed(0)} ${y.toFixed(0)}`; }
+    s += `<path d="${d}" stroke="#fff36b" stroke-width="9" fill="none" stroke-linejoin="round"/><path d="${d}" stroke="#fff" stroke-width="3" fill="none"/>`; }
+  g.innerHTML = s;
+}
+const shock = (t) => ({ la: 70 + 10 * Math.sin(t * 40), ra: 30 + 8 * Math.cos(t * 37), face: "shock", tilt: 8 * Math.sin(t * 33), sq: .97 + .03 * Math.sin(t * 50) });
+const hip = (s) => FL - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = room() + wire("w1") + person("f1", FR) + `<g id="z1"></g>` + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#1b2433"/><g id="z2" opacity=".5"></g>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = room() + wire("w4") + person("f4", FR) + person("p4", HERO) + `<g id="z4"></g>`;
+  $("#a5").innerHTML = room() + `<rect width="${W}" height="${H}" fill="#000" opacity=".25"/>` + wire("w5") + person("f5", FR) + `<g id="dr5"></g><g id="z5"></g>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#cfd6dc"/><g transform="translate(540 720)"><rect x="-300" y="-330" width="600" height="660" rx="24" fill="#8a96a3" stroke="#000" stroke-width="10"/>
+    <rect x="-250" y="-270" width="500" height="540" rx="12" fill="#5b6672" stroke="#000" stroke-width="6"/>${[-160, -60, 40, 140].map((x) => `<rect x="${x - 34}" y="-170" width="68" height="200" rx="10" fill="#eee" stroke="#000" stroke-width="6"/>`).join("")}
+    <g id="sw6"><rect x="-186" y="-150" width="44" height="80" rx="8" fill="#ff3b47" stroke="#000" stroke-width="5"/></g>
+    <text x="0" y="200" font-size="56" text-anchor="middle" fill="#ffd23f">⚡ ЩИТОК</text></g>
+    <g id="pl6" transform="translate(500 1170)"><rect x="-200" y="-30" width="160" height="60" rx="14" fill="#fff" stroke="#000" stroke-width="7"/><path d="M-280 0 H-200" stroke="#222" stroke-width="14"/>
+    <g id="pg6"><rect x="40" y="-50" width="120" height="100" rx="18" fill="#333" stroke="#000" stroke-width="7"/><path d="M160 0 H360" stroke="#222" stroke-width="14"/><path d="M20 -20 H40 M20 20 H40" stroke="#aaa" stroke-width="10"/></g></g>`;
+  $("#a7").innerHTML = room() + `<rect x="120" y="${FL - 10}" width="360" height="30" fill="#c9a26a" stroke="#000" stroke-width="5"/>` + wire("w7") + person("f7", FR) + person("p7", HERO) +
+    `<line id="st7" stroke="#8a5a2a" stroke-width="20" stroke-linecap="round"/><g id="z7"></g>`;
+  $("#a8").innerHTML = room() + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/><path id="ecg8" fill="none" stroke="#4dff8a" stroke-width="10" stroke-linejoin="round"/>`;
+  $("#a9").innerHTML = `<rect width="${W}" height="${H}" fill="#e9e1d3"/>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; P("f1", 640 + 6 * Math.sin(t * 45), hip(1.6), 1.6, shock(t));
+    setWire("w1", 640 + 6 * Math.sin(t * 45) + 130, hip(1.6) - 230); zap("z1", t, 650, hip(1.6) - 160, 260, 300, 6);
+    P("p1", 230, hip(1.6), 1.6, { la: 30, ra: 60, face: "panic", look: 1 });
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { show($("#q2"), t, 4.65); countdown($("#c2"), t, 11.2); zap("z2", t, 540, 1500, 900, 600, 3); },
+  s3() {},
+  s4(lt, t) {
+    const g = t > 15.4; P("f4", 660 + 6 * Math.sin(t * 45), hip(1.6), 1.6, shock(t)); setWire("w4", 790, hip(1.6) - 230);
+    P("p4", g ? 470 + 6 * Math.cos(t * 43) : lerp(260, 470, prog(t, 15.0, 15.4)), hip(1.6), 1.6, g ? { ...shock(t + 1), ra: 100 } : { la: 20, ra: 90, face: "focus", look: 1 });
+    zap("z4", t, g ? 560 : 660, hip(1.6) - 160, g ? 520 : 260, 300, g ? 10 : 6);
+  },
+  s5(lt, t) {
+    P("f5", 640 + 6 * Math.sin(t * 45), hip(1.6), 1.6, shock(t)); setWire("w5", 770, hip(1.6) - 230); zap("z5", t, 640, hip(1.6) - 100, 420, 420, 9);
+    $("#dr5").innerHTML = Array.from({ length: 12 }, (_, i) => `<ellipse cx="${520 + 260 * hash(i)}" cy="${(hip(1.6) - 300 + ((t * 600 + i * 90) % 500)).toFixed(0)}" rx="12" ry="18" fill="#5cc8ff"/>`).join("");
+  },
+  s6(lt, t) {
+    const off = easeOut(prog(t, 22.1, 22.35)); $("#sw6").setAttribute("transform", `translate(0 ${90 * off})`);
+    const pull = easeOut(prog(t, 23.7, 24.1)); $("#pg6").setAttribute("transform", `translate(${130 * pull} 0)`);
+  },
+  s7(lt, t) {
+    const free = t > 27.2, push = easeOut(prog(t, 26.4, 27.2));
+    P("f7", 700 + (free ? 0 : 6 * Math.sin(t * 45)), hip(1.6), 1.6, free ? { la: 20, ra: 20, face: "worried" } : shock(t), free ? -8 : 0);
+    const hx = lerp(830, 920, push), hy = lerp(hip(1.6) - 230, hip(1.6) + 60, push); setWire("w7", hx, hy);
+    P("p7", 300, hip(1.6) - 10, 1.6, { la: 20, ra: 75, face: "focus", look: 1 });
+    const st = $("#st7"); st.setAttribute("x1", 380); st.setAttribute("y1", hip(1.6) - 170); st.setAttribute("x2", lerp(760, hx - 20, push)); st.setAttribute("y2", lerp(hip(1.6) - 260, hy - 20, push));
+    zap("z7", t, 720, hip(1.6) - 160, 260, 300, 5, !free);
+  },
+  s8(lt, t) {
+    show($("#ph8"), t, 29.45, .35, 60); $("#st8").textContent = t > 30.8 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3);
+    let d = ""; for (let x = 0; x <= W; x += 12) { const p = ((x / W) * 3 + t * 1.2) % 1, flat = t > 33.6; d += `${x ? "L" : "M"}${x} ${(1180 - (flat ? 0 : p > .45 && p < .5 ? 160 : p > .5 && p < .55 ? -60 : 0)).toFixed(0)} `; }
+    $("#ecg8").setAttribute("d", d); $("#ecg8").setAttribute("stroke", t > 33.6 ? "#ff3b47" : "#4dff8a");
+  },
+  s9(lt, t) { show($("#q9"), t, 35.05); },
+  s10(lt, t) { loopTo(U, t, 38.9, 41.6); },
+  s11() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  const buzz = (a, d) => sfx.osc("sawtooth", 100, a, .02, .08, d);
+  add(0, (a) => buzz(a, 4.5)); add(0.2, sfx.crack);
+  add(15.4, sfx.crack); add(15.4, (a) => buzz(a, 4)); add(19.4, (a) => buzz(a, 2.2)); add(19.5, sfx.splash);
+  add(22.1, (a) => sfx.noise(a, .06, "lowpass", 600, 1, .6, .002)); add(23.7, (a) => sfx.noise(a, .05, "highpass", 2000, 1, .3, .002));
+  add(24.8, (a) => buzz(a, 2.4)); add(27.2, sfx.hit);
+  for (let t = 29.7; t < 30.8; t += .4) add(t, sfx.beep); add(30.8, sfx.ok); add(33.6, (a) => sfx.osc("sine", 880, a, .01, .1, 1.2));
+  choiceSound(sfx, add, { tick: [5.0, 11.2], cd: 11.2, ans: 13.2, loop: [38.9, 41.6] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>
