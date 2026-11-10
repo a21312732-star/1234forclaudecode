@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #16 — Давка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#d9d4e8}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:100px">НАЧАЛАСЬ<br><b>ДАВКА</b> 😱</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg></div>
+  <div class="scene" id="s9"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a9"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q9">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s10"></div>
+  <div class="scene" id="s11"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 40.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.2, 2.18], [4.2, 4.17], [5.2, 5.20], [7.8, 8.05], [9.8, 9.92], [12.8, 14.31], [14.8, 16.77], [16.6, 18.47], [19.8, 21.47], [22.8, 24.09], [27, 29.89], [30, 33.43], [34, 36.84], [35.2, 38.22], [40.6, 43.16], [40.9, 43.46]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.2 }, { id: "s2", s: 4.2, e: 14.8 }, { id: "s3", s: 14.8, e: 16.6 }, { id: "s4", s: 16.6, e: 19.8 },
+  { id: "s5", s: 19.8, e: 22.8 }, { id: "s6", s: 22.8, e: 27.0 }, { id: "s7", s: 27.0, e: 30.0 }, { id: "s8", s: 30.0, e: 34.0 },
+  { id: "s9", s: 34.0, e: 37.9 }, { id: "s10", s: 37.9, e: 40.6 }, { id: "s11", s: 40.6, e: 40.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.3, 21.6];
+const FLASHES = [14.8];
+const clockText = (t) => (t >= 4.2 && t < 37.9 ? "ВЫЖИВИ #16 · ДАВКА" : null);
+const CAPS = [
+  [0.1, "Ты в толпе, и {r:началась давка.}"],
+  [2.2, "Тебя {r:сжимают со всех сторон.}"],
+  [4.2, "Что делаешь?"],
+  [5.2, "{y:А} — пробиваешься назад, против толпы."],
+  [7.8, "{y:Б} — приседаешь, чтобы переждать."],
+  [9.8, "{y:В} — идёшь вместе с толпой и смещаешься к краю."],
+  [12.8, "{r:Три, два, один!}"],
+  [14.8, "Правильный ответ — {g:В.}"],
+  [16.6, "Против толпы {r:ты не пройдёшь,}"],
+  [18.21, "только потратишь силы."],
+  [19.8, "А если присядешь или упадёшь,"],
+  [21.57, "{r:тебя затопчут.}"],
+  [22.8, "{y:Согни руки и прижми их к груди,} как боксёр,"],
+  [25.42, "чтобы было чем дышать."],
+  [27, "{g:Двигайся с потоком}"],
+  [28.09, "и {g:по диагонали уходи к краю.}"],
+  [30, "Если всё-таки упал,"],
+  [31.2, "{y:свернись на боку} и закрой голову руками."],
+  [34, "А ты что выбрал?"],
+  [35.2, "{y:Пиши букву в комменты}"],
+  [36.94, "и запомни это,"],
+  [38.13, "потому что {r:если однажды...}"],
+  [40.6, ""]
+];
+const MUSIC = { bpm: 120, root: 49, parts: [[0, 14.8, "pulse", .8], [14.8, 34.0, "drive", .5], [34.0, 37.9, "pad", .6], [37.9, 40.9, "pulse", .8]] };
+
+const OPTS = [["⬅", "ПРОТИВ ТОЛПЫ", "А"], ["⬇", "ПРИСЕДАЮ", "Б"], ["↗", "С ТОЛПОЙ К КРАЮ", "В"]];
+const E = [
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [5.2, 7.8, 9.8]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ПРОТИВ ТОЛПЫ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ПРИСЕДАЮ", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "С ТОЛПОЙ К КРАЮ", "В"], 14.85, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 15.1, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "⛔ ПРОТИВ ТОЛПЫ НЕ ПРОЙТИ", 16.7, 99, -2, "font-size:44px"],
+  ["s4", "e4b", "badge b-yel", "c", 340, "🔋 СИЛЫ УХОДЯТ", 18.4, 99, 2, "font-size:50px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "⬇ УПАЛ = ЗАТОПЧУТ", 21.6, 99, -2, "font-size:52px"],
+  ["s6", "e6a", "badge b-yel", "c", 220, "🥊 РУКИ К ГРУДИ", 22.9, 99, -2, "font-size:56px"],
+  ["s6", "e6b", "badge b-grn", "c", 340, "🫁 ЕСТЬ ЧЕМ ДЫШАТЬ", 25.6, 99, 2, "font-size:50px"],
+  ["s7", "e7a", "badge b-grn", "c", 160, "↗ С ПОТОКОМ К КРАЮ", 27.1, 99, -2, "font-size:52px"],
+  ["s8", "e8a", "badge b-yel", "c", 220, "🛡 НА БОК, РУКИ НА ГОЛОВУ", 31.2, 99, -2, "font-size:44px"],
+  ...OPTS3("s9", ["o9a", "o9b", "o9c"], 520, OPTS, [35.2, 35.45, 35.7]),
+  ["s9", "m9a", "cmt", 110, 1060, "В, к краю 😎", 36.8, 99, -3], ["s9", "m9b", "cmt", 520, 1120, "я бы присел… 💀", 37.2, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" };
+const COLS = ["#e8553d", "#3a7bd5", "#9b59b6", "#f1c40f", "#e67e22", "#16a085", "#c0392b", "#7f8c8d", "#d35400", "#2c3e50"];
+const W = 1080, H = 1920, FL = 1150;
+const bg = () => `<rect width="${W}" height="${H}" fill="#d9d4e8"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#8f8aa3"/>
+  ${Array.from({ length: 6 }, (_, i) => `<rect x="${40 + i * 180}" y="200" width="120" height="${FL - 200}" fill="#cbc5de"/>`).join("")}
+  <rect x="380" y="140" width="320" height="90" rx="12" fill="#1eff7a" stroke="#000" stroke-width="6"/><text x="540" y="202" font-size="52" text-anchor="middle" fill="#063">ВЫХОД</text>`;
+// толпа: ряды людей
+const crowd = (pre, n, rows) => Array.from({ length: n }, (_, i) => person(`${pre}${i}`, { coat: COLS[i % COLS.length], coat2: "#0004", hair: ["#3b2a1e", "#6b3e1f", "#222", "#b5651d"][i % 4], pants: "#2d3a4f" })).join("");
+function placeCrowd(pre, n, t, ox, sc, dx = 0) {
+  for (let i = 0; i < n; i++) { const row = i % 2, x = ((i * 157 + dx * (row ? 1.2 : 1)) % 1300 + 1300) % 1300 - 110, s = sc * (row ? .92 : 1.05);
+    P(`${pre}${i}`, x + 6 * Math.sin(t * 8 + i), FL - 88 * s + (row ? -40 : 30), s, { la: 30 + 10 * Math.sin(t * 6 + i), ra: 30 + 10 * Math.cos(t * 5 + i), face: ["worried", "panic", "calm"][i % 3], ll: 10 * Math.sin(t * 7 + i), rl: -10 * Math.sin(t * 7 + i) }, 4 * Math.sin(t * 4 + i)); }
+}
+const hip = (s) => FL - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = bg() + `<g id="cb1">${crowd("b1_", 8)}</g><g id="cf1">${crowd("f1_", 7)}</g>` + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#2a2440"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = bg() + `<g opacity=".7">${crowd("b4_", 8)}</g>` + person("p4", HERO) + `<g id="ar4">${[0, 1, 2].map((i) => `<path d="M${200 + i * 300} 1000 h120 m-40 -40 l40 40 l-40 40" stroke="#ff3b47" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}</g>`;
+  $("#a5").innerHTML = bg() + `<rect width="${W}" height="${H}" fill="#000" opacity=".2"/>` + `<g id="ft5" opacity=".8"></g>` + person("p5", HERO);
+  $("#a6").innerHTML = bg() + `<g opacity=".7">${crowd("b6_", 8)}</g>` + person("p6", HERO) + `<g id="ln6"><path d="M420 760 Q540 700 660 760" stroke="#4dff8a" stroke-width="12" fill="none" stroke-dasharray="20 14"/></g>`;
+  $("#a7").innerHTML = `<rect width="${W}" height="${H}" fill="#8f8aa3"/><rect x="0" y="0" width="70" height="${H}" fill="#3a3550"/><rect x="${W - 70}" y="0" width="70" height="${H}" fill="#3a3550"/>
+    <g id="dots7">${Array.from({ length: 90 }, (_, i) => `<circle r="26" fill="${COLS[i % COLS.length]}" stroke="#000" stroke-width="4"/>`).join("")}</g>
+    <path id="tr7" fill="none" stroke="#4dff8a" stroke-width="10" stroke-dasharray="18 12"/><g id="me7"><circle r="46" fill="#4caf50" stroke="#ffd23f" stroke-width="12"/><text y="18" font-size="44" text-anchor="middle" fill="#fff">ТЫ</text></g>
+    ${[0, 1, 2, 3].map((i) => `<path d="M${250 + i * 190} 1250 v-120 m-36 40 l36 -40 l36 40" stroke="#fff" stroke-width="12" fill="none" opacity=".5"/>`).join("")}`;
+  $("#a8").innerHTML = bg() + `<rect width="${W}" height="${H}" fill="#000" opacity=".15"/>` + `<g id="ft8" opacity=".8"></g>` + person("p8", HERO);
+  $("#a9").innerHTML = `<rect width="${W}" height="${H}" fill="#e6e1f2"/>`;
+}
+// топающие ноги
+const feet = (id, t, y) => { $("#" + id).innerHTML = Array.from({ length: 7 }, (_, i) => { const x = 60 + i * 150, up = Math.max(0, Math.sin(t * 9 + i * 1.7)) * 120;
+  return `<g transform="translate(${x} ${y - up})"><rect x="-26" y="-400" width="52" height="390" rx="20" fill="#2d3a4f" stroke="#000" stroke-width="6"/><rect x="-34" y="-20" width="80" height="30" rx="12" fill="#1d1d1d"/></g>`; }).join(""); };
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; placeCrowd("b1_", 8, t, 0, 1.45, -t * 40); placeCrowd("f1_", 7, t + 3, 0, 1.75, -t * 55);
+    P("p1", 540 + 8 * Math.sin(t * 9), hip(1.9) + 60, 1.9, { la: 20, ra: 20, face: "panic", tilt: 6 * Math.sin(t * 11), sq: .94 + .03 * Math.sin(t * 12) });
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { show($("#q2"), t, 4.25); countdown($("#c2"), t, 12.8); },
+  s3() {},
+  s4(lt, t) {
+    placeCrowd("b4_", 8, t, 0, 1.45, t * 160);
+    const back = Math.max(0, Math.sin((t - 16.6) * 3)) * 40; P("p4", 600 - back - 60 * prog(t, 16.6, 19.8), hip(1.8) + 40, 1.8, walk(t, 1.5, { face: t > 18.4 ? "worried" : "focus", look: -1 }), -8);
+    $("#ar4").setAttribute("transform", `translate(${(t * 220) % 300 - 150} 0)`);
+  },
+  s5(lt, t) { const d = easeInOut(prog(t, 19.9, 20.8)); P("p5", 540, lerp(hip(1.6), FL - 60, d), 1.6, { la: 20, ra: 20, face: "panic" }, -90 * d * (t > 21.4 ? 1 : 0)); if (t <= 21.4) P("p5", 540, lerp(hip(1.6), hip(1.6) + 70, d), 1.6, { la: 20, ra: 20, ll: 60 * d, rl: -60 * d, face: "panic", sq: 1 - .2 * d }); feet("ft5", t, FL + 200 + (t > 21.6 ? 0 : 400)); },
+  s6(lt, t) {
+    placeCrowd("b6_", 8, t, 0, 1.45, t * 120); const up = easeOut(prog(t, 23.0, 23.5));
+    P("p6", 540 + 6 * Math.sin(t * 8), hip(1.8) + 40, 1.8, { la: lerp(20, 128, up), ra: lerp(20, 128, up), face: "focus", look: 0 });
+    $("#ln6").setAttribute("opacity", t > 25.6 ? .6 + .4 * Math.sin(t * 6) : 0);
+  },
+  s7(lt, t) {
+    $$("#dots7 circle").forEach((c, i) => { const col = i % 10, k = ((t * .18 + Math.floor(i / 10) / 9) % 1); c.setAttribute("cx", 130 + col * 92 + 10 * Math.sin(i + t * 3)); c.setAttribute("cy", 1300 - k * 1200); });
+    const k = prog(t, 27.2, 29.8), mx = lerp(540, 900, easeInOut(k)), my = lerp(1150, 500, k);
+    $("#me7").setAttribute("transform", `translate(${mx} ${my})`); $("#tr7").setAttribute("d", `M540 1150 L${mx} ${my}`);
+  },
+  s8(lt, t) {
+    const d = easeInOut(prog(t, 30.1, 30.9)); P("p8", 540, lerp(hip(1.6), FL - 50, d), 1.6, { la: lerp(20, 165, d * prog(t, 31.2, 31.7)), ra: lerp(20, 165, d * prog(t, 31.2, 31.7)), ll: 70 * d, rl: 70 * d, face: "worried" }, -90 * d);
+    feet("ft8", t, FL + 250);
+  },
+  s9(lt, t) { show($("#q9"), t, 34.05); },
+  s10(lt, t) { loopTo(U, t, 37.9, 40.6); },
+  s11() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  const crowdN = (a, d) => sfx.noise(a, d, "bandpass", 700, .8, .18, .4);
+  add(0, (a) => crowdN(a, 4.2)); add(0.3, sfx.boom); add(16.6, (a) => crowdN(a, 3.2)); add(19.8, (a) => crowdN(a, 3));
+  for (let t = 20.6; t < 22.8; t += .3) add(t, (a) => sfx.noise(a, .07, "lowpass", 220, 1, .4, .005));
+  add(22.9, sfx.whoosh); add(27.1, sfx.whoosh); add(30.1, sfx.whooshDown); add(31.2, sfx.ok);
+  choiceSound(sfx, add, { tick: [4.7, 12.8], cd: 12.8, ans: 14.8, loop: [37.9, 40.6] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>
