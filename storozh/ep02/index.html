@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правила ночного сторожа — Серия 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+#stage{background:#0b0d14}
+#clock{background:#c8242f;color:#fff;box-shadow:0 6px 0 #6a0f15;font-size:26px}
+.full{transform-origin:540px 760px}
+.ttl{position:absolute;left:30px;right:30px;text-align:center;font:900 76px/1.05 var(--head);color:#fff;z-index:6;
+  text-shadow:6px 0 0 #000,-6px 0 0 #000,0 6px 0 #000,0 -6px 0 #000,5px 5px 0 #000,-5px 5px 0 #000,5px -5px 0 #000,-5px -5px 0 #000}
+.ttl i{font-style:normal;color:#ffd23f}
+.ep{position:absolute;left:40px;top:60px;background:#c8242f;color:#fff;font:900 36px var(--head);padding:10px 26px;border-radius:14px;z-index:6}
+.card{position:absolute;left:70px;right:70px;height:180px;border-radius:30px;background:rgba(18,20,30,.92);border:3px solid #3a3f52;display:flex;align-items:center;gap:30px;padding:0 30px;z-index:6;color:#fff}
+.card .n{flex:none;width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:900 80px var(--head)}
+.card b{display:block;font:900 50px/1.05 var(--head)} .card span{display:block;font:800 34px var(--head);color:#9fb4c8;margin-top:8px}
+.note{position:absolute;left:110px;right:110px;top:330px;min-height:560px;padding:50px 46px;background:#eadfbf;color:#1f2a44;font:700 76px/1.15 Caveat;z-index:6;box-shadow:0 20px 40px rgba(0,0,0,.7);transform:rotate(-2deg);
+  background-image:repeating-linear-gradient(transparent 0 86px,#9cb4c9 86px 88px)}
+.note .r{color:#8a1010}
+.bub{position:absolute;left:0;right:0;margin:auto;width:max-content;max-width:900px;padding:22px 40px;border-radius:50px;background:#fff;color:#111;font:900 58px var(--head);z-index:7;border:6px solid #000;text-align:center}
+.bub.red{background:#c8242f;color:#fff}
+.bdg{position:absolute;left:0;right:0;margin:auto;width:max-content;padding:14px 30px;border-radius:18px;font:900 46px var(--head);z-index:7;border:5px solid #000}
+.gray{filter:grayscale(1) sepia(.35) contrast(1.1)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">СЕРИЯ 2</div><div class="ttl" id="h1" style="top:170px">ВЫ ВЫБРАЛИ:<br><i>ПОСВЕТИТЬ 🔦</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="note" id="n3"><span id="n3a"></span><br><span id="n3b" class="r"></span></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="bub" id="b4" style="top:250px">«ТЫ ПОСВЕТИЛ, ДА?»</div></div>
+  <div class="scene" id="s5"><svg class="full gray" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="bdg" id="b5" style="top:200px;background:#fff;color:#111">🕑 2 ЧАСА НАЗАД</div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="bub red" id="b6" style="top:250px">«ТОЛЬКО НЕ<br>ОБОРАЧИВАЙСЯ»</div></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="ttl" id="q8" style="top:240px">ЧТО МНЕ <i>ДЕЛАТЬ?</i></div>
+    <div class="card" id="c8a" style="top:470px"><div class="n" style="background:#c8242f">1</div><div><b>ОБЕРНУТЬСЯ 👀</b><span>и посмотреть, кто зовёт</span></div></div>
+    <div class="card" id="c8b" style="top:690px"><div class="n" style="background:#2f6fd6">2</div><div><b>БЕЖАТЬ К ВЫХОДУ</b><span>не оборачиваясь</span></div></div>
+    <div class="bdg" id="b8a" style="top:930px;background:#fff;color:#111">💬 ПИШИ ЦИФРУ В КОММЕНТЫ</div>
+    <div class="bdg" id="b8b" style="top:1060px;background:#c8242f;color:#fff">СЕРИЯ 3 — РЕШАЕШЬ ТЫ</div></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 36.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.8, 2.00], [4.2, 4.26], [5.6, 5.98], [7.4, 7.89], [9.4, 9.94], [11.6, 11.94], [14, 13.97], [15.6, 16.59], [17, 18.10], [18.4, 19.80], [21.2, 22.33], [22.8, 24.08], [24.6, 25.72], [27.6, 28.70], [28.8, 29.70], [30.2, 31.48], [33, 34.39], [34.4, 35.88], [35.8, 37.20], [36.1, 37.50]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.2 }, { id: "s2", s: 4.2, e: 7.4 }, { id: "s3", s: 7.4, e: 14.0 }, { id: "s4", s: 14.0, e: 18.4 },
+  { id: "s5", s: 18.4, e: 21.2 }, { id: "s6", s: 21.2, e: 24.6 }, { id: "s7", s: 24.6, e: 27.6 }, { id: "s8", s: 27.6, e: 35.8 },
+  { id: "s9", s: 35.8, e: 36.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [22.8, 25.6];
+const FLASHES = [];
+const clockText = (t) => (t >= 4.2 && t < 27.6 ? "ПРАВИЛА НОЧНОГО СТОРОЖА · СЕРИЯ 2" : null);
+const CAPS = [
+  [0.1, "Вы выбрали: {y:посветить.}"],
+  [1.8, "Я навёл фонарь {y:в конец коридора.}"],
+  [4.2, "Там {r:никого не было.}"],
+  [5.6, "Только на полу {y:лежал листок.}"],
+  [7.4, "Тот же почерк, что в правилах:"],
+  [9.4, "«Ты нарушил {r:правило номер два.}"],
+  [11.6, "Теперь оно {r:знает, как тебя зовут».}"],
+  [14, "И тут {y:зашипела рация.}"],
+  [15.6, "Голос сменщика спросил:"],
+  [17, "«Ты посветил, да?»"],
+  [18.4, "Но сменщик {r:ушёл домой два часа назад.}"],
+  [21.2, "Рация щёлкнула ещё раз:"],
+  [22.8, "{r:«Только не оборачивайся».}"],
+  [24.6, "А сзади кто-то тихо {r:позвал меня по имени.}"],
+  [27.6, "Что мне делать?"],
+  [28.8, "{y:Один} — обернуться."],
+  [30.2, "{y:Два} — бежать к выходу, не оборачиваясь."],
+  [33, "Пиши {y:цифру} в комменты."],
+  [34.4, "Решать тебе."],
+  [35.8, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 27.6, "pad", .6], [27.6, 36.1, "pad", .35]] };
+// где звучит рация (для эффекта на голосе, время сценария)
+const RADIO = [[17.0, 18.4], [22.8, 24.6]];
+
+const GB = { label: "ОХРАНА", torch: 1 };
+const GX = 420, GY = 2060, GS = 1.25;
+const tipOf = (hx, hy, ang) => { const a = ang * Math.PI / 180, lx = hx + 8 + 60 * Math.sin(a), ly = hy - 16 - 60 * Math.cos(a); return [GX + lx * GS, GY + ly * GS]; };
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const flick = (t, wins) => wins.some(([a, b]) => t >= a && t < b);
+const [EX, EY] = PP(.4, .2, 10.7);
+const NOTE1 = "Ты нарушил правило №2.", NOTE2 = "Теперь оно знает, как тебя зовут.";
+// рация крупно
+const radio = (id) => `<rect width="1080" height="1920" fill="#0b0d14"/><ellipse cx="540" cy="1000" rx="520" ry="620" fill="url(#gLamp)" opacity=".18"/>
+  <g transform="translate(540 1000) rotate(-6)" stroke="${OL}" stroke-width="12" stroke-linejoin="round">
+  <rect x="120" y="-640" width="44" height="300" rx="20" fill="#2b2b2b"/>
+  <rect x="-230" y="-380" width="460" height="760" rx="70" fill="#2b2f36"/><rect x="-180" y="-320" width="360" height="300" rx="30" fill="#14171c"/>
+  ${Array.from({ length: 7 }, (_, i) => `<path d="M-150 ${-290 + i * 40} H150" stroke="#3a3f48" stroke-width="16"/>`).join("")}
+  <rect x="-150" y="20" width="300" height="120" rx="16" fill="#3e6b4a"/><text id="${id}T" x="0" y="100" font-family="JetBrains Mono" font-weight="800" font-size="64" text-anchor="middle" fill="#0d1f12" stroke="none">CH 1</text>
+  <circle id="${id}L" cx="150" cy="-340" r="22" fill="#ff3b30"/><circle cx="-120" cy="250" r="44" fill="#444"/><rect x="20" y="210" width="130" height="80" rx="14" fill="#444"/></g>
+  <g id="${id}W" stroke="#9fb4c8" stroke-width="8" fill="none" stroke-linecap="round" opacity=".7"></g>`;
+function build() {
+  const guard = (id) => `<g transform="translate(${GX} ${GY}) scale(${GS})">${personBack(id, GB)}</g>`;
+  $("#a1").innerHTML = DEFS + corridor("c1", { beam: 1 }) + `<rect width="1080" height="1920" fill="url(#gVig)"/>` + guard("g1");
+  $("#a2").innerHTML = DEFS + corridor("c2", { beam: 1 }) + poly([[0, 0, 10.2], [.75, 0, 10.1], [.8, 0, 11.1], [.05, 0, 11.2]], "#eadfbf", `stroke="${OL}" stroke-width="2"`) + [0, 1, 2].map((i) => poly([[.12, 0, 10.4 + i * .22], [.62, 0, 10.35 + i * .22], [.62, 0, 10.42 + i * .22], [.12, 0, 10.47 + i * .22]], "#1f2a44")).join("") + `<ellipse cx="${PP(.4, 0, 10.65)[0]}" cy="${PP(.4, 0, 10.65)[1]}" rx="120" ry="40" fill="#fff4cc" opacity=".35" style="mix-blend-mode:screen"/><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a3").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#1c1e26"/>${Array.from({ length: 12 }, (_, i) => `<path d="M0 ${i * 170} H1080 M${i * 170} 0 V1920" stroke="#121319" stroke-width="5"/>`).join("")}<rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a4").innerHTML = DEFS + radio("r4");
+  $("#a5").innerHTML = DEFS + lobby() + `<g id="o5w">${personBack("o5", { old: 1, coat: "#5a4636", coat2: "#45362a", hair: "#a8a8a8", pants: "#3a3530" })}</g>`;
+  $("#a6").innerHTML = DEFS + radio("r6");
+  $("#a7").innerHTML = DEFS + `<g filter="url(#fBlur)">${corridor("c7")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".5"/>
+    <g id="fg7" opacity="0" transform="translate(860 560)"><ellipse rx="190" ry="240" fill="#e2e6ea"/><ellipse cx="-70" cy="-30" rx="46" ry="76" fill="#000"/><ellipse cx="70" cy="-30" rx="46" ry="76" fill="#000"/><path d="M-40 120 Q0 140 40 120" stroke="#000" stroke-width="10" fill="none"/></g>
+    <g id="h7" transform="translate(500 1100)">${shoulders}${face("f7")}</g>`;
+  $("#a8").innerHTML = DEFS + `<g filter="url(#fBlur)">${corridor("c8")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".6"/>`;
+  ["c2", "c7", "c8"].forEach((c) => $(`#${c}F`).setAttribute("opacity", 0));
+}
+// помехи рации
+const waves = (id, t, on) => { $("#" + id + "W").innerHTML = on ? [0, 1, 2].map((i) => { const r = 120 + ((t * 300 + i * 90) % 270); return `<path d="M${640 + r * .5} ${330 - r * .6} A${r} ${r} 0 0 1 ${640 + r * .5} ${330 + r * .3}" opacity="${1 - (r - 120) / 270}"/>`; }).join("") : ""; };
+const U = {
+  s1(lt, t) {
+    zoom("#a1", 1 + .02 * t); const k = easeInOut(prog(t, .2, 1.2));
+    const hx = 150, hy = -430, ang = 6; setArm("g1", 178, -300, hx, hy, ang); const [tx, ty] = tipOf(hx, hy, ang);
+    const aim = lerp(.6, 1.55, easeInOut(prog(t, 1.8, 2.8))); setBeam("c1", tx, ty, aim, .3);
+    const gone = t > 2.6; $("#c1F").setAttribute("opacity", gone ? 0 : 1); $("#c1L").setAttribute("opacity", gone || flick(t, [[1.0, 1.08], [2.2, 2.3]]) ? 0 : 1);
+    const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`;
+  },
+  s2(lt, t) {
+    zoom("#a2", lerp(2.8, 3.4, prog(t, 4.2, 7.4)), EX, EY); const [tx, ty] = tipOf(150, -430, 6); setBeam("c2", tx, ty, 1.36 + .02 * Math.sin(t * 3), .4);
+    $("#c2L").setAttribute("opacity", 0);
+  },
+  s3(lt, t) {
+    const n = $("#n3"), p = easeOut(prog(t, 7.45, 7.9)); n.style.opacity = p; n.style.transform = `rotate(-2deg) scale(${.85 + .15 * p})`;
+    $("#n3a").textContent = NOTE1.slice(0, Math.floor(NOTE1.length * prog(t, 9.4, 11.2))); $("#n3b").textContent = NOTE2.slice(0, Math.floor(NOTE2.length * prog(t, 11.6, 13.4)));
+    zoom("#a3", 1 + .03 * lt);
+  },
+  s4(lt, t) {
+    zoom("#a4", 1 + .03 * lt, 540, 1000); $("#r4L").setAttribute("opacity", Math.sin(t * 12) > 0 ? 1 : .2); waves("r4", t, 1);
+    const b = $("#b4"); show(b, t, 17.0); if (t < 17.0) b.style.opacity = 0;
+  },
+  s5(lt, t) {
+    zoom("#a5", 1 + .02 * lt, 540, 1200); const k = easeInOut(prog(t, 18.4, 21.0));
+    $("#o5w").setAttribute("transform", `translate(${lerp(640, 860, k)} ${lerp(1640, 1190, k)}) scale(${lerp(.95, .55, k)})`); $("#o5w").setAttribute("opacity", 1 - prog(t, 20.7, 21.1));
+    stepBack("o5", t); setArm("o5", 131, -226, 140, -150, 0); show($("#b5"), t, 18.5);
+  },
+  s6(lt, t) {
+    zoom("#a6", 1.05 + .05 * lt, 540, 1000); $("#r6L").setAttribute("opacity", t > 22.8 ? (Math.sin(t * 20) > 0 ? 1 : .2) : .2); waves("r6", t, t > 22.8);
+    $("#r6T").textContent = t > 22.8 ? "CH ?" : "CH 1"; const b = $("#b6"); show(b, t, 22.8); if (t < 22.8) b.style.opacity = 0;
+  },
+  s7(lt, t) {
+    zoom("#a7", 1 + .06 * lt, 540, 1000); setFace("f7", t < 25.4 ? "fear" : "shock", 1);
+    $("#h7").setAttribute("transform", `translate(${500 + 3 * Math.sin(t * 40)} 1100)`);
+    const p = easeInOut(prog(t, 25.4, 27.2)); $("#fg7").setAttribute("opacity", p * .95); $("#fg7").setAttribute("transform", `translate(${lerp(980, 860, p)} 560) rotate(${lerp(10, 28, p)}) scale(${lerp(.8, 1, p)})`);
+  },
+  s8(lt, t) {
+    show($("#q8"), t, 27.65); show($("#c8a"), t, 28.8, .3, 60); show($("#c8b"), t, 30.2, .3, 60); show($("#b8a"), t, 33.0); show($("#b8b"), t, 34.4);
+    if (t < 28.8) $("#c8a").style.opacity = 0; if (t < 30.2) $("#c8b").style.opacity = 0; if (t < 33.0) $("#b8a").style.opacity = 0; if (t < 34.4) $("#b8b").style.opacity = 0;
+  },
+  s9(lt, t) { const s = $("#s8"); s.style.display = "block"; s.style.opacity = 1; U.s8(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  const buzz = (a) => sfx.noise(a, .07, "highpass", 2500, 1, .12, .002);
+  const hiss = (a, d) => sfx.noise(a, d, "highpass", 3000, 1, .1, .05);
+  add(.1, (a) => sfx.noise(a, .05, "highpass", 1500, 1, .3, .002)); [1.0, 2.2, 2.6].forEach((t) => add(t, buzz)); add(2.6, sfx.whooshDown);
+  add(5.6, sfx.hit); add(7.45, (a) => sfx.noise(a, .3, "highpass", 3000, 1, .12, .05));
+  for (let t = 9.5; t < 13.4; t += .18) add(t, (a) => sfx.noise(a, .05, "bandpass", 3500, 3, .05, .01));
+  add(14.0, (a) => hiss(a, 4.2)); add(14.0, (a) => sfx.noise(a, .05, "highpass", 1500, 1, .3, .002));
+  add(18.4, sfx.whoosh); add(21.2, (a) => sfx.noise(a, .05, "highpass", 1500, 1, .35, .002)); add(21.3, (a) => hiss(a, 3.2)); add(22.8, sfx.boom);
+  for (let t = 24.7; t < 27.6; t += .5) add(t, (a) => sfx.heart(a, .9)); add(25.4, (a) => sfx.breath(a, 1.2)); add(25.6, sfx.hit);
+  [28.8, 30.2].forEach((t) => add(t, sfx.ding)); [33.0, 34.4].forEach((t) => add(t, sfx.pop));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
