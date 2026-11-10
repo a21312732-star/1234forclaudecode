@@ -136,7 +136,7 @@ const U = {
   s5(lt, t) { const d = easeInOut(prog(t, 19.9, 20.8)); P("p5", 540, lerp(hip(1.6), FL - 60, d), 1.6, { la: 20, ra: 20, face: "panic" }, -90 * d * (t > 21.4 ? 1 : 0)); if (t <= 21.4) P("p5", 540, lerp(hip(1.6), hip(1.6) + 70, d), 1.6, { la: 20, ra: 20, ll: 60 * d, rl: -60 * d, face: "panic", sq: 1 - .2 * d }); feet("ft5", t, FL + 200 + (t > 21.6 ? 0 : 400)); },
   s6(lt, t) {
     placeCrowd("b6_", 8, t, 0, 1.45, t * 120); const up = easeOut(prog(t, 23.0, 23.5));
-    P("p6", 540 + 6 * Math.sin(t * 8), hip(1.8) + 40, 1.8, { la: lerp(20, 128, up), ra: lerp(20, 128, up), face: "focus", look: 0 });
+    P("p6", 540 + 6 * Math.sin(t * 8), hip(1.8) + 40, 1.8, { la: lerp(20, -98, up), ra: lerp(20, -98, up), face: "focus", look: 0 });
     $("#ln6").setAttribute("opacity", t > 25.6 ? .6 + .4 * Math.sin(t * 6) : 0);
   },
   s7(lt, t) {
