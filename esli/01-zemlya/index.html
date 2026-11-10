@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #1 — Земля остановилась</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#140a33}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}
+.spd{position:absolute;left:0;right:0;text-align:center;font:900 120px var(--mono);color:#ffd23f;z-index:6;text-shadow:6px 6px 0 #000}
+.spd small{display:block;font:900 44px var(--head);color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:86px">ЧТО ЕСЛИ ЗЕМЛЯ<br><b>ОСТАНОВИТСЯ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="spd" id="sp2" style="top:1010px">0<small>КМ/Ч</small></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg></div>
+  <div class="scene" id="s9"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a9"></svg></div>
+  <div class="scene" id="s10"></div>
+  <div class="scene" id="s11"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script>
+"use strict";
+const DUR = 40.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.6, 3.43], [9.4, 8.70], [13.4, 12.37], [17.4, 16.06], [18.9, 17.56], [21.2, 19.89], [24.4, 22.87], [26, 24.56], [29.4, 27.62], [32.8, 30.66], [35.2, 33.35], [37.6, 36.03], [38.8, 37.34], [40.6, 38.43], [40.9, 38.73]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.6 }, { id: "s2", s: 3.6, e: 9.4 }, { id: "s3", s: 9.4, e: 13.4 }, { id: "s4", s: 13.4, e: 17.4 },
+  { id: "s5", s: 17.4, e: 21.2 }, { id: "s6", s: 21.2, e: 24.4 }, { id: "s7", s: 24.4, e: 29.4 }, { id: "s8", s: 29.4, e: 32.8 },
+  { id: "s9", s: 32.8, e: 37.6 }, { id: "s10", s: 37.6, e: 40.6 }, { id: "s11", s: 40.6, e: 40.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [13.6, 15.2, 31.3];
+const FLASHES = [13.6];
+const clockText = (t) => (t >= 3.6 && t < 37.6 ? "ЕСЛИ ВДРУГ · #1" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:Земля остановится}"],
+  [2, "всего {r:на одну секунду?}"],
+  [3.6, "Прямо сейчас она крутится,"],
+  [5.11, "и ты вместе с ней несёшься со скоростью"],
+  [7.34, "{y:около тысячи километров в час.}"],
+  [9.4, "Ты этого не чувствуешь,"],
+  [10.7, "потому что {y:всё вокруг летит вместе с тобой.}"],
+  [13.4, "Но если Земля {r:резко встанет,}"],
+  [15.18, "ты {r:по инерции полетишь дальше.}"],
+  [17.4, "Тысяча километров в час —"],
+  [18.9, "это {y:быстрее пассажирского самолёта.}"],
+  [21.2, "Вместе с тобой полетят {r:машины, дома и деревья.}"],
+  [24.4, "Воздух тоже не остановится:"],
+  [26, "по планете пронесётся {r:ветер сильнее любого урагана.}"],
+  [29.4, "А океаны выплеснутся на берега"],
+  [31.23, "{r:гигантскими волнами.}"],
+  [32.8, "Одна секунда — и {y:планету не узнать.}"],
+  [35.2, "Пиши в комменты, {y:что проверить дальше.}"],
+  [37.6, "А пока представь:"],
+  [38.8, "{y:что будет, если...}"],
+  [40.6, ""]
+];
+const MUSIC = { bpm: 118, root: 55, parts: [[0, 13.4, "pulse", .8], [13.4, 32.8, "drive", .55], [32.8, 37.6, "pad", .6], [37.6, 40.9, "pulse", .8]] };
+
+const E = [
+  ["s1", "e1a", "badge b-yel", "c", 1080, "⏱ НА 1 СЕКУНДУ", 0.3, 99, -2, "font-size:54px"],
+  ["s3", "e3a", "badge b-wht", "c", 220, "🌍 ВСЁ ЛЕТИТ ВМЕСТЕ С ТОБОЙ", 10.9, 99, -2, "font-size:40px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🛑 СТОП!", 13.5, 99, -3, "font-size:70px"],
+  ["s4", "e4b", "badge b-yel", "c", 360, "➡ ИНЕРЦИЯ", 15.2, 99, 2, "font-size:54px"],
+  ["s6", "e6a", "badge b-red", "c", 220, "🚗 🏠 🌳 ЛЕТЯТ!", 21.3, 99, -2, "font-size:56px"],
+  ["s7", "e7a", "badge b-blu", "c", 220, "🌪 СИЛЬНЕЕ ЛЮБОГО УРАГАНА", 26.0, 99, -2, "font-size:42px"],
+  ["s8", "e8a", "badge b-blu", "c", 220, "🌊 ГИГАНТСКИЕ ВОЛНЫ", 31.3, 99, 2, "font-size:50px"],
+  ["s9", "e9a", "badge b-yel", "c", 230, "⏱ ВСЕГО 1 СЕКУНДА", 32.9, 99, -2, "font-size:50px"],
+  ["s9", "m9a", "cmt", 90, 980, "а если Луна исчезнет? 🌙", 35.3, 99, -3], ["s9", "m9b", "cmt", 300, 1080, "а если не спать неделю? 😵", 35.7, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", hair: "#3b2a1e", pants: "#3b3f58" };
+const W = 1080, H = 1920, GR = 1150;
+const space = () => `<rect width="${W}" height="${H}" fill="#140a33"/>${Array.from({ length: 90 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+// мультяшная Земля: материки смещаются (вращение), лицо поверх
+const LANDS = `<path d="M-170 -60 Q-120 -140 -40 -120 Q0 -60 -60 -20 Q-120 10 -150 60 Q-200 20 -170 -60Z M40 -170 Q120 -160 160 -90 Q130 -40 80 -70 Q30 -100 40 -170Z M60 60 Q140 40 180 90 Q150 170 80 160 Q40 120 60 60Z M-80 110 Q-30 90 0 140 Q-40 190 -90 170Z" fill="#46c46a" stroke="#111" stroke-width="10"/>`;
+function earth(id, r = 300) {
+  return `<g id="${id}"><defs><clipPath id="${id}c"><circle r="215"/></clipPath></defs><g transform="scale(${r / 215})">
+    <circle r="230" fill="#7fd0ff" opacity=".25"/><circle r="215" fill="#3aa0ff" stroke="#111" stroke-width="14"/>
+    <g clip-path="url(#${id}c)"><g class="ld">${[-430, 0, 430].map((x) => `<g transform="translate(${x} 0)">${LANDS}</g>`).join("")}</g></g>
+    <circle r="215" fill="none" stroke="#111" stroke-width="14"/>
+    <g class="fc"><ellipse class="e1" cx="-70" cy="-10" rx="44" ry="56" fill="#fff" stroke="#111" stroke-width="10"/><ellipse class="e2" cx="70" cy="-10" rx="44" ry="56" fill="#fff" stroke="#111" stroke-width="10"/>
+      <circle class="p1" cx="-62" cy="-2" r="18" fill="#111"/><circle class="p2" cx="78" cy="-2" r="18" fill="#111"/>
+      <path class="mo" fill="#5a1a12" stroke="#111" stroke-width="10"/><path class="br" fill="none" stroke="#111" stroke-width="14" stroke-linecap="round"/></g></g></g>`;
+}
+function setEarth(id, spin, mood = "calm", t = 0) {
+  const g = document.getElementById(id); g.querySelector(".ld").setAttribute("transform", `translate(${((spin % 430) + 430) % 430 - 215} 0)`);
+  const mo = { calm: "M-40 80 Q0 110 40 80 Q0 100 -40 80Z", shock: "M-38 95 a38 46 0 1 0 76 0 a38 46 0 1 0 -76 0Z", dizzy: "M-50 100 Q-25 80 0 100 Q25 120 50 100" }[mood];
+  g.querySelector(".mo").setAttribute("d", mo); g.querySelector(".mo").setAttribute("fill", mood === "dizzy" ? "none" : "#5a1a12");
+  g.querySelector(".br").setAttribute("d", mood === "shock" ? "M-130 -110 Q-80 -150 -30 -110 M30 -110 Q80 -150 130 -110" : "M-120 -90 Q-80 -105 -40 -90 M40 -90 Q80 -105 120 -90");
+  const dz = mood === "dizzy"; g.querySelectorAll(".p1,.p2").forEach((p, i) => p.setAttribute("transform", dz ? `rotate(${t * 400 * (i ? 1 : -1)} ${i ? 70 : -70} -10) translate(0 -18)` : ""));
+}
+// город: дома, деревья, машины (группы с id для разлёта)
+const house = (x, w, h, c) => `<g><rect x="${x}" y="${GR - h}" width="${w}" height="${h}" fill="${c}" stroke="#111" stroke-width="7"/>${Array.from({ length: Math.floor(h / 90) }, (_, r) => [0, 1].map((k) => `<rect x="${x + 18 + k * (w / 2)}" y="${GR - h + 24 + r * 90}" width="${w / 2 - 36}" height="44" fill="#ffe27a" stroke="#111" stroke-width="5"/>`).join("")).join("")}</g>`;
+const tree = (x, s = 1) => `<g transform="translate(${x} ${GR}) scale(${s})"><rect x="-14" y="-120" width="28" height="120" fill="#7a5232" stroke="#111" stroke-width="6"/><circle cy="-170" r="80" fill="#46c46a" stroke="#111" stroke-width="7"/></g>`;
+const car = (x, c) => `<g transform="translate(${x} ${GR - 36})"><rect x="-90" y="-50" width="180" height="60" rx="18" fill="${c}" stroke="#111" stroke-width="6"/><path d="M-50 -50 L-30 -90 H40 L60 -50" fill="#bfe3f5" stroke="#111" stroke-width="6"/><circle cx="-50" cy="14" r="24" fill="#222"/><circle cx="50" cy="14" r="24" fill="#222"/></g>`;
+let SKN = 0; const skyDay = () => { const id = "sky" + (++SKN); return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb6ff"/><stop offset="1" stop-color="#cfeaff"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#${id})"/>
+  <rect y="${GR}" width="${W}" height="${H - GR}" fill="#8a8f99"/><rect y="${GR}" width="${W}" height="18" fill="#5d626b"/>${Array.from({ length: 6 }, (_, i) => `<rect x="${i * 200 + 30}" y="${GR + 90}" width="110" height="16" fill="#fff"/>`).join("")}`; };
+const cloud = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse rx="120" ry="50" fill="#fff"/><ellipse cx="-60" cy="-30" rx="60" ry="50" fill="#fff"/><ellipse cx="50" cy="-40" rx="70" ry="60" fill="#fff"/></g>`;
+const city = () => house(60, 220, 420, "#e8a87c") + house(320, 180, 560, "#9fb4e8") + house(830, 200, 380, "#c3e88d") + tree(560) + tree(700, .85);
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = space() + `<g transform="translate(540 760)">${earth("ea1", 330)}</g>`;
+  $("#a2").innerHTML = space() + `<g transform="translate(540 700)">${earth("ea2", 300)}<path id="ar2" d="M-360 -40 A360 120 0 0 0 360 -40" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round"/><path d="M340 -70 L372 -30 L322 -20" fill="#ffd23f"/><g id="pp2">${person("p2", HERO)}</g></g>`;
+  $("#a3").innerHTML = skyDay() + `<g id="cl3">${cloud(200, 260, 1) + cloud(800, 380, .8) + cloud(1300, 300, 1)}</g><g id="ct3">${city()}</g>` + person("p3", HERO);
+  $("#a4").innerHTML = skyDay() + city() + person("p4", HERO) + `<g id="sl4" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity="0">${Array.from({ length: 8 }, (_, i) => `<path d="M${-100 - i * 60} ${700 + i * 50} h${200 + 80 * hash(i)}"/>`).join("")}</g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#5fb6ff"/>${cloud(300, 1200, 1.3) + cloud(900, 900, 1)}
+    <g id="pl5" transform="translate(300 620)"><path d="M-170 0 Q-170 -40 -120 -40 H140 Q200 -40 220 0 Q200 40 140 40 H-120 Q-170 40 -170 0Z" fill="#fff" stroke="#111" stroke-width="8"/><path d="M-20 -30 L-80 -150 H-30 L60 -30Z M-20 30 L-80 150 H-30 L60 30Z M-150 -30 L-190 -110 H-150 L-110 -30Z" fill="#dfe6ee" stroke="#111" stroke-width="7"/>${[0, 1, 2, 3, 4].map((i) => `<circle cx="${-60 + i * 40}" cy="-8" r="10" fill="#7fd0ff" stroke="#111" stroke-width="4"/>`).join("")}</g>
+    <g id="hp5">${person("p5", HERO)}</g>
+    <g font-family="Montserrat" font-weight="900"><rect x="70" y="860" width="440" height="90" rx="20" fill="#fff" stroke="#111" stroke-width="6"/><text x="290" y="922" font-size="48" text-anchor="middle" fill="#111">✈ ~900 км/ч</text>
+    <rect x="570" y="860" width="440" height="90" rx="20" fill="#ffd23f" stroke="#111" stroke-width="6"/><text x="790" y="922" font-size="48" text-anchor="middle" fill="#111">🧍 ~1000 км/ч</text></g>`;
+  $("#a6").innerHTML = skyDay() + `<g id="fly6">${[[house(0, 200, 400, "#e8a87c"), 150], [tree(0), 600], [car(0, "#ff3b47"), 300], [house(0, 160, 300, "#9fb4e8"), 820], [car(0, "#3aa0ff"), 700], [tree(0, .8), 120]].map(([s, x], i) => `<g class="fo" data-x="${x}" data-i="${i}">${s}</g>`).join("")}</g>`;
+  $("#a7").innerHTML = skyDay() + city() + `<g id="wd7" stroke="#fff" stroke-width="12" stroke-linecap="round"></g>`;
+  $("#a8").innerHTML = skyDay() + city() + `<path id="wv8" fill="#2b7bbf" stroke="#111" stroke-width="10"/><path id="fm8" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>`;
+  $("#a9").innerHTML = space() + `<g transform="translate(540 760)">${earth("ea9", 290)}<g id="bd9"><rect x="-150" y="-260" width="140" height="44" rx="10" fill="#f4d3b0" stroke="#111" stroke-width="7" transform="rotate(-25)"/><path d="M180 120 l30 -40 l20 40" fill="none" stroke="#fff" stroke-width="10"/></g></g>`;
+}
+const hip = (s) => GR - 88 * s;
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; setEarth("ea1", t * 160, "calm"); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) {
+    setEarth("ea2", t * 160, "calm"); $("#pp2").setAttribute("transform", `translate(0 -300) scale(.55)`); P("p2", 0, 0, 1, { la: 20, ra: 20, face: "happy" });
+    const v = Math.round(1000 * easeOut(prog(t, 5.0, 7.6))); $("#sp2").innerHTML = `${v}<small>КМ/Ч</small>`; $("#sp2").style.transform = `scale(${1 + (t > 7.2 && t < 7.6 ? .15 : 0)})`;
+  },
+  s3(lt, t) {
+    P("p3", 540, hip(1.7), 1.7, { la: 20 + 8 * Math.sin(t * 2), ra: 20, face: "happy" });
+    $("#cl3").setAttribute("transform", `translate(${-(t * 40) % 1100} 0)`);
+  },
+  s4(lt, t) {
+    const fly = prog(t, 15.2, 17.2); P("p4", 540 + 900 * fly * fly, hip(1.7) - 260 * Math.sin(Math.PI * Math.min(1, fly * 1.2)), 1.7, { la: 160, ra: 160, ll: 30, rl: -30, face: t > 13.6 ? "shock" : "happy" }, 540 * fly);
+    $("#sl4").setAttribute("opacity", t > 15.2 ? 1 : 0); $("#sl4").setAttribute("transform", `translate(${(t * 1400) % 600} 0)`);
+  },
+  s5(lt, t) {
+    const k = prog(t, 17.4, 21.2); $("#pl5").setAttribute("transform", `translate(${lerp(200, 560, k)} 620)`);
+    $("#hp5").setAttribute("transform", `translate(${lerp(-100, 820, k)} 470) rotate(${t * 300})`); P("p5", 0, 0, 1.1, { la: 160, ra: 160, face: "shock" });
+  },
+  s6(lt, t) {
+    const k = prog(t, 21.2, 24.4); $$("#fly6 .fo").forEach((g) => { const x0 = +g.dataset.x, i = +g.dataset.i, d = k * (500 + 300 * hash(i)), up = Math.sin(Math.min(1, k * 1.4) * Math.PI) * (120 + 160 * hash(i + 4));
+      g.setAttribute("transform", `translate(${x0 + d} ${-up}) rotate(${k * (180 + 200 * hash(i + 2))} ${x0 + 100} ${GR - 150})`); });
+  },
+  s7(lt, t) {
+    $("#wd7").innerHTML = Array.from({ length: 14 }, (_, i) => { const x = ((t * 2200 + i * 400 * hash(i)) % 1700) - 300, y = 200 + i * 75; return `<path d="M${x} ${y} h${180 + 140 * hash(i)}" opacity="${.5 + .5 * hash(i + 1)}"/>`; }).join("");
+  },
+  s8(lt, t) {
+    const k = easeInOut(prog(t, 29.4, 32.6)), x = lerp(1400, -200, k), hgt = lerp(300, 1000, Math.min(1, k * 1.5)), top = GR - hgt;
+    $("#wv8").setAttribute("d", `M${x} ${H} L${x} ${top + 220} C${x - 40} ${top + 40} ${x + 120} ${top - 40} ${x + 270} ${top + 20} C${x + 200} ${top + 40} ${x + 170} ${top + 130} ${x + 240} ${top + 170} C${x + 420} ${top + 120} ${x + 700} ${top + 190} ${x + 1300} ${top + 210} L${x + 1300} ${H} Z`);
+    $("#fm8").setAttribute("d", `M${x + 10} ${top + 150} Q${x + 80} ${top + 10} ${x + 250} ${top + 25}`);
+  },
+  s9(lt, t) { setEarth("ea9", 0, "dizzy", t); $("#bd9").setAttribute("opacity", 1); },
+  s10(lt, t) { loopTo(U, t, 37.6, 40.6); },
+  s11() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0.05, (a) => sfx.whoosh(a, .5)); add(5.0, (a) => sfx.riser(a, 2.4)); add(7.6, sfx.ding);
+  add(13.4, (a) => sfx.osc("sawtooth", 900, a, .01, .1, .6, 300)); add(13.6, sfx.boom); add(15.2, (a) => sfx.whoosh(a, 1.2));
+  add(17.4, (a) => sfx.engine(a, 3.6, .6)); add(21.3, sfx.crack); add(21.5, (a) => sfx.whoosh(a, 1)); add(22.6, sfx.hit);
+  add(24.4, (a) => sfx.wind(a, 5, 1.4)); add(29.4, (a) => sfx.noise(a, 3.2, "lowpass", 400, 1, .5, 1.5)); add(31.3, sfx.splash); add(31.3, sfx.boom);
+  add(32.9, sfx.no); E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(37.65, sfx.whooshDown); add(40.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
