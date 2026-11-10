@@ -148,16 +148,18 @@ const shoulders = `<g stroke="${OL}" stroke-width="10" stroke-linejoin="round">
   <rect x="200" y="470" width="90" height="150" rx="14" fill="#2b2b2b"/><path d="M265 470 V380" stroke-width="12"/><circle cx="245" cy="510" r="10" fill="#ff3b30" stroke="none"/>
   <rect x="-110" y="230" width="220" height="130" fill="#e3a985"/></g>`;
 // герой в полный рост спереди (ноги в 0,0), держит лист
-function guardFront(id, fid) {
+function guardFront(id, fid, o = {}) {
   return `<g id="${id}"><g stroke="${OL}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
     <rect x="-62" y="-150" width="52" height="150" rx="20" fill="#2a2f3d"/><rect x="10" y="-150" width="52" height="150" rx="20" fill="#2a2f3d"/>
     <path d="M-74 -10 h68 v22 h-74z M6 -10 h68 v22 h-74z" fill="#1a1a1f"/>
     <path d="M-110 -170 Q-118 -370 -60 -390 L60 -390 Q118 -370 110 -170 Z" fill="${COAT}"/><rect x="-112" y="-200" width="224" height="34" rx="10" fill="${COAT2}"/>
     <path d="M-50 -392 L0 -340 L50 -392" fill="#1b2335"/><rect x="-92" y="-330" width="80" height="28" rx="4" fill="#d9c25a"/>
     <rect x="-150" y="-370" width="48" height="190" rx="22" fill="${COAT2}" transform="rotate(8 -126 -370)"/>
-    <rect x="102" y="-370" width="48" height="130" rx="22" fill="${COAT2}" transform="rotate(-8 126 -370)"/>
+    ${o.free ? `<rect x="102" y="-370" width="48" height="190" rx="22" fill="${COAT2}" transform="rotate(-8 126 -370)"/><circle cx="-146" cy="-176" r="22" fill="${SKIN2}"/>
+      <g transform="translate(150 -176)"><path d="M-14 0 L14 0 L20 46 L-20 46 Z" fill="#3a3a3a"/><rect x="-24" y="44" width="48" height="16" rx="5" fill="#555"/></g><circle cx="146" cy="-176" r="22" fill="${SKIN2}"/>`
+    : `<rect x="102" y="-370" width="48" height="130" rx="22" fill="${COAT2}" transform="rotate(-8 126 -370)"/>
     <g transform="translate(60 -250) rotate(-8)"><rect x="-70" y="-90" width="120" height="160" fill="#eadfbf"/>${[0, 1, 2, 3, 4].map((i) => `<path d="M-55 ${-65 + i * 26} H35" stroke="#1f2a44" stroke-width="5"/>`).join("")}</g>
-    <circle cx="120" cy="-232" r="22" fill="${SKIN2}"/><circle cx="-2" cy="-232" r="22" fill="${SKIN2}"/></g>
+    <circle cx="120" cy="-232" r="22" fill="${SKIN2}"/><circle cx="-2" cy="-232" r="22" fill="${SKIN2}"/>`}</g>
     <g transform="translate(0 -505) scale(.36)">${face(fid)}</g></g>`;
 }
 
