@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Записки прошлого сторожа №2 — Бассейн</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">ЗАПИСКИ ПРОШЛОГО СТОРОЖА · №2</div><div class="ttl" id="h1" style="top:170px">ПРАВИЛО №5:<br><i>В БАССЕЙНЕ НЕТ ВОДЫ</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="hand" id="t5">…прямо к моей вахте.</div>
+    <div class="ttl" id="q5" style="top:1060px;font-size:66px">ТЫ БЫ ПОШЁЛ<br><i>ПО СЛЕДАМ?</i></div>
+    <div class="bdg" id="b5" style="top:1260px;background:#fff;color:#111">💬 ПИШИ В КОММЕНТЫ</div></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script src="../zap.js"></script>
+<script>
+"use strict";
+const DUR = 25.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [1.8, 2.04], [2.8, 3.77], [5, 6.67], [6.4, 8.55], [8.4, 10.84], [11.2, 14.22], [12.2, 15.45], [13.8, 17.79], [15, 19.11], [16.6, 21.09], [18.8, 23.60], [21, 25.89], [22.6, 27.74], [23.8, 29.30], [25.2, 31.13], [25.5, 31.43]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.8 }, { id: "s2", s: 2.8, e: 8.4 }, { id: "s3", s: 8.4, e: 13.8 }, { id: "s4", s: 13.8, e: 21.0 },
+  { id: "s5", s: 21.0, e: 25.2 }, { id: "s6", s: 25.2, e: 25.5 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [11.2];
+const FLASHES = [];
+const clockText = (t) => (t >= 2.8 && t < 21.0 ? "ЗАПИСКИ ПРОШЛОГО СТОРОЖА · №2" : null);
+const CAPS = [
+  [0.1, "Ещё одна запись {y:из журнала.}"],
+  [1.8, "«Ночь пятая."],
+  [2.8, "В бассейне {y:нет воды уже тридцать лет.}"],
+  [5, "Я сам спускался на дно —"],
+  [6.4, "там только трещины и сухие листья."],
+  [8.4, "Но сегодня в два часа ночи {r:я услышал плеск.}"],
+  [11.2, "{r:Кто-то плавал.}"],
+  [12.2, "Медленно, туда и обратно."],
+  [13.8, "Я заглянул в дверь."],
+  [15, "Бассейн был {y:пуст и сух.}"],
+  [16.6, "А по кафелю {r:тянулись мокрые следы —}"],
+  [18.8, "{r:из бассейна прямо к моей вахте.»}"],
+  [21, "На этом запись обрывается."],
+  [22.6, "Ты бы пошёл по следам?"],
+  [23.8, "Пиши в комменты."],
+  [25.2, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 25.5, "pad", .6]] };
+// пустой бассейн: вид сверху-сбоку
+const pool = (id, dark = .55) => `<rect width="1080" height="1920" fill="#1c2a33"/><g transform="translate(0 -260)">
+  <rect y="0" width="1080" height="560" fill="#2b3a44"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${i * 80} 0 V560" stroke="#22303a" stroke-width="4"/>`).join("")}
+  <path d="M0 560 H1080 V1920 H0Z" fill="#3a4f5c"/>${Array.from({ length: 18 }, (_, i) => `<path d="M0 ${600 + i * 80} H1080" stroke="#2f414c" stroke-width="4"/>`).join("")}${Array.from({ length: 14 }, (_, i) => `<path d="M${i * 80} 560 V1920" stroke="#2f414c" stroke-width="4"/>`).join("")}
+  <path d="M120 640 H960 L900 1180 H180Z" fill="#6f93a6" stroke="${OL}" stroke-width="10"/>
+  <path d="M180 1180 H900 L860 1100 H220Z" fill="#5a7a8c"/>${Array.from({ length: 10 }, (_, i) => `<path d="M${150 + i * 82} 640 L${200 + i * 70} 1180" stroke="#5f8396" stroke-width="3"/>`).join("")}
+  <path d="M360 760 l40 60 l-20 50 l50 80 M700 900 l-30 40 l20 60" stroke="#2b3a44" stroke-width="6" fill="none"/>
+  ${[[420, 1100, 20], [610, 1140, -30], [760, 1080, 60], [300, 1060, 10]].map(([x, y, r]) => `<path transform="translate(${x} ${y}) rotate(${r})" d="M0 0 Q20 -18 40 0 Q20 18 0 0Z" fill="#8a6a3a"/>`).join("")}
+  <g stroke="#c9d2d8" stroke-width="10" fill="none"><path d="M860 560 V760 M920 560 V760"/><path d="M860 620 H920 M860 680 H920 M860 740 H920"/></g>
+  <g id="${id}R" fill="none" stroke="#bfe3f5" stroke-width="6"></g></g><rect width="1080" height="1920" fill="#000" opacity="${dark}"/><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+// мокрые следы от бассейна к камере
+const steps = (id) => `<g id="${id}">${Array.from({ length: 10 }, (_, i) => { const k = i / 9, x = 540 + (i % 2 ? 40 : -40) * (1 + k), y = 940 + k * 380, s = .6 + k * .8;
+  return `<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)}) scale(${s.toFixed(2)})" class="st"><ellipse rx="22" ry="40" fill="#0a1a24" opacity=".9"/>${[-14, -4, 6, 15].map((dx) => `<circle cx="${dx}" cy="-50" r="7" fill="#0a1a24" opacity=".9"/>`).join("")}</g>`; }).join("")}</g>`;
+function build() {
+  $("#a1").innerHTML = DEFS + journal("j1");
+  $("#a2").innerHTML = DEFS + pool("p2", .1);
+  $("#a3").innerHTML = DEFS + pool("p3", .3);
+  $("#a4").innerHTML = DEFS + pool("p4", .2) + steps("ft4") + `<g stroke="${OL}" stroke-width="10"><path d="M0 0 V1920 H120 V0Z M1080 0 V1920 H960 V0Z" fill="#14171c"/></g>`;
+  $("#a5").innerHTML = DEFS + torn;
+}
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const ripples = (id, t, on) => { $("#" + id + "R").innerHTML = on ? [0, 1, 2].map((i) => { const k = (t * .7 + i / 3) % 1, x = 540 + 260 * Math.sin(t * .6); return `<ellipse cx="${x.toFixed(0)}" cy="900" rx="${(40 + 220 * k).toFixed(0)}" ry="${(14 + 70 * k).toFixed(0)}" opacity="${(1 - k).toFixed(2)}"/>`; }).join("") : ""; };
+const U = {
+  s1(lt, t) { zoom("#a1", 1 + .03 * t, 540, 900); const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`; },
+  s2(lt, t) { zoom("#a2", 1 + .03 * lt, 540, 900); },
+  s3(lt, t) { zoom("#a3", 1.05 + .03 * lt, 540, 900); ripples("p3", t, t > 8.8); },
+  s4(lt, t) {
+    zoom("#a4", 1 + .03 * lt, 540, 1200); $$("#ft4 .st").forEach((g, i) => g.setAttribute("opacity", t > 16.6 + i * .45 ? 1 : 0));
+  },
+  s5(lt, t) { show($("#t5"), t, 21.05); show($("#q5"), t, 22.6); if (t < 22.6) $("#q5").style.opacity = 0; show($("#b5"), t, 23.8); if (t < 23.8) $("#b5").style.opacity = 0; },
+  s6(lt, t) { const s = $("#s5"); s.style.display = "block"; s.style.opacity = 1; U.s5(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.noise(a, .4, "highpass", 3000, 1, .1, .05)); add(2.9, (a) => sfx.wind(a, 5.4, .3));
+  for (let t = 8.8; t < 13.8; t += 1.1) add(t, (a) => sfx.noise(a, .35, "bandpass", 1200, 1.5, .25, .02, 500)); add(11.2, sfx.hit);
+  add(13.9, (a) => sfx.noise(a, .6, "lowpass", 300, 1, .3, .05)); for (let i = 0; i < 10; i++) add(16.6 + i * .45, (a) => sfx.noise(a, .06, "bandpass", 700, 2, .3, .005));
+  for (let t = 15.0; t < 21.0; t += .6) add(t, (a) => sfx.heart(a, .7)); add(21.0, (a) => sfx.noise(a, .5, "highpass", 2000, 1, .3, .01, 600)); add(22.6, sfx.ding);
+}
+ENGINE.start();
+</script>
+</body>
+</html>
