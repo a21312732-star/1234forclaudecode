@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #3 — Луна исчезнет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#140a33}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">ЧТО ЕСЛИ<br><b>ЛУНА ИСЧЕЗНЕТ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 33.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2, 2.32], [3.6, 4.15], [8, 8.87], [10.2, 11.09], [13.2, 14.32], [16.8, 18.67], [19.8, 22.26], [26, 28.67], [28.2, 30.62], [30.6, 33.10], [31.8, 34.41], [33.6, 35.59], [33.9, 35.89]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.0 }, { id: "s2", s: 2.0, e: 8.0 }, { id: "s3", s: 8.0, e: 13.2 }, { id: "s4", s: 13.2, e: 16.8 },
+  { id: "s5", s: 16.8, e: 26.0 }, { id: "s6", s: 26.0, e: 30.6 }, { id: "s7", s: 30.6, e: 33.6 }, { id: "s8", s: 33.6, e: 33.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [];
+const FLASHES = [];
+const clockText = (t) => (t >= 2.0 && t < 30.6 ? "ЕСЛИ ВДРУГ · #3" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:Луна исчезнет?}"],
+  [2, "Первыми это заметят {y:моря.}"],
+  [3.6, "Приливы держит в основном Луна,"],
+  [5.31, "и без неё они станут {r:в несколько раз слабее.}"],
+  [8, "Ночи станут {r:по-настоящему тёмными:}"],
+  [10.2, "без лунного света в лесу {r:не увидишь собственной руки.}"],
+  [13.2, "Ночные животные, которые охотятся при луне,"],
+  [15.58, "{r:собьются с толку.}"],
+  [16.8, "А главное — Луна держит наклон Земли, {y:как руль.}"],
+  [19.8, "Без неё {r:ось планеты начнёт раскачиваться,}"],
+  [22.26, "и за миллионы лет климат будет швырять"],
+  [24.54, "{r:от жары к ледникам.}"],
+  [26, "{g:Хорошо, что Луна никуда не денется.}"],
+  [28.2, "Пиши в комменты, {y:что проверить дальше.}"],
+  [30.6, "А пока представь:"],
+  [31.8, "{y:что будет, если...}"],
+  [33.6, ""]
+];
+const MUSIC = { bpm: 92, root: 49, parts: [[0, 16.8, "pad", .6], [16.8, 26.0, "pulse", .6], [26.0, 30.6, "pad", .5], [30.6, 33.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-blu", "c", 220, "🌊 ПРИЛИВЫ В РАЗЫ СЛАБЕЕ", 5.5, 99, -2, "font-size:44px"],
+  ["s3", "e3a", "badge b-wht", "c", 220, "🌑 НОЧИ — ЧЕРНЕЕ ЧЕРНОГО", 8.1, 99, -2, "font-size:44px"],
+  ["s4", "e4a", "badge b-yel", "c", 220, "🦉 ОХОТНИКИ СБИТЫ С ТОЛКУ", 13.3, 99, 2, "font-size:42px"],
+  ["s5", "e5a", "badge b-yel", "c", 220, "🌙 ЛУНА = РУЛЬ ЗЕМЛИ", 16.9, 99, -2, "font-size:50px"],
+  ["s5", "e5b", "badge b-red", "c", 1060, "🔥 ↔ 🧊 КЛИМАТ ШВЫРЯЕТ", 22.5, 99, 2, "font-size:46px"],
+  ["s6", "e6a", "badge b-grn", "c", 220, "😮‍💨 ЛУНА НА МЕСТЕ", 26.1, 99, -2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "а если Солнце погаснет? ☀", 28.3, 99, -3], ["s6", "m6b", "cmt", 340, 1100, "а если упасть на Юпитер? 🪐", 28.7, 99, 2],
+];
+const moon = (id) => `<g id="${id}"><circle r="110" fill="#e8e6dc" stroke="#111" stroke-width="10"/><circle cx="-30" cy="-30" r="22" fill="#cfccbf"/><circle cx="40" cy="20" r="16" fill="#cfccbf"/><circle cx="-10" cy="50" r="12" fill="#cfccbf"/></g>`;
+const poof = (id) => `<g id="${id}">${Array.from({ length: 12 }, () => `<circle r="22" fill="#fff"/>`).join("")}</g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = space() + `<g transform="translate(470 860)">${earth("ea1", 260)}</g>` + moon("mn1") + poof("pf1");
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#8cc8ee"/><path d="M0 1250 L1080 1050 L1080 1920 L0 1920Z" fill="#e8d29a"/><path id="sea2" fill="#2b7bbf" stroke="#111" stroke-width="8"/>
+    <g id="mk2"><path d="M760 1030 V1250" stroke="#c0392b" stroke-width="12"/><path d="M760 1030 l60 20 l-60 20" fill="#c0392b"/></g>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#050510"/>${Array.from({ length: 7 }, (_, i) => `<path d="M${i * 170 - 30} ${GR} l80 -520 l80 520Z" fill="#0b1410"/>`).join("")}
+    <g id="hd3" transform="translate(540 980)"><path d="M-60 120 V-40 Q-60 -70 -40 -70 Q-20 -70 -20 -40 V-120 Q-20 -150 0 -150 Q20 -150 20 -120 V-40 Q40 -60 60 -40 V120Z" fill="#f4c7a1" stroke="#111" stroke-width="8"/></g><rect id="dk3" width="${W}" height="${H}" fill="#000" opacity="0"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#0b1430"/>${Array.from({ length: 6 }, (_, i) => `<path d="M${i * 200 - 20} ${GR} l90 -560 l90 560Z" fill="#0f2318"/>`).join("")}
+    <g transform="translate(540 820)"><ellipse rx="150" ry="190" fill="#8a6a4a" stroke="#111" stroke-width="10"/><path d="M-120 -150 L-80 -230 L-40 -160 M40 -160 L80 -230 L120 -150" fill="#8a6a4a" stroke="#111" stroke-width="10"/>
+    <circle cx="-55" cy="-50" r="52" fill="#ffd23f" stroke="#111" stroke-width="8"/><circle cx="55" cy="-50" r="52" fill="#ffd23f" stroke="#111" stroke-width="8"/><circle id="e4a" cx="-55" cy="-50" r="20" fill="#111"/><circle id="e4b" cx="55" cy="-50" r="20" fill="#111"/>
+    <path d="M-16 0 L0 30 L16 0Z" fill="#e8a33a" stroke="#111" stroke-width="6"/><text id="q4" x="150" y="-200" font-size="150" fill="#ffd23f" stroke="#111" stroke-width="8">?</text></g>`;
+  $("#a5").innerHTML = `<rect id="bg5" width="${W}" height="${H}" fill="#140a33"/>${space().replace(/<rect[^>]*\/>/, "")}<g transform="translate(540 820)"><g id="ax5"><path d="M0 -420 V420" stroke="#ffd23f" stroke-width="14" stroke-dasharray="30 20"/>${earth("ea5", 280)}</g></g>
+    <g id="wh5" transform="translate(860 420)"><circle r="90" fill="none" stroke="#fff" stroke-width="18"/><path d="M-90 0 H90 M0 0 V90" stroke="#fff" stroke-width="14"/><circle r="20" fill="#fff"/></g>`;
+  $("#a6").innerHTML = space() + `<g transform="translate(470 860)">${earth("ea6", 260)}</g>` + `<g transform="translate(830 480)">${moon("mn6")}</g>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; setEarth("ea1", t * 60, t > 1.4 ? "shock" : "calm");
+    const g = prog(t, 1.3, 1.6); at("mn1", 830, 480, 1 - g, 1 - g);
+    $$("#pf1 circle").forEach((c, i) => { const k = prog(t, 1.3, 2.0), a = i / 12 * 6.283; c.setAttribute("cx", 830 + Math.cos(a) * 180 * k); c.setAttribute("cy", 480 + Math.sin(a) * 180 * k); c.setAttribute("opacity", t > 1.3 ? 1 - k : 0); });
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    const amp = t < 5.4 ? 140 : lerp(140, 45, prog(t, 5.4, 6.4)), lvl = 1180 + amp * Math.sin(t * 2.2);
+    let d = `M0 1920 L0 ${lvl}`; for (let x = 0; x <= W; x += 40) d += ` L${x} ${(lvl - x * .19 + 10 * Math.sin(x / 60 + t * 3)).toFixed(0)}`; $("#sea2").setAttribute("d", d + " L1080 1920Z");
+  },
+  s3(lt, t) { $("#dk3").setAttribute("opacity", lerp(0, .82, prog(t, 9.0, 11.5))); },
+  s4(lt, t) { const l = Math.sin(t * 2.5) * 20; $("#e4a").setAttribute("cx", -55 + l); $("#e4b").setAttribute("cx", 55 + l); $("#q4").setAttribute("opacity", t > 15.6 ? 1 : 0); },
+  s5(lt, t) {
+    const wob = t < 19.8 ? 23 : 23 + 25 * Math.sin((t - 19.8) * 3) * prog(t, 19.8, 21);
+    $("#ax5").setAttribute("transform", `rotate(${wob})`); setEarth("ea5", t * 60, t > 19.8 ? "shock" : "calm"); $("#wh5").setAttribute("opacity", t < 19.8 ? 1 : 0); $("#wh5").setAttribute("transform", `translate(860 420) rotate(${20 * Math.sin(t * 2)})`);
+    const c = t > 22.4 ? (Math.sin((t - 22.4) * 3) > 0 ? "#6a1a1a" : "#1a3a6a") : "#140a33"; $("#bg5").setAttribute("fill", c);
+  },
+  s6(lt, t) { setEarth("ea6", t * 60, "calm"); },
+  s7(lt, t) { loopTo(U, t, 30.6, 33.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(1.3, sfx.pop); add(1.35, sfx.whooshDown); add(2.1, (a) => sfx.noise(a, 5.8, "lowpass", 500, 1, .25, 1.5)); add(5.5, sfx.no);
+  add(9.0, (a) => sfx.wind(a, 4, .5)); add(13.3, (a) => sfx.osc("sine", 420, a, .05, .12, .4, 380)); add(13.9, (a) => sfx.osc("sine", 420, a, .05, .12, .5, 360));
+  add(19.8, sfx.boom); add(22.5, (a) => sfx.riser(a, 2)); add(26.1, sfx.ok);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(30.65, sfx.whooshDown); add(33.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

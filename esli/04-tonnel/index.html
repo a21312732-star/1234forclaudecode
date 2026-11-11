@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #4 — Тоннель сквозь Землю</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#140a33}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}
+.spd{position:absolute;right:40px;top:150px;text-align:right;font:900 72px var(--mono);color:#ffd23f;z-index:6;text-shadow:5px 5px 0 #000}
+.spd small{display:block;font:900 34px var(--head);color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">ПРЫГНУТЬ<br><b>СКВОЗЬ ЗЕМЛЮ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg><div class="spd" id="sp2">0<small>КМ/Ч</small></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg><div class="spd" id="sp3">0<small>КМ/Ч</small></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 33.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.6, 3.49], [6.6, 6.49], [11.2, 10.57], [15, 15.17], [19.8, 20.29], [22.2, 22.65], [23.4, 24.18], [26.6, 28.02], [28.2, 29.44], [30.4, 31.47], [31.6, 32.63], [33.4, 33.72], [33.7, 34.02]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.6 }, { id: "s2", s: 3.6, e: 11.2 }, { id: "s3", s: 11.2, e: 15.0 }, { id: "s4", s: 15.0, e: 19.8 },
+  { id: "s5", s: 19.8, e: 22.2 }, { id: "s6", s: 22.2, e: 26.6 }, { id: "s7", s: 26.6, e: 30.4 }, { id: "s8", s: 30.4, e: 33.4 }, { id: "s9", s: 33.4, e: 33.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [23.4];
+const FLASHES = [];
+const clockText = (t) => (t >= 3.6 && t < 30.4 ? "ЕСЛИ ВДРУГ · #4" : null);
+const CAPS = [
+  [0.1, "Что будет, если прыгнуть в тоннель,"],
+  [1.92, "{y:прорытый сквозь всю Землю?}"],
+  [3.6, "Сначала ты просто падаешь,"],
+  [5.14, "{y:всё быстрее и быстрее.}"],
+  [6.6, "В центре планеты твоя скорость будет"],
+  [8.67, "{r:около тридцати тысяч километров в час.}"],
+  [11.2, "А потом гравитация начнёт тянуть тебя назад,"],
+  [13.48, "и ты будешь {y:замедляться.}"],
+  [15, "На другой стороне Земли ты остановишься"],
+  [17.29, "{y:прямо у края дыры…}"],
+  [18.37, "{r:и полетишь обратно.}"],
+  [19.8, "Весь путь займёт {y:около сорока минут.}"],
+  [22.2, "Правда, есть проблема:"],
+  [23.4, "в центре Земли {r:жарко почти как на поверхности Солнца.}"],
+  [26.6, "{g:Так что лучше не прыгать.}"],
+  [28.2, "Пиши в комменты, {y:что проверить дальше.}"],
+  [30.4, "А пока представь:"],
+  [31.6, "{y:что будет, если...}"],
+  [33.4, ""]
+];
+const MUSIC = { bpm: 120, root: 55, parts: [[0, 11.2, "pulse", .8], [11.2, 26.6, "drive", .5], [26.6, 30.4, "pad", .6], [30.4, 33.7, "pulse", .8]] };
+const E = [
+  ["s4", "e4a", "badge b-yel", "c", 220, "🔄 И ОБРАТНО", 18.7, 99, -2, "font-size:56px"],
+  ["s5", "e5a", "badge b-yel", "c", 1060, "⏱ ≈ 40 МИНУТ", 19.9, 99, -2, "font-size:60px"],
+  ["s6", "e6a", "badge b-red", "c", 220, "🔥 ЯДРО ≈ 5000 °C", 23.5, 99, -2, "font-size:56px"],
+  ["s7", "e7a", "badge b-grn", "c", 220, "🚫 ЛУЧШЕ НЕ ПРЫГАТЬ", 26.7, 99, -2, "font-size:52px"],
+  ["s7", "m7a", "cmt", 90, 980, "а если упасть в чёрную дыру? 🕳", 28.3, 99, -3], ["s7", "m7b", "cmt", 300, 1080, "а если Земля станет плоской? 🥞", 28.7, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", hair: "#3b2a1e", pants: "#3b3f58" };
+const CX = 540, CY = 1000, R = 560;
+// разрез Земли с тоннелем
+const section = (id) => `<g id="${id}"><circle cx="${CX}" cy="${CY}" r="${R + 30}" fill="#3aa0ff" stroke="#111" stroke-width="12"/><circle cx="${CX}" cy="${CY}" r="${R}" fill="#8a5a32" stroke="#111" stroke-width="8"/>
+  <circle cx="${CX}" cy="${CY}" r="${R * .8}" fill="#e8743a"/><circle cx="${CX}" cy="${CY}" r="${R * .5}" fill="#ffb03a"/><circle cx="${CX}" cy="${CY}" r="${R * .22}" fill="#fff1a8"/>
+  <circle cx="${CX}" cy="${CY}" r="${R * .32}" fill="#fff6c8" opacity=".35"/>
+  <rect x="${CX - 34}" y="${CY - R - 30}" width="68" height="${2 * R + 60}" fill="#1a1022" stroke="#111" stroke-width="6"/>
+  <path d="M${CX - 200} ${CY - R - 26} Q${CX} ${CY - R - 60} ${CX + 200} ${CY - R - 26}" fill="#46c46a" stroke="#111" stroke-width="7"/></g>`;
+const hipY = (y, s) => y;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = space() + section("x1") + person("p1", HERO);
+  $("#a2").innerHTML = space() + section("x2") + person("p2", HERO) + `<g id="sl2" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".7"></g>`;
+  $("#a3").innerHTML = space() + section("x3") + person("p3", HERO) + `<g id="ar3"><path d="M${CX + 90} ${CY + 60} V${CY - 80} M${CX + 60} ${CY - 50} L${CX + 90} ${CY - 80} L${CX + 120} ${CY - 50}" stroke="#ffd23f" stroke-width="14" fill="none" stroke-linecap="round"/></g>`;
+  $("#a4").innerHTML = space() + section("x4") + person("p4", HERO);
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#2b2350"/><g transform="translate(540 760)"><circle r="300" fill="#fff" stroke="#111" stroke-width="16"/>
+    ${Array.from({ length: 12 }, (_, i) => { const a = i / 12 * 6.283; return `<path d="M${260 * Math.sin(a)} ${-260 * Math.cos(a)} L${290 * Math.sin(a)} ${-290 * Math.cos(a)}" stroke="#111" stroke-width="10"/>`; }).join("")}
+    <path id="sec5" fill="#ffd23f" opacity=".7"/><path id="hn5" d="M0 0 V-230" stroke="#111" stroke-width="14" stroke-linecap="round"/><circle r="18" fill="#111"/></g>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#2a0a0a"/><circle cx="540" cy="820" r="420" fill="#ff7a1a"/><circle cx="540" cy="820" r="300" fill="#ffb03a"/><circle cx="540" cy="820" r="170" fill="#fff1a8"/>
+    <g id="fl6"></g><g transform="translate(880 1100)"><rect x="-40" y="-300" width="80" height="320" rx="40" fill="#fff" stroke="#111" stroke-width="10"/><rect id="th6" x="-22" y="-280" width="44" height="270" rx="22" fill="#ff3b47"/><circle cy="40" r="70" fill="#ff3b47" stroke="#111" stroke-width="10"/></g>
+    <g transform="translate(200 420)"><circle r="90" fill="#ffd23f" stroke="#111" stroke-width="10"/>${Array.from({ length: 8 }, (_, i) => { const a = i / 8 * 6.283; return `<path d="M${110 * Math.cos(a)} ${110 * Math.sin(a)} L${150 * Math.cos(a)} ${150 * Math.sin(a)}" stroke="#ffd23f" stroke-width="14" stroke-linecap="round"/>`; }).join("")}<text y="200" font-size="40" text-anchor="middle" fill="#fff">≈ СОЛНЦЕ</text></g>`;
+  $("#a7").innerHTML = space() + `<g transform="translate(540 800)"><path d="M0 -330 L300 200 H-300Z" fill="#ffd23f" stroke="#111" stroke-width="18" stroke-linejoin="round"/><text y="140" font-size="300" text-anchor="middle" fill="#111">!</text></g>`;
+}
+// позиция в тоннеле: u от -1 (верх) до 1 (низ)
+const posY = (u) => CY + u * (R + 10);
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; P("p1", CX, CY - R - 70, 1.1, { la: 150 + 10 * Math.sin(t * 6), ra: 150, face: "happy", tilt: 4 * Math.sin(t * 5) });
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    const k = prog(t, 3.6, 11.2), u = -Math.cos(Math.PI / 2 * k); P("p2", CX, posY(u) + 60, .95, { la: 160, ra: 160, face: t > 8.6 ? "shock" : "panic" }, 180);
+    const v = Math.round(30000 * Math.sin(Math.PI / 2 * k) / 100) * 100; $("#sp2").innerHTML = `${v.toLocaleString("ru")}<small>КМ/Ч</small>`;
+    $("#sl2").innerHTML = [0, 1, 2, 3].map((i) => `<path d="M${CX - 20 + i * 14} ${posY(u) - 120 - ((t * 600 + i * 40) % 200)} v-60"/>`).join("");
+  },
+  s3(lt, t) {
+    const k = prog(t, 11.2, 15.0), u = Math.sin(Math.PI / 2 * k * .6); P("p3", CX, posY(u) + 60, .95, { la: 160, ra: 160, face: "worried" }, 180);
+    $("#sp3").innerHTML = `${(Math.round(30000 * Math.cos(Math.PI / 2 * k * .6) / 100) * 100).toLocaleString("ru")}<small>КМ/Ч</small>`;
+    $("#ar3").setAttribute("opacity", t > 13.6 ? 1 : 0);
+  },
+  s4(lt, t) {
+    const k = prog(t, 15.0, 17.6), back = prog(t, 18.6, 19.8), u = lerp(.6, 1, Math.sin(Math.PI / 2 * k)) - .5 * back * back;
+    P("p4", CX, posY(u) + 60, 1.0, { la: t > 17.0 && t < 18.6 ? 100 : 160, ra: t > 17.0 && t < 18.6 ? 30 + 30 * Math.sin(t * 12) : 160, face: t > 18.6 ? "shock" : "happy" }, 180);
+  },
+  s5(lt, t) {
+    const a = lerp(0, 240, prog(t, 19.8, 22.0)) * Math.PI / 180, x = 230 * Math.sin(a), y = -230 * Math.cos(a);
+    $("#hn5").setAttribute("d", `M0 0 L${x.toFixed(0)} ${y.toFixed(0)}`); $("#sec5").setAttribute("d", `M0 0 L0 -230 A230 230 0 ${a > Math.PI ? 1 : 0} 1 ${x.toFixed(0)} ${y.toFixed(0)} Z`);
+  },
+  s6(lt, t) {
+    $("#th6").setAttribute("height", 270 * prog(t, 22.4, 24.0)); $("#th6").setAttribute("y", -10 - 270 * prog(t, 22.4, 24.0));
+    $("#fl6").innerHTML = Array.from({ length: 8 }, (_, i) => { const k = (t * .8 + i / 8) % 1, x = 540 + Math.cos(i * 2.4) * 430; return `<circle cx="${x.toFixed(0)}" cy="${(820 + 420 - k * 900).toFixed(0)}" r="${(30 - 25 * k).toFixed(0)}" fill="#ff9a3a" opacity="${1 - k}"/>`; }).join("");
+  },
+  s7() {},
+  s8(lt, t) { loopTo(U, t, 30.4, 33.4, "540px 500px"); },
+  s9() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(1.0, (a) => sfx.whoosh(a, .5)); add(3.7, (a) => sfx.riser(a, 7)); add(3.7, (a) => sfx.wind(a, 7.5, 1)); add(11.3, (a) => sfx.wind(a, 3.7, .6));
+  add(17.0, sfx.pop); add(18.7, sfx.whooshDown); for (let t = 20.0; t < 22.0; t += .25) add(t, sfx.tick); add(22.0, sfx.ding);
+  add(22.3, (a) => sfx.fire(a, 4.2)); add(23.4, sfx.boom); add(26.7, sfx.no);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(30.45, sfx.whooshDown); add(32.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
