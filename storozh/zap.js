@@ -33,3 +33,12 @@ const ZAP_CSS = `
 .bdg{position:absolute;left:0;right:0;margin:auto;width:max-content;padding:14px 30px;border-radius:18px;font:900 46px var(--head);z-index:7;border:5px solid #000}
 .hand{position:absolute;left:150px;right:150px;top:470px;text-align:center;font:700 74px/1.15 Caveat;color:#1f2a44;z-index:6;transform:rotate(2deg)}`;
 document.head.insertAdjacentHTML("beforeend", `<style>${ZAP_CSS}</style>`);
+// окно ночью: стекло, луна, силуэт снаружи (id+S), туман (id+F), отпечаток ладони (id+H)
+const nightWin = (id, x = 290, y = 380, w = 500, h = 640) => `<defs><clipPath id="${id}c"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath></defs>
+  <rect x="${x - 30}" y="${y - 30}" width="${w + 60}" height="${h + 60}" fill="#c9c2a8" stroke="${OL}" stroke-width="10"/>
+  <g clip-path="url(#${id}c)"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#0d1a33"/><circle cx="${x + w * .75}" cy="${y + 120}" r="46" fill="#e8f0ff"/><circle cx="${x + w * .75}" cy="${y + 120}" r="120" fill="url(#gMoon)"/>
+    ${Array.from({ length: 5 }, (_, i) => `<path d="M${x + i * 110} ${y + h} l50 -260 l50 260Z" fill="#06101e"/>`).join("")}
+    <g id="${id}S"><path d="M0 0 V-330 Q0 -420 60 -430 Q120 -420 120 -330 V0Z" fill="#000"/><circle cx="40" cy="-380" r="7" fill="#fff"/><circle cx="80" cy="-380" r="7" fill="#fff"/></g>
+    <g id="${id}H" opacity="0"><ellipse cx="${x + w * .45}" cy="${y + h * .45}" rx="50" ry="62" fill="#fff" opacity=".5"/>${[-36, -14, 8, 30].map((dx, i) => `<rect x="${x + w * .45 + dx - 9}" y="${y + h * .45 - 130 + (i % 3) * 6}" width="18" height="70" rx="9" fill="#fff" opacity=".5"/>`).join("")}</g>
+    <rect id="${id}F" x="${x}" y="${y}" width="${w}" height="${h}" fill="#dfe8f0" opacity="0"/></g>
+  <path d="M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}" stroke="#c9c2a8" stroke-width="22"/>`;

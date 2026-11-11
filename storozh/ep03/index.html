@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правила ночного сторожа — Серия 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+.card{position:absolute;left:70px;right:70px;height:180px;border-radius:30px;background:rgba(18,20,30,.92);border:3px solid #3a3f52;display:flex;align-items:center;gap:30px;padding:0 30px;z-index:6;color:#fff}
+.card .n{flex:none;width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:900 80px var(--head)}
+.card b{display:block;font:900 50px/1.05 var(--head)} .card span{display:block;font:800 34px var(--head);color:#9fb4c8;margin-top:8px}
+.dig{position:absolute;left:0;right:0;top:300px;text-align:center;font:800 220px var(--mono);color:#ff3b30;z-index:6;text-shadow:0 0 40px rgba(255,59,48,.6)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">СЕРИЯ 3</div><div class="ttl" id="h1" style="top:170px">ВЫ ВЫБРАЛИ:<br><i>ЗАПЕРЕТЬ ПОДВАЛ 🔒</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="bub" id="b2" style="top:150px"><i>«Сынок, открой,<br>мне холодно»</i></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="bub red" id="b3" style="top:150px"><i>«Ничего. Я подожду»</i></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg><div class="dig" id="d4">3:14</div></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="bdg" id="b6" style="top:220px;background:#c8242f;color:#fff">🔑 МОЙ КЛЮЧ?!</div></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="ttl" id="q7" style="top:240px">ЧТО МНЕ <i>ДЕЛАТЬ?</i></div>
+    <div class="card" id="c7a" style="top:470px"><div class="n" style="background:#c8242f">1</div><div><b>ПОСМОТРЕТЬ В ОКНО 🪟</b><span>кто стучит в 3:15</span></div></div>
+    <div class="card" id="c7b" style="top:690px"><div class="n" style="background:#2f6fd6">2</div><div><b>ПРОВЕРИТЬ ПОДВАЛ 🚪</b><span>заперт ли он ещё</span></div></div>
+    <div class="bdg" id="b7a" style="top:930px;background:#fff;color:#111">💬 ПИШИ ЦИФРУ В КОММЕНТЫ</div>
+    <div class="bdg" id="b7b" style="top:1060px;background:#c8242f;color:#fff">СЕРИЯ 4 — РЕШАЕШЬ ТЫ</div></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script src="../zap.js"></script>
+<script>
+"use strict";
+const DUR = 40.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.4, 2.27], [4.8, 5.27], [6.6, 7.33], [8.6, 9.77], [10.6, 11.95], [13.6, 15.03], [15.4, 17.36], [16.6, 18.60], [17.8, 19.98], [20.4, 22.69], [22.6, 24.84], [23.6, 25.78], [24.6, 27.16], [28, 31.08], [29, 32.28], [31.6, 34.65], [32.8, 35.87], [34.4, 37.50], [37, 39.92], [38.4, 41.47], [39.8, 42.75], [40.1, 43.05]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.8 }, { id: "s2", s: 4.8, e: 10.6 }, { id: "s3", s: 10.6, e: 15.4 }, { id: "s4", s: 15.4, e: 20.4 },
+  { id: "s5", s: 20.4, e: 24.6 }, { id: "s6", s: 24.6, e: 31.6 }, { id: "s7", s: 31.6, e: 39.8 }, { id: "s8", s: 39.8, e: 40.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [8.6, 13.6, 22.6, 28.0];
+const FLASHES = [];
+const clockText = (t) => (t >= 4.8 && t < 31.6 ? "ПРАВИЛА НОЧНОГО СТОРОЖА · СЕРИЯ 3" : null);
+const CAPS = [
+  [0.1, "Вы выбрали: {y:молча запереть подвал.}"],
+  [2.4, "Я повернул ключ {y:и не сказал ни слова.}"],
+  [4.8, "Голос мамы за дверью стал громче:"],
+  [6.6, "«Сынок, открой, мне холодно»."],
+  [8.6, "Потом {r:по двери заскребли ногти.}"],
+  [10.6, "А потом голос сказал {r:уже совсем не маминым голосом:}"],
+  [13.6, "{r:«Ничего. Я подожду».}"],
+  [15.4, "И всё стихло."],
+  [16.6, "Я вернулся на вахту."],
+  [17.8, "Часы показывали {y:три часа четырнадцать минут.}"],
+  [20.4, "Ровно через минуту {r:в окно постучали.}"],
+  [22.6, "{r:Три раза.}"],
+  [23.6, "Я не смотрел."],
+  [24.6, "Но на подоконнике, с моей стороны,"],
+  [26.52, "{r:лежал ключ от подвала.}"],
+  [28, "{r:Мой ключ.}"],
+  [29, "Который всё это время {r:был у меня в кармане.}"],
+  [31.6, "Что мне делать?"],
+  [32.8, "{y:Один} — посмотреть в окно."],
+  [34.4, "{y:Два} — бежать проверить дверь подвала."],
+  [37, "Пиши {y:цифру} в комменты."],
+  [38.4, "Решать тебе."],
+  [39.8, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 31.6, "pad", .6], [31.6, 40.1, "pad", .35]] };
+// дверь подвала: id+D — створка, id+K — ключ, id+C — царапины, id+G — свечение из-под двери
+const cellar = (id) => `<rect width="1080" height="1920" fill="#232a36"/><rect y="1180" width="1080" height="740" fill="#1c1e26"/><rect y="760" width="1080" height="420" fill="#17332c"/>
+  <g stroke="${OL}" stroke-width="8"><rect x="300" y="420" width="480" height="760" fill="#14161c"/>
+  <g id="${id}D"><rect x="300" y="420" width="480" height="760" fill="#3a2c26"/>${[0, 1, 2].map((i) => `<rect x="340" y="${470 + i * 230}" width="400" height="190" fill="none" stroke="#2a1f1a" stroke-width="8"/>`).join("")}
+    <rect x="690" y="760" width="50" height="90" rx="8" fill="#8a7a5a"/><circle cx="715" cy="790" r="9" fill="#111"/></g>
+  <rect x="390" y="320" width="300" height="80" rx="8" fill="#c9c2a8"/><text x="540" y="378" font-family="Montserrat" font-weight="900" font-size="48" text-anchor="middle" fill="#7a2020" stroke="none">ПОДВАЛ</text></g>
+  <g id="${id}K" transform="translate(715 805)"><rect x="-6" y="0" width="12" height="70" fill="#d9c25a" stroke="${OL}" stroke-width="4"/><circle cy="90" r="24" fill="none" stroke="#d9c25a" stroke-width="10"/></g>
+  <g id="${id}C" stroke="#d8cfc0" stroke-width="5" opacity="0">${Array.from({ length: 5 }, (_, i) => `<path d="M${420 + i * 22} 700 l${10 + i * 2} 160"/>`).join("")}${Array.from({ length: 4 }, (_, i) => `<path d="M${560 + i * 24} 900 l${-8} 130"/>`).join("")}</g>
+  <ellipse id="${id}G" cx="540" cy="1185" rx="260" ry="26" fill="#ff3b30" opacity="0"/><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+function build() {
+  $("#a1").innerHTML = DEFS + cellar("x1") + `<g id="hd1" transform="translate(790 900)"><ellipse rx="70" ry="54" fill="${SKIN2}" stroke="${OL}" stroke-width="8"/><rect x="40" y="-30" width="260" height="70" rx="20" fill="${COAT}" stroke="${OL}" stroke-width="8"/></g>`;
+  $("#a2").innerHTML = DEFS + cellar("x2");
+  $("#a3").innerHTML = DEFS + cellar("x3") + `<rect id="dk3" width="1080" height="1920" fill="#000" opacity="0"/>`;
+  $("#a4").innerHTML = DEFS + lobby() + `<g id="w4">${guardFront("gf4", "f4", { free: 1 })}</g><rect width="1080" height="1920" fill="#000" opacity=".4"/>`;
+  $("#a5").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#262c3a"/><rect y="1100" width="1080" height="820" fill="#17332c"/>` + nightWin("w5", 240, 260, 600, 700) +
+    `<g transform="translate(540 1640) scale(1.05)">${guardFront("gf5", "f5", { free: 1 })}</g><rect x="80" y="1300" width="920" height="60" fill="#5a3d2c" stroke="${OL}" stroke-width="8"/><rect x="120" y="1360" width="840" height="560" fill="#4a3022" stroke="${OL}" stroke-width="8"/><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a6").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#262c3a"/>` + nightWin("w6", 140, 200, 800, 760) + `<rect x="100" y="960" width="880" height="80" fill="#c9c2a8" stroke="${OL}" stroke-width="10"/>
+    <ellipse cx="540" cy="975" rx="200" ry="40" fill="#fff4cc" opacity=".25"/><g id="k6" transform="translate(540 968) rotate(-80)"><rect x="-8" y="-150" width="16" height="140" fill="#d9c25a" stroke="${OL}" stroke-width="5"/><path d="M8 -140 h22 v14 h-22 M8 -110 h16 v12 h-16" fill="#d9c25a" stroke="${OL}" stroke-width="4"/><circle cy="20" r="34" fill="none" stroke="#d9c25a" stroke-width="14"/></g>
+    <rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a7").innerHTML = DEFS + `<g filter="url(#fBlur)">${corridor("c7")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".6"/>`;
+  $("#c7F").setAttribute("opacity", 0);
+}
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const U = {
+  s1(lt, t) {
+    zoom("#a1", 1 + .03 * t, 700, 820); const k = easeInOut(prog(t, 2.4, 3.4));
+    $("#x1K").setAttribute("transform", `translate(715 805) rotate(${-90 * k} 0 0)`); 
+    const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`;
+  },
+  s2(lt, t) {
+    zoom("#a2", 1 + .03 * lt, 540, 800); $("#x2K").setAttribute("transform", "translate(715 805) rotate(-90)");
+    const b = $("#b2"); show(b, t, 6.6); if (t < 6.6) b.style.opacity = 0;
+    $("#x2C").setAttribute("opacity", prog(t, 8.6, 9.6)); $("#x2D").setAttribute("transform", t > 8.6 ? `translate(${3 * Math.sin(t * 50)} 0)` : "");
+  },
+  s3(lt, t) {
+    zoom("#a3", lerp(1.05, 1.35, prog(t, 10.6, 15.4)), 540, 1100); $("#x3K").setAttribute("transform", "translate(715 805) rotate(-90)"); $("#x3C").setAttribute("opacity", 1);
+    $("#x3G").setAttribute("opacity", t > 13.6 && t < 15.4 ? .5 + .3 * Math.sin(t * 9) : 0);
+    const b = $("#b3"); show(b, t, 13.6); if (t < 13.6 || t > 15.3) b.style.opacity = 0; $("#dk3").setAttribute("opacity", .8 * prog(t, 15.0, 15.4));
+  },
+  s4(lt, t) {
+    const k = prog(t, 15.4, 17.6); $("#w4").setAttribute("transform", `translate(${lerp(820, 560, k)} ${lerp(1300, 1660, k) - Math.abs(Math.sin(t * 7)) * 10 * (k < 1)}) scale(${lerp(.6, 1, k)})`);
+    setFace("f4", "fear", -.5); const d = $("#d4"); d.style.opacity = t > 17.8 ? (Math.sin(t * 5) > -.4 ? 1 : .35) : 0;
+  },
+  s5(lt, t) {
+    zoom("#a5", 1 + .04 * lt, 540, 900); const kn = [22.6, 23.0, 23.4].some((k) => t > k && t < k + .12);
+    $("#w5S").setAttribute("transform", `translate(${470 + (kn ? 6 : 0)} ${1000}) scale(1.3)`); setFace("f5", t > 23.6 ? "fear" : "shock", 0);
+    const g = document.querySelector("#f5 .eo"), c = document.querySelector("#f5 .ec"); if (t > 23.6) { g.setAttribute("opacity", 0); c.setAttribute("opacity", 1); }
+  },
+  s6(lt, t) {
+    zoom("#a6", lerp(1, 1.5, easeInOut(prog(t, 24.6, 28.0))), 540, 960); $("#w6S").setAttribute("transform", `translate(470 960) scale(1.4)`);
+    const b = $("#b6"); show(b, t, 28.0); if (t < 28.0) b.style.opacity = 0;
+  },
+  s7(lt, t) {
+    show($("#q7"), t, 31.65); show($("#c7a"), t, 32.8, .3, 60); show($("#c7b"), t, 34.4, .3, 60); show($("#b7a"), t, 37.0); show($("#b7b"), t, 38.4);
+    if (t < 32.8) $("#c7a").style.opacity = 0; if (t < 34.4) $("#c7b").style.opacity = 0; if (t < 37.0) $("#b7a").style.opacity = 0; if (t < 38.4) $("#b7b").style.opacity = 0;
+  },
+  s8(lt, t) { const s = $("#s7"); s.style.display = "block"; s.style.opacity = 1; U.s7(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  const knock = (a) => sfx.noise(a, .07, "bandpass", 900, 3, .55, .003);
+  add(2.5, (a) => sfx.noise(a, .12, "highpass", 1800, 2, .4, .005)); add(3.2, (a) => sfx.noise(a, .08, "bandpass", 1200, 3, .4, .003));
+  add(6.6, (a) => sfx.breath(a, 1.4)); for (let t = 8.7; t < 10.5; t += .3) add(t, (a) => sfx.noise(a, .25, "bandpass", 3000, 4, .12, .05, 1500));
+  add(13.6, sfx.boom); add(13.6, (a) => sfx.noise(a, 1.6, "lowpass", 120, 1, .5, .3)); add(15.4, sfx.whooshDown);
+  for (let t = 15.6; t < 17.6; t += .5) add(t, (a) => sfx.noise(a, .07, "lowpass", 260, 1, .3, .005)); add(17.9, sfx.beep);
+  [22.6, 23.0, 23.4].forEach((t) => add(t, knock)); for (let t = 23.6; t < 31.6; t += .55) add(t, (a) => sfx.heart(a, .8)); add(28.0, sfx.hit); add(28.0, (a) => sfx.riser(a, 1.4));
+  [32.8, 34.4].forEach((t) => add(t, sfx.ding)); [37.0, 38.4].forEach((t) => add(t, sfx.pop));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
