@@ -1,3 +1,4 @@
 voice-ref/
 __pycache__/
 voice-cache/
+nochnaya/**/*.mp4
