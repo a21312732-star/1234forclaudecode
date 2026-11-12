@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #1 — Великая эму-война</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#f3e2c0}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}
+.cntr{position:absolute;left:0;right:0;top:300px;text-align:center;font:900 150px var(--mono);color:#fff;z-index:6;text-shadow:6px 6px 0 #000}
+.cntr small{display:block;font:900 46px var(--head)}
+.news{position:absolute;left:90px;right:90px;top:260px;padding:30px;background:#f1ead8;border:6px solid #1a1410;box-shadow:0 16px 30px rgba(0,0,0,.4);color:#1a1410;z-index:6;transform:rotate(-2deg);text-align:center}
+.news .h{font:900 30px var(--mono);border-bottom:4px double #1a1410;padding-bottom:10px}
+.news .t{font:900 86px/1.02 var(--head);margin-top:16px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">АРМИЯ <b>ПРОИГРАЛА</b><br>ВОЙНУ ПТИЦАМ</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg><div class="cntr" id="n2">0<small>ЭМУ</small></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg><div class="cntr" id="n7" style="top:240px">0<small>ПАТРОНОВ</small></div></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="news" id="nw8"><div class="h">ГАЗЕТА · 1932</div><div class="t">ВЕЛИКАЯ<br>ЭМУ-ВОЙНА</div></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 44.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [44.5, 44.5]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.6 }, { id: "s2", s: 3.6, e: 8.4 }, { id: "s3", s: 8.4, e: 12.6 }, { id: "s4", s: 12.6, e: 16.2 },
+  { id: "s5", s: 16.2, e: 24.4 }, { id: "s6", s: 24.4, e: 29.0 }, { id: "s7", s: 29.0, e: 34.0 }, { id: "s8", s: 34.0, e: 40.0 },
+  { id: "s9", s: 40.0, e: 44.2 }, { id: "s10", s: 44.2, e: 44.5 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [24.4];
+const FLASHES = [];
+const clockText = (t) => (t >= 3.6 && t < 40.0 ? "КОТОИСТОРИЯ · 1932" : null);
+const CAPS = [
+  [0.1, "Армия Австралии {y:объявила войну птицам.}"],
+  [2.4, "{r:И проиграла.}"],
+  [3.6, "{y:Двадцать тысяч страусов эму} пришли из пустыни"],
+  [6.4, "и начали поедать урожай фермеров."],
+  [8.4, "Фермеры попросили помощи,"],
+  [9.8, "и правительство отправило {r:солдат с пулемётами.}"],
+  [12.6, "Звучит как лёгкая победа, правда?"],
+  [14.6, "Но {y:эму оказались хитрее.}"],
+  [16.2, "Стоило солдатам приблизиться,"],
+  [17.8, "огромная стая {y:разбегалась маленькими группами}"],
+  [20.4, "в разные стороны"],
+  [21.6, "{r:со скоростью до пятидесяти километров в час.}"],
+  [24.4, "{r:Пулемёт заклинило,}"],
+  [25.8, "а грузовик не мог угнаться за птицами по бездорожью."],
+  [29.0, "Через месяц армия истратила {y:почти десять тысяч патронов}"],
+  [32.4, "{r:и… отступила.}"],
+  [34.0, "Эту историю так и назвали: {y:Великая эму-война.}"],
+  [37.2, "Пиши в комменты, какую историю рассказать дальше."],
+  [40.0, "А ведь всё началось {y:в тысяча девятьсот тридцать втором году,} когда…"],
+  [44.2, ""]
+];
+const MUSIC = { bpm: 120, root: 55, parts: [[0, 12.6, "pulse", .7], [12.6, 34.0, "drive", .5], [34.0, 40.0, "pad", .6], [40.0, 44.5, "pulse", .8]] };
+const E = [
+  ["s1", "e1a", "badge b-yel", "c", 1080, "🇦🇺 АВСТРАЛИЯ, 1932", 0.3, 99, -2, "font-size:48px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "🔫 2 ПУЛЕМЁТА", 9.9, 99, -2, "font-size:56px"],
+  ["s4", "e4a", "badge b-wht", "c", 220, "😎 ЛЁГКАЯ ПОБЕДА?", 12.7, 99, 2, "font-size:52px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "💨 ДО 50 КМ/Ч", 21.7, 99, -2, "font-size:60px"],
+  ["s6", "e6a", "badge b-red", "c", 220, "⚠ ЗАКЛИНИЛО!", 24.5, 99, -3, "font-size:60px"],
+  ["s8", "m8a", "cmt", 90, 1000, "а про ведро есть? 🪣", 37.3, 99, -3], ["s8", "m8b", "cmt", 360, 1100, "давай про Занзибар! 🏝", 37.7, 99, 2],
+];
+const GR = 1150;
+const SOLD = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#8a7a4a", coat2: "#5e5230", hat: "slouch" }, SOLD2 = { fur: "#9a9a9a", fur2: "#6a6a6a", coat: "#8a7a4a", coat2: "#5e5230", hat: "slouch" };
+const FARM = { fur: "#3a3a3a", fur2: "#1a1a1a", coat: "#c0392b", coat2: "#8a2a1e", hat: "cap", hatC: "#3a6a2a" };
+// эму (смотрит влево), лапы в 0,0
+function emu(id, s = 1) {
+  return `<g id="${id}"><g transform="scale(${s})"><ellipse cx="0" cy="4" rx="80" ry="10" fill="#000" opacity=".2"/>
+    <g class="l1"><path d="M-10 -120 L-24 -10 L-44 0" stroke="#5a4a3a" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g class="l2"><path d="M20 -120 L12 -10 L-8 0" stroke="#4a3a2a" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <path d="M-70 -150 Q-80 -230 10 -240 Q100 -240 100 -170 Q90 -110 10 -110 Q-60 -110 -70 -150Z" fill="#6a5a4a" stroke="${OL}" stroke-width="6"/>
+    ${[0, 1, 2, 3, 4].map((i) => `<path d="M${-40 + i * 28} -200 q10 30 -4 60" stroke="#4a3e32" stroke-width="5" fill="none"/>`).join("")}
+    <g class="nk"><path d="M-50 -200 Q-80 -280 -70 -340" stroke="${OL}" stroke-width="30" fill="none" stroke-linecap="round"/><path d="M-50 -200 Q-80 -280 -70 -340" stroke="#8aa0b8" stroke-width="20" fill="none" stroke-linecap="round"/>
+      <g transform="translate(-74 -352)"><ellipse rx="30" ry="24" fill="#5a4a3a" stroke="${OL}" stroke-width="5"/><path d="M-26 4 L-58 10 L-26 16Z" fill="#2a2018" stroke="${OL}" stroke-width="3"/>
+        <circle cx="-8" cy="-4" r="11" fill="#fff" stroke="${OL}" stroke-width="3"/><circle class="pp" cx="-11" cy="-4" r="5" fill="#c86a1a"/></g></g></g></g>`;
+}
+function setEmu(id, t, run = 0) { const g = document.getElementById(id), w = Math.sin(t * 16) * run;
+  g.querySelector(".l1").setAttribute("transform", `rotate(${30 * w} 0 -120)`); g.querySelector(".l2").setAttribute("transform", `rotate(${-30 * w} 0 -120)`);
+  g.querySelector(".nk").setAttribute("transform", `rotate(${run ? -14 + 4 * Math.sin(t * 16) : 4 * Math.sin(t * 2)} -50 -200)`); }
+const outback = (wheat = 0) => `<defs><linearGradient id="ob${wheat}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c47a"/><stop offset="1" stop-color="#fbe6b6"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#ob${wheat})"/>
+  <circle cx="830" cy="330" r="90" fill="#fff3c0"/><path d="M0 ${GR - 120} Q300 ${GR - 200} 600 ${GR - 140} T1080 ${GR - 160} V${GR} H0Z" fill="#d89a5a"/>
+  <rect y="${GR}" width="${W}" height="${H - GR}" fill="#c9824a"/>${wheat ? Array.from({ length: 34 }, (_, i) => `<path d="M${i * 33} ${GR + 10} q6 -60 0 -110" stroke="#e8c050" stroke-width="7" fill="none"/><ellipse cx="${i * 33}" cy="${GR - 104}" rx="8" ry="18" fill="#e8c050" stroke="${OL}" stroke-width="2"/>`).join("") : ""}`;
+const mg = (id) => `<g id="${id}"><path d="M-40 0 L0 -70 L40 0 M0 -70 V0" stroke="${OL}" stroke-width="8"/><rect x="-80" y="-100" width="170" height="40" rx="10" fill="#3a3a3a" stroke="${OL}" stroke-width="6"/><rect x="80" y="-90" width="90" height="16" fill="#2a2a2a" stroke="${OL}" stroke-width="4"/><rect x="-40" y="-130" width="40" height="34" fill="#4a4a4a" stroke="${OL}" stroke-width="4"/></g>`;
+const truck = (id) => `<g id="${id}"><rect x="-260" y="-200" width="300" height="150" rx="10" fill="#6a7a4a" stroke="${OL}" stroke-width="7"/><path d="M40 -170 H140 L190 -110 V-50 H40Z" fill="#7a8a5a" stroke="${OL}" stroke-width="7"/><rect x="70" y="-158" width="70" height="50" fill="#bfe3f5" stroke="${OL}" stroke-width="5"/>
+  <g class="wh">${[-180, 120].map((x) => `<g transform="translate(${x} -40)"><circle r="44" fill="#222" stroke="${OL}" stroke-width="6"/><circle r="16" fill="#888"/><path d="M-30 0 H30" stroke="#555" stroke-width="6"/></g>`).join("")}</g></g>`;
+const flag = (id) => `<g id="${id}"><path d="M0 0 V-260" stroke="#7a5232" stroke-width="10"/><path class="fl" d="M0 -260 Q60 -280 120 -250 Q160 -230 200 -250 V-160 Q160 -140 120 -160 Q60 -190 0 -170Z" fill="#fff" stroke="${OL}" stroke-width="5"/></g>`;
+const hip = (s) => GR - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = outback() + mg("mg1") + cat("c1", SOLD) + emu("em1", 1.6) + `<g id="fg1" opacity="0">${flag("fl1")}</g>`;
+  $("#a2").innerHTML = outback(1) + `<g id="hd2">${Array.from({ length: 9 }, (_, i) => emu(`h2_${i}`, .7 + .25 * (i % 3))).join("")}</g>` + cat("f2", FARM);
+  $("#a3").innerHTML = outback() + truck("tr3") + cat("s3a", SOLD) + cat("s3b", SOLD2) + mg("mg3");
+  $("#a4").innerHTML = outback() + cat("c4", SOLD) + emu("em4", 1.5);
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#d89a5a"/>${Array.from({ length: 40 }, (_, i) => `<circle cx="${hash(i) * W}" cy="${200 + hash(i + 40) * 1100}" r="${4 + 6 * hash(i + 3)}" fill="#b8783a"/>`).join("")}
+    <g id="fk5">${Array.from({ length: 30 }, (_, i) => `<g class="b"><ellipse rx="26" ry="20" fill="#6a5a4a" stroke="${OL}" stroke-width="4"/><circle cx="-18" cy="-14" r="10" fill="#8aa0b8" stroke="${OL}" stroke-width="3"/></g>`).join("")}</g>
+    <g id="sq5">${[0, 1, 2].map((i) => `<g class="s"><rect x="-26" y="-26" width="52" height="52" rx="10" fill="#6a7a4a" stroke="${OL}" stroke-width="5"/><circle r="10" fill="#e8a14a"/></g>`).join("")}</g>`;
+  $("#a6").innerHTML = outback() + `<g id="bm6">${Array.from({ length: 6 }, (_, i) => `<ellipse cx="${i * 220 + 40}" cy="${GR + 6}" rx="70" ry="22" fill="#a86a3a"/>`).join("")}</g>` + truck("tr6") + cat("s6", SOLD) + mg("mg6") + `<g id="sm6"></g>` + emu("e6a", .9) + emu("e6b", .8);
+  $("#a7").innerHTML = outback() + cat("s7a", SOLD) + cat("s7b", SOLD2) + `<g id="fg7">${flag("fl7")}</g>` + `<g id="sh7">${Array.from({ length: 16 }, (_, i) => `<rect class="c" width="14" height="34" rx="6" fill="#d9a83a" stroke="${OL}" stroke-width="3"/>`).join("")}</g>`;
+  $("#a8").innerHTML = paperBg() + `<g transform="translate(0 280)">${emu("em8", 1.7)}</g>` + `<g id="md8"><circle r="40" fill="#ffd23f" stroke="${OL}" stroke-width="6"/><path d="M-20 -40 L-30 -110 M20 -40 L30 -110" stroke="#c8242f" stroke-width="16"/><text y="14" font-size="40" text-anchor="middle" fill="${OL}">1</text></g>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; at("mg1", 300, GR, 1.2); P("c1", 200, hip(1.7), 1.7, { la: 60, ra: 70, face: t > 2.4 ? "worried" : "focus", look: 1 }); wag("c1", t);
+    at("em1", 820, GR + 10, 1); setEmu("em1", t, 0); $("#fg1").setAttribute("opacity", t > 2.4 ? 1 : 0); at("fl1", 120, GR - 60, 1);
+    $("#fl1 .fl").setAttribute("transform", `skewY(${3 * Math.sin(t * 6)})`);
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) {
+    $$("#hd2 > g").forEach((g, i) => { const k = prog(t, 3.6 + i * .2, 6.0 + i * .2), x = lerp(1250, 330 + (i % 5) * 150, easeOut(k)), y = GR + 10 + (i % 3) * 40;
+      at(g.id, x, y, 1); setEmu(g.id, t + i, k < 1 ? 1 : 0); if (k >= 1) g.querySelector(".nk").setAttribute("transform", `rotate(${-50 + 10 * Math.sin(t * 6 + i)} -50 -200)`); });
+    P("f2", 130, hip(1.5), 1.5, { la: 140, ra: 140, face: "shock", look: 1 }); $("#n2").innerHTML = `${Math.round(20000 * easeOut(prog(t, 3.8, 6.0))).toLocaleString("ru")}<small>ЭМУ</small>`;
+  },
+  s3(lt, t) {
+    const k = easeOut(prog(t, 8.5, 10.4)); at("tr3", lerp(-300, 560, k), GR + 30, 1.1); $$("#tr3 .wh g").forEach((g) => g.setAttribute("transform", g.getAttribute("transform").replace(/ rotate\([^)]*\)/, "") + ` rotate(${t * 300})`));
+    P("s3a", lerp(-500, 380, k), hip(1.3) - 170, 1.3, { la: 30, ra: 140, face: "happy" }); P("s3b", lerp(-380, 500, k), hip(1.3) - 170, 1.3, { la: 30, ra: 30, face: "focus" });
+    at("mg3", lerp(-260, 620, k), GR - 150, .9); wag("s3a", t); wag("s3b", t, 1.3);
+  },
+  s4(lt, t) { P("c4", 330, hip(1.8), 1.8, { la: 20, ra: 150, face: "smug", look: 1 }); wag("c4", t); at("em4", 820, GR + 10, 1); setEmu("em4", t, 0); if (t > 14.6) $("#em4 .pp").setAttribute("cx", -6); },
+  s5(lt, t) {
+    const sp = prog(t, 17.8, 21.5); $$("#fk5 .b").forEach((b, i) => { const g = i % 5, a = g / 5 * 6.283 + .4, cx = 540 + 90 * Math.cos(i * 2.1) * (1 - sp * .3), cy = 760 + 90 * Math.sin(i * 1.7) * (1 - sp * .3);
+      const d = easeOut(sp) * (380 + 80 * hash(i)); b.setAttribute("transform", `translate(${(cx + Math.cos(a) * d).toFixed(0)} ${(cy + Math.sin(a) * d).toFixed(0)})`); });
+    $$("#sq5 .s").forEach((s, i) => s.setAttribute("transform", `translate(${300 + i * 240} ${lerp(1250, 1080, prog(t, 16.2, 18))})`));
+  },
+  s6(lt, t) {
+    const k = prog(t, 25.8, 29.0); at("tr6", 420 + 40 * Math.sin(t * 2), GR + 30 - Math.abs(Math.sin(t * 9)) * 40, 1.1, 1, 6 * Math.sin(t * 9)); $("#bm6").setAttribute("transform", `translate(${-(t * 500) % 220} 0)`);
+    P("s6", 280, hip(1.3) - 190 - Math.abs(Math.sin(t * 9)) * 40, 1.3, { la: 30, ra: 100, face: "panic" }); at("mg6", 520, GR - 170 - Math.abs(Math.sin(t * 9)) * 40, .9);
+    $("#sm6").innerHTML = t < 25.8 ? [0, 1, 2].map((i) => { const q = (t * 1.5 + i / 3) % 1; return `<circle cx="${640 + 30 * q}" cy="${GR - 280 - 120 * q}" r="${20 + 30 * q}" fill="#888" opacity="${1 - q}"/>`; }).join("") : "";
+    at("e6a", 860 + 150 * k, GR + 10, 1); setEmu("e6a", t, 1); at("e6b", 980 + 120 * k, GR + 40, 1); setEmu("e6b", t + 1, 1);
+  },
+  s7(lt, t) {
+    const n = Math.round(9860 * easeOut(prog(t, 29.2, 32.2))); $("#n7").innerHTML = `${n.toLocaleString("ru")}<small>ПАТРОНОВ</small>`;
+    $$("#sh7 .c").forEach((c, i) => { const q = ((t * .9 + i / 16) % 1); c.setAttribute("transform", `translate(${100 + (i * 61) % 880} ${300 + q * 900}) rotate(${q * 400})`); c.setAttribute("opacity", t < 32.4 ? 1 : 0); });
+    const r = prog(t, 32.4, 34.0); $("#fg7").setAttribute("opacity", t > 32.4 ? 1 : 0); at("fl7", 540, GR - 60, 1.2); $("#fl7 .fl").setAttribute("transform", `skewY(${3 * Math.sin(t * 6)})`);
+    P("s7a", 300 - 400 * r, hip(1.6), 1.6, { ...walk(t, 1.5), face: "worried", look: -1 }); P("s7b", 780 + 400 * r, hip(1.6), 1.6, { ...walk(t, 1.5), face: "worried" }); wag("s7a", t); wag("s7b", t);
+  },
+  s8(lt, t) { show($("#nw8"), t, 34.05); at("em8", 600, GR + 10, 1); setEmu("em8", t, 0); at("md8", 470, GR + 280 - 470, 1); },
+  s9(lt, t) { loopTo(U, t, 40.0, 44.2); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(2.4, sfx.no); for (let t = 3.8; t < 6.5; t += .25) add(t, (a) => sfx.noise(a, .05, "lowpass", 300, 1, .25, .005));
+  add(9.6, (a) => sfx.engine(a, 2.6, .7)); add(14.6, sfx.ding); for (let t = 16.4; t < 24.2; t += .3) add(t, (a) => sfx.noise(a, .05, "lowpass", 260, 1, .2, .005));
+  add(21.7, (a) => sfx.whoosh(a, .8)); [23.0, 23.15, 23.3, 23.45].forEach((t) => add(t, (a) => sfx.noise(a, .04, "highpass", 1500, 1, .35, .002)));
+  add(24.4, sfx.crack); add(24.6, sfx.no); add(25.8, (a) => sfx.engine(a, 3.2, .7)); for (let t = 29.2; t < 32.2; t += .12) add(t, sfx.tick); add(32.4, sfx.whooshDown);
+  add(34.1, sfx.ding); E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(40.05, sfx.whooshDown); add(43.6, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

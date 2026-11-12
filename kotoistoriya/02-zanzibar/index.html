@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #2 — Война длиной 38 минут</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#bfe6f0}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}
+.tmr{position:absolute;left:0;right:0;top:260px;text-align:center;font:900 170px var(--mono);color:#fff;z-index:6;text-shadow:6px 6px 0 #000}
+.tmr small{display:block;font:900 46px var(--head)}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">ВОЙНА ДЛИНОЙ<br><b>38 МИНУТ</b> ⏱</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg><div class="tmr" id="t6">0:00<small>ВОЙНА ИДЁТ</small></div></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg><div class="tmr" style="top:300px">38<small>МИНУТ. КОНЕЦ.</small></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 34.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [34.9, 34.9]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.2 }, { id: "s2", s: 3.2, e: 6.0 }, { id: "s3", s: 6.0, e: 11.4 }, { id: "s4", s: 11.4, e: 17.8 },
+  { id: "s5", s: 17.8, e: 19.4 }, { id: "s6", s: 19.4, e: 25.2 }, { id: "s7", s: 25.2, e: 27.6 }, { id: "s8", s: 27.6, e: 32.8 },
+  { id: "s9", s: 32.8, e: 34.6 }, { id: "s10", s: 34.6, e: 34.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [19.6, 20.4, 21.2, 22.2];
+const FLASHES = [19.6];
+const clockText = (t) => (t >= 3.2 && t < 32.8 ? "КОТОИСТОРИЯ · 1896" : null);
+const CAPS = [
+  [0.1, "Самая короткая война в истории длилась {r:тридцать восемь минут.}"],
+  [3.2, "Тысяча восемьсот девяносто шестой год, {y:остров Занзибар.}"],
+  [6.0, "Умер местный султан,"],
+  [7.4, "и его родственник тут же {y:захватил дворец}"],
+  [9.4, "и объявил себя новым правителем."],
+  [11.4, "Но Британия хотела видеть на троне {y:своего человека.}"],
+  [14.2, "Британцы поставили ультиматум:"],
+  [15.8, "{r:уйти из дворца до девяти утра.}"],
+  [17.8, "Новый султан {r:не ушёл.}"],
+  [19.4, "Ровно в девять {r:британские корабли открыли огонь.}"],
+  [22.2, "Через тридцать восемь минут {y:флаг над дворцом упал,}"],
+  [25.2, "а сам султан {y:сбежал через чёрный ход.}"],
+  [27.6, "{g:Война закончилась, не успев начаться.}"],
+  [30.0, "Пиши в комменты, какую историю рассказать дальше."],
+  [32.8, "Вот так и вышло, что…"],
+  [34.6, ""]
+];
+const MUSIC = { bpm: 116, root: 52, parts: [[0, 11.4, "pulse", .7], [11.4, 27.6, "drive", .5], [27.6, 32.8, "pad", .6], [32.8, 34.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 1060, "🏝 ЗАНЗИБАР · 1896", 3.3, 99, -2, "font-size:54px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "📜 УЛЬТИМАТУМ: ДО 9:00", 14.3, 99, -2, "font-size:48px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "🙅 НЕ УЙДУ!", 17.9, 99, 3, "font-size:64px"],
+  ["s7", "e7a", "badge b-yel", "c", 220, "🏃 ЧЕРЕЗ ЧЁРНЫЙ ХОД", 25.3, 99, -2, "font-size:50px"],
+  ["s8", "m8a", "cmt", 90, 980, "а самая длинная война? 🗡", 30.1, 99, -3], ["s8", "m8b", "cmt", 330, 1080, "давай про ведро! 🪣", 30.5, 99, 2],
+];
+const GR = 1180;
+const SULT = { fur: "#f1f1ea", fur2: "#c9c9c0", coat: "#2a8a5a", coat2: "#1a5a3a", hat: "turban", belt: "#d9a83a" };
+const OLD = { fur: "#d9d0c0", fur2: "#a89f90", coat: "#6a3a8a", coat2: "#4a2a6a", hat: "crown", beard: "#f4f1e6" };
+const BRIT = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#c8242f", coat2: "#8a1a1a", hat: "bicorne", medal: 1, belt: "#f4f1e6" };
+const sea = () => `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8f0"/><stop offset="1" stop-color="#d8f2ff"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#sk)"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#2b8abf"/>`;
+const palm = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0 Q10 -150 -10 -300" stroke="#8a5a32" stroke-width="22" fill="none"/>${[-60, -20, 20, 60, 100].map((a) => `<path d="M-10 -300 q${80 * Math.cos(a * Math.PI / 180)} ${-40 + 60 * Math.sin(a * Math.PI / 180)} ${150 * Math.cos(a * Math.PI / 180)} ${30 + 60 * Math.sin(a * Math.PI / 180)}" stroke="#2e8a3a" stroke-width="18" fill="none" stroke-linecap="round"/>`).join("")}</g>`;
+const palace = (id) => `<g id="${id}"><rect x="260" y="${GR - 420}" width="560" height="420" fill="#f3e6c8" stroke="${OL}" stroke-width="8"/>${[0, 1, 2, 3].map((i) => `<path d="M${300 + i * 130} ${GR - 330} h80 v-60 q-40 -50 -80 0z" fill="#3a6a8a" stroke="${OL}" stroke-width="5"/>`).join("")}
+  ${[0, 1, 2, 3].map((i) => `<rect x="${300 + i * 130}" y="${GR - 200}" width="80" height="110" fill="#3a6a8a" stroke="${OL}" stroke-width="5"/>`).join("")}<rect x="490" y="${GR - 140}" width="100" height="140" fill="#5a3a22" stroke="${OL}" stroke-width="6"/>
+  <path d="M540 ${GR - 420} V${GR - 560}" stroke="#5a3a22" stroke-width="10"/><g class="fl"><path d="M540 ${GR - 560} h110 v70 h-110z" fill="#c8242f" stroke="${OL}" stroke-width="5"/></g></g>`;
+const ship = (id) => `<g id="${id}"><path d="M-170 0 L170 0 L130 70 L-130 70Z" fill="#4a3a2a" stroke="${OL}" stroke-width="7"/><rect x="-90" y="-60" width="160" height="60" fill="#dcdcdc" stroke="${OL}" stroke-width="6"/><rect x="-20" y="-150" width="30" height="90" fill="#333" stroke="${OL}" stroke-width="5"/>
+  <path d="M-150 20 h-60" stroke="#222" stroke-width="16"/><circle class="fx" cx="-220" cy="20" r="0" fill="#ffd23f"/></g>`;
+const hip = (s) => GR - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = sea() + palm(120, GR) + palace("pl1") + ship("sh1") + `<g transform="translate(540 820)"><circle r="150" fill="#fff" stroke="${OL}" stroke-width="12"/><path id="hd1" d="M0 0 V-110" stroke="${OL}" stroke-width="12" stroke-linecap="round"/><circle r="12" fill="${OL}"/></g>`;
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#2b8abf"/>${Array.from({ length: 30 }, (_, i) => `<path d="M${hash(i) * W} ${hash(i + 30) * H} q20 -10 40 0" stroke="#7cc8f0" stroke-width="5" fill="none"/>`).join("")}
+    <path d="M440 520 Q600 500 640 640 Q700 820 620 980 Q560 1100 470 1040 Q400 900 420 760 Q380 620 440 520Z" fill="#e8d29a" stroke="${OL}" stroke-width="8"/><path d="M470 560 Q590 560 610 660 Q650 820 590 950 Q540 1030 490 990 Q440 880 450 760 Q430 640 470 560Z" fill="#5aa04a"/>
+    <g id="pin2" transform="translate(540 780)"><path d="M0 0 Q-40 -50 -40 -80 a40 40 0 1 1 80 0 Q40 -50 0 0Z" fill="#c8242f" stroke="${OL}" stroke-width="6"/><circle cy="-82" r="14" fill="#fff"/></g>`;
+  $("#a3").innerHTML = sea() + palm(120, GR) + palace("pl3") + `<g id="pt3" transform="translate(860 620)"><rect x="-90" y="-110" width="180" height="220" fill="#d9a83a" stroke="${OL}" stroke-width="8"/><g transform="translate(0 70) scale(.9)">${cat("old3", OLD)}</g><path d="M-90 -110 L-30 -110 L-90 -50Z" fill="#111"/></g>` + cat("su3", SULT);
+  $("#a4").innerHTML = sea() + ship("sh4") + cat("br4", BRIT) + `<g id="sc4"><rect x="-120" y="-150" width="240" height="300" rx="10" fill="#f1ead8" stroke="${OL}" stroke-width="6"/>${[0, 1, 2, 3, 4].map((i) => `<path d="M-90 ${-100 + i * 50} H90" stroke="${OL}" stroke-width="5"/>`).join("")}<text y="130" font-size="44" text-anchor="middle" fill="#c8242f">9:00</text></g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#f3e6c8"/><rect x="380" y="${GR - 300}" width="320" height="300" rx="20" fill="#c8242f" stroke="${OL}" stroke-width="8"/><rect x="420" y="${GR - 520}" width="240" height="240" rx="30" fill="#d9a83a" stroke="${OL}" stroke-width="8"/>` + cat("su5", SULT);
+  $("#a6").innerHTML = sea() + palace("pl6") + ship("sh6a") + ship("sh6b") + `<g id="sm6"></g>`;
+  $("#a7").innerHTML = `<rect width="${W}" height="${H}" fill="#f3e6c8"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#c9a87a"/><rect x="760" y="${GR - 320}" width="200" height="320" fill="#5a3a22" stroke="${OL}" stroke-width="8"/><rect x="790" y="${GR - 290}" width="140" height="290" fill="#111"/>` + cat("su7", SULT);
+  $("#a8").innerHTML = paperBg() + `<g transform="translate(540 1000)"><circle r="230" fill="#fff" stroke="${OL}" stroke-width="16"/><path d="M0 0 L0 -180" stroke="${OL}" stroke-width="14" stroke-linecap="round"/><path d="M0 0 L120 120" stroke="#c8242f" stroke-width="10" stroke-linecap="round"/><circle r="16" fill="${OL}"/></g>`;
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; at("sh1", 860, GR + 20, .8); $("#hd1").setAttribute("transform", `rotate(${t * 120})`);
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { const p = easeOut(prog(t, 3.3, 3.8)); $("#pin2").setAttribute("transform", `translate(540 ${780 - 200 * (1 - p)})`); },
+  s3(lt, t) {
+    $("#pt3").setAttribute("opacity", 1 - prog(t, 7.0, 7.4) * .3); const k = easeInOut(prog(t, 7.4, 9.2));
+    P("su3", lerp(-100, 520, k), hip(1.5), 1.5, t < 9.4 ? walk(t, 1.6, { face: "smug" }) : { la: 150, ra: 150, face: "happy" }); wag("su3", t);
+  },
+  s4(lt, t) { at("sh4", 820, GR + 20, .9); P("br4", 300, hip(1.7), 1.7, { la: 20, ra: 100, face: "focus", look: 1 }); wag("br4", t); const p = easeOut(prog(t, 14.3, 14.8)); $("#sc4").setAttribute("transform", `translate(640 ${780 + 300 * (1 - p)}) scale(${p})`); },
+  s5(lt, t) { P("su5", 540, hip(1.8) - 120, 1.8, { la: -100, ra: -100, face: "smug" }); wag("su5", t); },
+  s6(lt, t) {
+    at("sh6a", 160, GR + 30, .7); at("sh6b", 920, GR + 50, .8); const shots = [19.6, 20.4, 21.2, 22.0, 23.0, 24.0];
+    ["sh6a", "sh6b"].forEach((s, j) => { const f = shots.some((x) => t > x + j * .2 && t < x + j * .2 + .15); $(`#${s} .fx`).setAttribute("r", f ? 46 : 0); });
+    $("#sm6").innerHTML = shots.filter((x) => t > x).map((x, i) => { const q = Math.min(1, (t - x) / 1.5); return `<circle cx="${380 + i * 70}" cy="${GR - 300 - 120 * q}" r="${40 + 60 * q}" fill="#777" opacity="${(.8 - .6 * q).toFixed(2)}"/>`; }).join("");
+    const fall = easeInOut(prog(t, 22.2, 22.8)); $("#pl6 .fl").setAttribute("transform", `translate(0 ${250 * fall})`);
+    const m = Math.min(38, Math.floor(prog(t, 19.4, 22.3) * 38)); $("#t6").innerHTML = `${m}:00<small>${m >= 38 ? "ФЛАГ УПАЛ" : "ВОЙНА ИДЁТ"}</small>`;
+  },
+  s7(lt, t) { const k = prog(t, 25.3, 27.4); P("su7", lerp(860, -150, k), hip(1.5), 1.5, walk(t, 2.2, { face: "panic", look: -1 }), -6); wag("su7", t, 2); },
+  s8(lt, t) {},
+  s9(lt, t) { loopTo(U, t, 32.8, 34.6); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  for (let t = .2; t < 3.2; t += .5) add(t, sfx.tick); add(3.4, sfx.pop); add(7.4, (a) => sfx.whoosh(a, .6)); add(9.4, sfx.ding);
+  add(14.3, (a) => sfx.noise(a, .3, "highpass", 3000, 1, .15, .05)); add(17.9, sfx.no);
+  [19.6, 20.4, 21.2, 22.0, 23.0, 24.0].forEach((t) => { add(t, sfx.boom); add(t + .2, sfx.boom); }); add(22.2, sfx.whooshDown);
+  for (let t = 25.3; t < 27.4; t += .22) add(t, (a) => sfx.noise(a, .05, "lowpass", 300, 1, .25, .005)); add(27.7, sfx.ding);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(32.85, sfx.whooshDown); add(34.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

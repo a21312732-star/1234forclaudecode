@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #22 — Гололёд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#dfeef8}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:96px">ПОСКОЛЬЗНУЛСЯ<br>НА <b>ЛЬДУ</b> 😱</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q8">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 37.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [37.5, 37.5]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 11.6 }, { id: "s3", s: 11.6, e: 13.4 }, { id: "s4", s: 13.4, e: 16.8 },
+  { id: "s5", s: 16.8, e: 20.2 }, { id: "s6", s: 20.2, e: 26.2 }, { id: "s7", s: 26.2, e: 30.6 }, { id: "s8", s: 30.6, e: 34.5 },
+  { id: "s9", s: 34.5, e: 37.2 }, { id: "s10", s: 37.2, e: 37.5 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [14.4, 17.8];
+const FLASHES = [11.6];
+const clockText = (t) => (t >= 2.4 && t < 34.5 ? "ВЫЖИВИ #22 · ГОЛОЛЁД" : null);
+const CAPS = [
+  [0.1, "Ты поскользнулся на льду {r:и летишь вниз.}"],
+  [2.4, "Что делаешь?"],
+  [3.4, "{y:А} — выставляешь прямые руки."],
+  [5.2, "{y:Б} — падаешь назад, как получится."],
+  [7.2, "{y:В} — группируешься и падаешь на бок."],
+  [9.6, "{r:Три, два, один!}"],
+  [11.6, "Правильный ответ — {g:В.}"],
+  [13.4, "Прямая рука — это {r:почти гарантированный перелом запястья.}"],
+  [16.8, "А падение на спину — {r:удар затылком об лёд} и сотрясение."],
+  [20.2, "{y:Прижми подбородок к груди,} согни колени"],
+  [22.6, "и постарайся {g:упасть на бок.}"],
+  [24.2, "Руки держи согнутыми, ближе к телу."],
+  [26.2, "А чтобы вообще не падать, {y:ходи как пингвин:}"],
+  [28.8, "маленькими шагами, всей стопой."],
+  [30.6, "А ты что выбрал?"],
+  [31.8, "{y:Пиши букву в комменты}"],
+  [33.4, "и запомни это,"],
+  [34.5, "потому что {r:если однажды...}"],
+  [37.2, ""]
+];
+const MUSIC = { bpm: 116, root: 52, parts: [[0, 11.6, "pulse", .8], [11.6, 30.6, "drive", .5], [30.6, 34.5, "pad", .6], [34.5, 37.5, "pulse", .8]] };
+const OPTS = [["✋", "ПРЯМЫЕ РУКИ", "А"], ["⬇", "ПАДАЮ НАЗАД", "Б"], ["🤸", "ГРУППИРУЮСЬ, НА БОК", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-blu", "c", 1090, "🧊 ГОЛОЛЁД", 0.3, 99, -2, "font-size:56px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [3.4, 5.2, 7.2]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ПРЯМЫЕ РУКИ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ПАДАЮ НАЗАД", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "ГРУППИРУЮСЬ, НА БОК", "В"], 11.65, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 11.9, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🦴 ПЕРЕЛОМ ЗАПЯСТЬЯ", 14.4, 99, -2, "font-size:52px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "💥 УДАР ЗАТЫЛКОМ", 17.8, 99, 2, "font-size:54px"],
+  ["s6", "e6a", "badge b-yel", 60, 200, "⬇ ПОДБОРОДОК К ГРУДИ", 20.3, 99, -2, "font-size:44px"],
+  ["s6", "e6b", "badge b-grn", 60, 310, "↘ ПАДАЙ НА БОК", 22.7, 99, 2, "font-size:46px"],
+  ["s6", "e6c", "badge b-yel", 60, 420, "💪 РУКИ СОГНУТЫ", 24.3, 99, -2, "font-size:46px"],
+  ["s7", "e7a", "badge b-grn", "c", 220, "🐧 ХОДИ КАК ПИНГВИН", 26.3, 99, -2, "font-size:52px"],
+  ...OPTS3("s8", ["o8a", "o8b", "o8c"], 520, OPTS, [31.8, 32.05, 32.3]),
+  ["s8", "m8a", "cmt", 110, 1060, "В, как каскадёр 😎", 33.4, 99, -3], ["s8", "m8b", "cmt", 520, 1120, "я всегда на руки… 💀", 33.8, 99, 3],
+];
+const HERO = { coat: "#3a7bd5", coat2: "#24539a", hair: "#3b2a1e", pants: "#3b3f58", hat: "#c8242f", hat2: "#fff", scarf: "#ffd23f" };
+const W = 1080, H = 1920, FL = 1150;
+const winter = () => `<rect width="${W}" height="${H}" fill="#dfeef8"/>${Array.from({ length: 40 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 40) * 1000).toFixed(0)}" r="${(3 + 4 * hash(i + 3)).toFixed(0)}" fill="#fff"/>`).join("")}
+  <rect x="0" y="${FL - 520}" width="${W}" height="520" fill="#c9d4e0"/>${[80, 380, 680, 980].map((x) => `<rect x="${x - 50}" y="${FL - 440}" width="100" height="140" fill="#8fb8d6" stroke="#000" stroke-width="6"/>`).join("")}
+  <rect y="${FL}" width="${W}" height="${H - FL}" fill="#eaf4fb"/><path d="M0 ${FL + 10} H${W}" stroke="#a8d4f0" stroke-width="16"/><ellipse cx="540" cy="${FL + 60}" rx="300" ry="26" fill="#bfe3f5" opacity=".9"/>`;
+const hip = (s) => FL - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = winter() + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#1b2a40"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = winter() + person("p4", HERO) + `<g id="cr4" opacity="0"><path d="M0 0 l20 -18 l10 20 l18 -16" stroke="#ff3b47" stroke-width="10" fill="none"/></g>`;
+  $("#a5").innerHTML = winter() + person("p5", HERO) + `<g id="st5" opacity="0" font-size="70" fill="#ffd23f" stroke="#000" stroke-width="4"><text x="300" y="${FL - 140}">★</text><text x="400" y="${FL - 200}">★</text><text x="210" y="${FL - 220}">★</text></g>`;
+  $("#a6").innerHTML = winter() + person("p6", HERO);
+  $("#a7").innerHTML = winter() + person("p7", HERO);
+  $("#a8").innerHTML = `<rect width="${W}" height="${H}" fill="#eef6fc"/>`;
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; const k = easeIn(prog(t, .3, 2.2)); P("p1", 520 + 60 * k, hip(1.7) + 20 * k, 1.7, { la: 150, ra: 120, ll: 50 * k, rl: -10, face: "panic" }, -25 * k); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { show($("#q2"), t, 2.45); countdown($("#c2"), t, 9.6); },
+  s3() {},
+  s4(lt, t) { const k = easeInOut(prog(t, 13.5, 14.4)); P("p4", 540 + 80 * k, lerp(hip(1.7), FL - 140, k), 1.7, { la: 0, ra: lerp(20, -10, k), face: k > .9 ? "panic" : "worried" }, 50 * k); const c = $("#cr4"); c.setAttribute("opacity", t > 14.4 ? 1 : 0); c.setAttribute("transform", `translate(${540 + 80 * k - 160} ${FL - 40})`); },
+  s5(lt, t) { const k = easeInOut(prog(t, 16.9, 17.8)); P("p5", 540 - 120 * k, lerp(hip(1.7), FL - 50, k), 1.7, { la: 160, ra: 160, ll: 20, rl: 20, face: "panic" }, -90 * k); $("#st5").setAttribute("opacity", t > 17.8 ? .6 + .4 * Math.sin(t * 8) : 0); $("#st5").setAttribute("transform", `rotate(${t * 40} 300 ${FL - 180})`); },
+  s6(lt, t) {
+    const ch = prog(t, 20.3, 20.8), k = easeInOut(prog(t, 22.7, 23.6));
+    P("p6", 540 + 100 * k, lerp(hip(1.7), FL - 60, k), 1.7, { la: lerp(20, -110, Math.max(ch, prog(t, 24.3, 24.8))), ra: lerp(20, -110, Math.max(ch, prog(t, 24.3, 24.8))), ll: 60 * ch, rl: 60 * ch, hy: 6 * ch, tilt: 14 * ch, face: "focus" }, 75 * k);
+  },
+  s7(lt, t) { P("p7", 200 + 70 * (t - 26.2), hip(1.7), 1.7, { la: -20, ra: -20, ll: 8 * Math.sin(t * 12), rl: -8 * Math.sin(t * 12), face: "happy" }, 5 * Math.sin(t * 12)); },
+  s8(lt, t) { show($("#q8"), t, 30.65); },
+  s9(lt, t) { loopTo(U, t, 34.5, 37.2); },
+  s10() { holdFirst(U); },
+};
+const easeIn = (x) => x * x;
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.3, (a) => sfx.whoosh(a, .5)); add(14.4, sfx.crack); add(14.4, sfx.hit); add(17.8, sfx.boom); add(18.0, (a) => sfx.osc("sine", 1200, a, .01, .08, 1.2, 900));
+  add(22.7, sfx.whoosh); add(23.6, (a) => sfx.noise(a, .15, "lowpass", 300, 1, .3, .01)); for (let t = 26.4; t < 30.4; t += .22) add(t, (a) => sfx.noise(a, .04, "highpass", 2500, 1, .1, .005));
+  choiceSound(sfx, add, { tick: [2.9, 9.6], cd: 9.6, ans: 11.6, loop: [34.5, 37.2] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #20 — Ужалила оса</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#dff0e0}
+.phone{position:absolute;left:340px;top:330px;width:400px;height:680px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">УЖАЛИЛА ОСА<br>И <b>ТРУДНО ДЫШАТЬ</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="phone" id="ph5"><div class="num">112</div><div class="st" id="st5">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q8">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 39.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [39.1, 39.1]];
+const SCENES = [
+  { id: "s1", s: 0, e: 4.2 }, { id: "s2", s: 4.2, e: 13.8 }, { id: "s3", s: 13.8, e: 15.6 }, { id: "s4", s: 15.6, e: 22.8 },
+  { id: "s5", s: 22.8, e: 26.4 }, { id: "s6", s: 26.4, e: 29.2 }, { id: "s7", s: 29.2, e: 32.2 }, { id: "s8", s: 32.2, e: 36.1 },
+  { id: "s9", s: 36.1, e: 38.8 }, { id: "s10", s: 38.8, e: 39.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.5];
+const FLASHES = [13.8];
+const clockText = (t) => (t >= 4.2 && t < 36.1 ? "ВЫЖИВИ #20 · ОСА" : null);
+const CAPS = [
+  [0.1, "Тебя ужалила оса, и через пару минут {r:опухли губы и стало трудно дышать.}"],
+  [4.2, "Что делаешь?"],
+  [5.2, "{y:А} — прикладываешь лёд и ждёшь."],
+  [7.2, "{y:Б} — пьёшь таблетку от аллергии и ложишься."],
+  [9.8, "{y:В} — сразу звонишь сто двенадцать."],
+  [11.8, "{r:Три, два, один!}"],
+  [13.8, "Правильный ответ — {g:В.}"],
+  [15.6, "Отёк лица и трудное дыхание —"],
+  [17.2, "это {r:опасная аллергия, анафилаксия.}"],
+  [19.6, "{r:Горло может отечь за минуты,} и лёд тут не поможет."],
+  [22.8, "Звони {g:сто двенадцать} и скажи:"],
+  [24.4, "аллергия на укус, трудно дышать."],
+  [26.4, "Если есть {y:шприц с адреналином —} коли в бедро."],
+  [29.2, "Сядь, расстегни тугую одежду {y:и не оставайся один.}"],
+  [32.2, "А ты что выбрал?"],
+  [33.4, "{y:Пиши букву в комменты}"],
+  [35.0, "и запомни это,"],
+  [36.1, "потому что {r:если однажды...}"],
+  [38.8, ""]
+];
+const MUSIC = { bpm: 112, root: 52, parts: [[0, 13.8, "pulse", .8], [13.8, 32.2, "drive", .5], [32.2, 36.1, "pad", .6], [36.1, 39.1, "pulse", .8]] };
+const OPTS = [["🧊", "ЛЁД И ЖДУ", "А"], ["💊", "ТАБЛЕТКА И СПАТЬ", "Б"], ["📞", "ЗВОНЮ 112", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 1090, "🐝 ОТЁК ЗА МИНУТЫ", 0.6, 99, -2, "font-size:50px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [5.2, 7.2, 9.8]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ЛЁД И ЖДУ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ТАБЛЕТКА И СПАТЬ", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "ЗВОНЮ 112", "В"], 13.85, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 14.1, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "⚠ АНАФИЛАКСИЯ", 17.3, 99, -2, "font-size:60px"],
+  ["s4", "e4b", "tile x", 700, 360, ["🧊", "ЛЁД НЕ ПОМОЖЕТ"], 20.6, 99, 3, "width:280px;height:260px"],
+  ["s5", "e5a", "badge b-wht", "c", 1060, "«АЛЛЕРГИЯ, ТРУДНО ДЫШАТЬ»", 24.5, 99, -1, "font-size:42px"],
+  ["s6", "e6a", "badge b-yel", "c", 220, "💉 АДРЕНАЛИН — В БЕДРО", 26.5, 99, -2, "font-size:48px"],
+  ["s7", "e7a", "badge b-grn", 60, 200, "🪑 СЯДЬ", 29.3, 99, -2, "font-size:46px"],
+  ["s7", "e7b", "badge b-grn", 60, 310, "👔 РАССТЕГНИ ОДЕЖДУ", 30.2, 99, 2, "font-size:46px"],
+  ["s7", "e7c", "badge b-yel", 60, 420, "👥 НЕ ОСТАВАЙСЯ ОДИН", 31.0, 99, -2, "font-size:46px"],
+  ...OPTS3("s8", ["o8a", "o8b", "o8c"], 520, OPTS, [33.4, 33.65, 33.9]),
+  ["s8", "m8a", "cmt", 110, 1060, "В, без вариантов 😎", 35.0, 99, -3], ["s8", "m8b", "cmt", 500, 1120, "я бы лёд… 💀", 35.4, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" }, HELP = { coat: "#3a7bd5", coat2: "#24539a", hair: "#6b3e1f", pants: "#2d3a4f" };
+const W = 1080, H = 1920, FL = 1150;
+const park = () => `<rect width="${W}" height="${H}" fill="#cfe9f7"/><path d="M0 ${FL - 160} Q300 ${FL - 240} 600 ${FL - 170} T1080 ${FL - 190} V${FL} H0Z" fill="#8cc87a"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#6aa84a"/>
+  ${[120, 900].map((x) => `<g transform="translate(${x} ${FL})"><rect x="-16" y="-200" width="32" height="200" fill="#7a5232" stroke="#000" stroke-width="6"/><circle cy="-260" r="110" fill="#46a04a" stroke="#000" stroke-width="7"/></g>`).join("")}`;
+const wasp = (id) => `<g id="${id}"><ellipse cx="0" cy="0" rx="34" ry="22" fill="#ffd23f" stroke="#000" stroke-width="5"/><path d="M-10 -20 V20 M8 -21 V21" stroke="#000" stroke-width="8"/><circle cx="-36" cy="-4" r="16" fill="#ffd23f" stroke="#000" stroke-width="5"/><path d="M34 0 L54 4 L34 8Z" fill="#000"/>
+  <ellipse class="wg" cx="0" cy="-30" rx="26" ry="14" fill="#fff" opacity=".7" stroke="#000" stroke-width="3"/></g>`;
+const lips = `<ellipse cx="0" cy="20" rx="22" ry="12" fill="#e05a5a" stroke="#7a1c1c" stroke-width="3"/>`;
+const hip = (s) => FL - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = park() + person("p1", HERO) + wasp("ws1");
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#3a2a10"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#fbe9e4"/><g transform="translate(420 900)"><path d="M-170 -420 Q-200 -560 0 -580 Q200 -560 170 -420 L150 -240 Q140 -170 80 -150 L80 260 L-80 260 L-80 -150 Q-140 -170 -150 -240Z" fill="#f4c7a1" stroke="#000" stroke-width="10"/>
+    <path id="aw4" fill="#9fd4ff" stroke="#3a7bd5" stroke-width="8"/><text x="0" y="330" font-size="40" text-anchor="middle" fill="#555">ДЫХАТЕЛЬНОЕ ГОРЛО</text></g>`;
+  $("#a5").innerHTML = park() + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#e8f0ff"/><g transform="translate(540 900)"><path d="M-260 -200 Q-280 200 -200 520 L60 520 Q120 200 80 -200Z" fill="#3b3f58" stroke="#000" stroke-width="10"/>
+    <g id="pen6"><rect x="-40" y="-260" width="80" height="320" rx="30" fill="#ffd23f" stroke="#000" stroke-width="8"/><rect x="-40" y="40" width="80" height="60" rx="10" fill="#ff8a3d" stroke="#000" stroke-width="8"/><text y="-80" font-size="40" text-anchor="middle" fill="#000" transform="rotate(90 0 -80)">АДРЕНАЛИН</text></g></g>`;
+  $("#a7").innerHTML = park() + `<rect x="300" y="${FL - 180}" width="260" height="30" fill="#8a5a3a" stroke="#000" stroke-width="6"/><rect x="320" y="${FL - 150}" width="22" height="150" fill="#6a4a2a"/><rect x="518" y="${FL - 150}" width="22" height="150" fill="#6a4a2a"/>` + person("p7", HERO) + person("h7", HELP);
+  $("#a8").innerHTML = `<rect width="${W}" height="${H}" fill="#e6f4e6"/>`;
+  document.querySelector("#p1 .hd").insertAdjacentHTML("beforeend", `<g class="sw">${lips}</g>`);
+  document.querySelector("#p7 .hd").insertAdjacentHTML("beforeend", `<g class="sw">${lips}</g>`);
+}
+const U = {
+  s1(lt, t) {
+    $("#a1").style.transform = ""; P("p1", 480, hip(1.8), 1.8, { la: -100 + 4 * Math.sin(t * 10), ra: -100, face: "panic", tilt: 4 * Math.sin(t * 9) });
+    const s = 1 + .5 * prog(t, .5, 2.5); document.querySelector("#p1 .sw").setAttribute("transform", `scale(${s})`);
+    at("ws1", 760 + 80 * Math.sin(t * 3), 560 + 50 * Math.sin(t * 5), 1.4, 1, 10 * Math.sin(t * 9)); $("#ws1 .wg").setAttribute("ry", 14 * Math.abs(Math.sin(t * 40)));
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`;
+  },
+  s2(lt, t) { show($("#q2"), t, 4.25); countdown($("#c2"), t, 11.8); },
+  s3() {},
+  s4(lt, t) { const k = 1 - .75 * prog(t, 19.6, 22.0) + .03 * Math.sin(t * 6); $("#aw4").setAttribute("d", `M${-40 * k} -560 L${40 * k} -560 L${40 * k} 240 L${-40 * k} 240Z`); },
+  s5(lt, t) { show($("#ph5"), t, 22.85, .35, 60); $("#st5").textContent = t > 24.2 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3); },
+  s6(lt, t) { const k = easeOut(prog(t, 27.4, 27.9)); $("#pen6").setAttribute("transform", `translate(-60 ${-260 + 260 * k})`); },
+  s7(lt, t) {
+    P("p7", 430, FL - 180 - 88 * 1.6 + 70, 1.6, { la: 20, ra: 20, ll: 80, rl: 80, face: "worried" }); document.querySelector("#p7 .sw").setAttribute("transform", "scale(1.4)");
+    P("h7", 760, hip(1.6), 1.6, { la: 20, ra: t > 31.0 ? 90 : 20, face: "worried", look: -1 });
+  },
+  s8(lt, t) { show($("#q8"), t, 32.25); },
+  s9(lt, t) { loopTo(U, t, 36.1, 38.8); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.osc("sawtooth", 220, a, .05, .05, 1.8, 260)); add(0.5, sfx.hit); add(1.5, (a) => sfx.breath(a, 1.2)); add(17.3, sfx.no); add(19.7, (a) => sfx.breath(a, 1.4));
+  for (let t = 23.0; t < 24.2; t += .4) add(t, sfx.beep); add(24.2, sfx.ok); add(27.9, sfx.hit); add(29.3, sfx.ok);
+  choiceSound(sfx, add, { tick: [4.7, 11.8], cd: 11.8, ans: 13.8, loop: [36.1, 38.8] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>

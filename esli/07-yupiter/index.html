@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #7 — Упасть на Юпитер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#140a33}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}
+.gx{position:absolute;left:0;right:0;top:300px;text-align:center;font:900 160px var(--mono);color:#ffd23f;z-index:6;text-shadow:6px 6px 0 #000}
+.gx small{display:block;font:900 44px var(--head);color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">УПАСТЬ<br>НА <b>ЮПИТЕР?</b> 🪐</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg><div class="gx" id="g4">×2,5<small>ГРАВИТАЦИЯ</small></div></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 31.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [31.1, 31.1]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.0 }, { id: "s2", s: 2.0, e: 7.8 }, { id: "s3", s: 7.8, e: 12.8 }, { id: "s4", s: 12.8, e: 18.4 },
+  { id: "s5", s: 18.4, e: 25.4 }, { id: "s6", s: 25.4, e: 27.8 }, { id: "s7", s: 27.8, e: 30.8 }, { id: "s8", s: 30.8, e: 31.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [9.4, 21.2];
+const FLASHES = [];
+const clockText = (t) => (t >= 2.0 && t < 27.8 ? "ЕСЛИ ВДРУГ · #7" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:упасть на Юпитер?}"],
+  [2.0, "Первое, что ты поймёшь: {r:стоять там не на чем.}"],
+  [4.6, "У Юпитера нет твёрдой поверхности,"],
+  [6.4, "{y:он почти весь из газа.}"],
+  [7.8, "Ты будешь падать сквозь облака,"],
+  [9.4, "а ветер будет швырять тебя {r:со скоростью сотни километров в час.}"],
+  [12.8, "Гравитация там {y:в два с половиной раза сильнее,}"],
+  [15.4, "так что ты будешь весить {y:в два с половиной раза больше.}"],
+  [18.4, "Чем глубже, {r:тем жарче и тем сильнее давление.}"],
+  [21.2, "Очень скоро {r:тебя просто раздавит,}"],
+  [23.0, "и ты так и не долетишь ни до какого дна."],
+  [25.4, "Пиши в комменты, {y:что проверить дальше.}"],
+  [27.8, "А пока представь:"],
+  [29.0, "{y:что будет, если...}"],
+  [30.8, ""]
+];
+const MUSIC = { bpm: 112, root: 49, parts: [[0, 7.8, "pulse", .7], [7.8, 25.4, "drive", .5], [25.4, 27.8, "pad", .6], [27.8, 31.1, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-red", "c", 220, "🚫 НЕТ ПОВЕРХНОСТИ", 2.1, 99, -2, "font-size:52px"],
+  ["s2", "e2b", "badge b-yel", "c", 340, "☁ ПОЧТИ ВЕСЬ ИЗ ГАЗА", 6.5, 99, 2, "font-size:48px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "🌪 ВЕТЕР — СОТНИ КМ/Ч", 9.5, 99, -2, "font-size:48px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "🔥 ЖАРЧЕ · ⬇ ДАВЛЕНИЕ", 18.5, 99, -2, "font-size:48px"],
+  ["s6", "m6a", "cmt", 90, 1000, "а если упасть в чёрную дыру? 🕳", 25.5, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "а если жить на Марсе? 🔴", 25.9, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", hair: "#3b2a1e", pants: "#3b3f58" };
+const jup = (id, r = 300) => `<g id="${id}"><defs><clipPath id="${id}c"><circle r="${r}"/></clipPath></defs><circle r="${r}" fill="#e8b98a" stroke="#111" stroke-width="12"/><g clip-path="url(#${id}c)"><g class="bd">
+  ${[-260, -170, -90, -10, 70, 150, 230].map((y, i) => `<rect x="${-r * 2}" y="${y * r / 300}" width="${r * 4}" height="${40 * r / 300}" fill="${["#c98a5a", "#f1d6b0", "#b06a3a", "#e8c8a0", "#c98a5a", "#a85a2a", "#f1d6b0"][i]}"/>`).join("")}
+  <ellipse cx="${r * .3}" cy="${120 * r / 300}" rx="${70 * r / 300}" ry="${40 * r / 300}" fill="#c8442a" stroke="#111" stroke-width="5"/></g></g><circle r="${r}" fill="none" stroke="#111" stroke-width="12"/></g>`;
+const astro = (id) => `<g id="${id}">${person(id + "p", HERO)}</g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = space() + `<g transform="translate(540 1050)">${jup("j1", 380)}</g>` + astro("a1x");
+  $("#a2").innerHTML = space() + `<g transform="translate(540 1300)">${jup("j2", 520)}</g>` + astro("a2x");
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#d8a878"/><g id="cl3">${Array.from({ length: 18 }, (_, i) => `<ellipse rx="${120 + 80 * hash(i)}" ry="40" fill="${i % 2 ? "#f1d6b0" : "#b06a3a"}" opacity=".85"/>`).join("")}</g>` + astro("a3x") + `<g id="wd3" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".7"></g>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#c98a5a"/><g transform="translate(540 1150)"><rect x="-200" y="0" width="400" height="60" rx="10" fill="#ddd" stroke="#111" stroke-width="8"/><rect x="-160" y="60" width="320" height="40" fill="#999" stroke="#111" stroke-width="6"/></g>` + astro("a4x");
+  $("#a5").innerHTML = `<rect id="bg5" width="${W}" height="${H}" fill="#a85a2a"/>` + astro("a5x") + `<g id="pr5">${Array.from({ length: 8 }, (_, i) => `<path class="pa" stroke="#fff" stroke-width="14" stroke-linecap="round"/>`).join("")}</g>`;
+  $("#a6").innerHTML = space() + `<g transform="translate(540 1000)">${jup("j6", 300)}</g>`;
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; $("#j1 .bd").setAttribute("transform", `translate(${(t * 40) % 200} 0)`); P("a1xp", 540, 560 + 20 * Math.sin(t * 2), 1.2, { la: 150, ra: 150, face: "shock" }, 20 * Math.sin(t)); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { $("#j2 .bd").setAttribute("transform", `translate(${(t * 40) % 200} 0)`); const k = prog(t, 2.0, 7.8); P("a2xp", 540, lerp(500, 820, k), 1.1, { la: 160, ra: 160, face: "panic" }, 180 * k); },
+  s3(lt, t) {
+    $$("#cl3 ellipse").forEach((e, i) => { e.setAttribute("cx", ((hash(i) * 1400 - (t * (300 + 200 * hash(i + 2)) % 1600) + 1600) % 1600 - 200).toFixed(0)); e.setAttribute("cy", ((hash(i + 5) * 1900 - t * 400) % 1900 + 1900) % 1900); });
+    P("a3xp", 540 + 200 * Math.sin(t * 2.2), 900 + 80 * Math.cos(t * 3), 1.3, { la: 160 + 20 * Math.sin(t * 9), ra: 130, face: "panic" }, t * 160);
+    $("#wd3").innerHTML = t > 9.4 ? Array.from({ length: 10 }, (_, i) => { const x = ((t * 1800 + i * 200) % 1500) - 200, y = 200 + i * 110; return `<path d="M${x} ${y} h${160}"/>`; }).join("") : "";
+  },
+  s4(lt, t) { const sq = t > 15.4 ? .78 : 1; P("a4xp", 540, 1150 - 88 * 1.6 * sq, 1.6, { la: -10, ra: -10, face: t > 15.4 ? "shock" : "worried", sq }); $("#g4").innerHTML = t > 15.4 ? "×2,5<small>ТЫ ВЕСИШЬ</small>" : "×2,5<small>ГРАВИТАЦИЯ</small>"; },
+  s5(lt, t) {
+    const k = prog(t, 18.4, 23.0); $("#bg5").setAttribute("fill", `rgb(${Math.round(lerp(168, 230, k))},${Math.round(lerp(90, 60, k))},${Math.round(lerp(42, 20, k))})`);
+    const sq = 1 - .45 * prog(t, 21.2, 23.0); P("a5xp", 540, 980, 1.5, { la: 160, ra: 160, face: "panic", sq }, 180);
+    $$("#pr5 .pa").forEach((p, i) => { const a = i / 8 * 6.283, r = lerp(420, 220, prog(t, 18.4, 23)); const x = 540 + Math.cos(a) * r, y = 860 + Math.sin(a) * r; p.setAttribute("d", `M${x.toFixed(0)} ${y.toFixed(0)} L${(x - Math.cos(a) * 60).toFixed(0)} ${(y - Math.sin(a) * 60).toFixed(0)}`); });
+  },
+  s6(lt, t) { $("#j6 .bd").setAttribute("transform", `translate(${(t * 40) % 200} 0)`); },
+  s7(lt, t) { loopTo(U, t, 27.8, 30.8); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.whoosh(a, .6)); add(2.1, sfx.no); add(2.2, (a) => sfx.wind(a, 5.4, .6)); add(7.9, (a) => sfx.wind(a, 4.8, 1.4)); add(9.4, sfx.boom);
+  add(15.4, sfx.hit); add(18.5, (a) => sfx.riser(a, 3)); add(21.2, sfx.crack); add(21.2, sfx.boom);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(27.85, sfx.whooshDown); add(30.2, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

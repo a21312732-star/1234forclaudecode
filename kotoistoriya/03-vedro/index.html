@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #3 — Война за ведро</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#f3e2c0}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}
+.vs{position:absolute;left:0;right:0;top:260px;display:flex;justify-content:space-around;font:900 110px var(--mono);z-index:6;text-shadow:6px 6px 0 #000}
+.vs small{display:block;font:900 40px var(--head);text-align:center;color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">ВОЙНА<br>ИЗ-ЗА <b>ВЕДРА</b> 🪣</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="vs"><div style="color:#ff6b6b" id="v5a">0<small>БОЛОНЬЯ</small></div><div style="color:#ffd23f" id="v5b">0<small>МОДЕНА</small></div></div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 32.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [32.9, 32.9]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.0 }, { id: "s2", s: 3.0, e: 9.0 }, { id: "s3", s: 9.0, e: 14.2 }, { id: "s4", s: 14.2, e: 17.4 },
+  { id: "s5", s: 17.4, e: 22.6 }, { id: "s6", s: 22.6, e: 24.4 }, { id: "s7", s: 24.4, e: 28.0 }, { id: "s8", s: 28.0, e: 30.8 },
+  { id: "s9", s: 30.8, e: 32.6 }, { id: "s10", s: 32.6, e: 32.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [17.6, 19.0];
+const FLASHES = [22.6];
+const clockText = (t) => (t >= 3.0 && t < 30.8 ? "КОТОИСТОРИЯ · 1325" : null);
+const CAPS = [
+  [0.1, "Из-за деревянного ведра {r:погибли две тысячи человек.}"],
+  [3.0, "Тысяча триста двадцать пятый год, {y:Италия.}"],
+  [5.4, "Два соседних города, {y:Модена и Болонья,} давно враждовали."],
+  [9.0, "Однажды ночью солдаты из Модены пробрались в Болонью"],
+  [12.0, "и {r:украли ведро} из городского колодца."],
+  [14.2, "Болонья потребовала его вернуть."],
+  [16.0, "{r:Модена отказалась.}"],
+  [17.4, "И началась настоящая битва:"],
+  [19.0, "{y:тридцать тысяч солдат Болоньи}"],
+  [20.8, "против {y:семи тысяч из Модены.}"],
+  [22.6, "{g:И маленькая Модена победила.}"],
+  [24.4, "Ведро так и не вернули —"],
+  [25.8, "{y:его до сих пор показывают в Модене.}"],
+  [28.0, "Пиши в комменты, какую историю рассказать дальше."],
+  [30.8, "Вот так и вышло, что…"],
+  [32.6, ""]
+];
+const MUSIC = { bpm: 112, root: 49, parts: [[0, 9.0, "pulse", .7], [9.0, 28.0, "drive", .5], [28.0, 30.8, "pad", .6], [30.8, 32.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇮🇹 ИТАЛИЯ · 1325", 3.1, 99, -2, "font-size:54px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🙅 НЕ ОТДАДИМ!", 16.0, 99, 3, "font-size:60px"],
+  ["s6", "e6a", "badge b-grn", "c", 220, "🏆 МОДЕНА ПОБЕДИЛА", 22.7, 99, -2, "font-size:54px"],
+  ["s7", "e7a", "badge b-yel", "c", 220, "🪣 ДО СИХ ПОР В МОДЕНЕ", 25.9, 99, 2, "font-size:48px"],
+  ["s8", "m8a", "cmt", 90, 1000, "серьёзно, из-за ведра?! 😂", 28.1, 99, -3], ["s8", "m8b", "cmt", 330, 1100, "а про войну с эму? 🐦", 28.5, 99, 2],
+];
+const GR = 1180;
+const MOD = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#d9a83a", coat2: "#2b4a8a", hat: "helmet" }, BOL = { fur: "#5a5a5a", fur2: "#333", coat: "#c8242f", coat2: "#f4f1e6", hat: "helmet" };
+const bucket = (id, s = 1) => `<g id="${id}"><g transform="scale(${s})"><path d="M-90 -120 Q0 -230 90 -120" fill="none" stroke="#5a4a3a" stroke-width="12"/><path d="M-100 -120 L-80 60 Q0 80 80 60 L100 -120 Q0 -100 -100 -120Z" fill="#a8743a" stroke="${OL}" stroke-width="8"/>
+  ${[-60, -20, 20, 60].map((x) => `<path d="M${x} -112 L${x * .8} 66" stroke="#7a5228" stroke-width="5"/>`).join("")}<path d="M-96 -80 Q0 -60 96 -80 M-88 20 Q0 40 88 20" stroke="#4a4a4a" stroke-width="10" fill="none"/></g></g>`;
+const town = (x, col, flagC) => `<g><rect x="${x}" y="${GR - 380}" width="420" height="380" fill="${col}" stroke="${OL}" stroke-width="8"/>${[0, 1, 2, 3, 4, 5, 6].map((i) => `<rect x="${x + i * 60}" y="${GR - 420}" width="36" height="42" fill="${col}" stroke="${OL}" stroke-width="6"/>`).join("")}
+  <rect x="${x + 170}" y="${GR - 160}" width="80" height="160" rx="40" fill="#3a2a1a" stroke="${OL}" stroke-width="6"/><path d="M${x + 210} ${GR - 420} V${GR - 560}" stroke="#5a3a22" stroke-width="8"/><path d="M${x + 210} ${GR - 560} h90 v54 h-90z" fill="${flagC}" stroke="${OL}" stroke-width="5"/></g>`;
+const hip = (s) => GR - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = `<rect width="${W}" height="${H}" fill="#1a1410"/><ellipse cx="540" cy="900" rx="420" ry="520" fill="#fff3c0" opacity=".25"/>` + bucket("bk1", 2.2);
+  $("#a2").innerHTML = paperBg() + `<rect y="${GR}" width="${W}" height="${H - GR}" fill="#9a7a4a"/>` + town(20, "#e8d29a", "#2b4a8a") + town(640, "#e8b0a0", "#c8242f") + cat("m2", MOD) + cat("b2", BOL);
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#14182a"/><circle cx="860" cy="300" r="60" fill="#eef3ff"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#2a2a3a"/>
+    <g transform="translate(540 ${GR})"><rect x="-160" y="-160" width="320" height="160" fill="#7a7a8a" stroke="${OL}" stroke-width="8"/><path d="M-140 -160 V-420 M140 -160 V-420 M-170 -420 H170" stroke="#5a3a22" stroke-width="16"/></g>` + bucket("bk3", .6) + cat("t3a", MOD) + cat("t3b", MOD);
+  $("#a4").innerHTML = paperBg() + cat("b4", BOL) + cat("m4", MOD) + bucket("bk4", .55) + `<g id="sc4" transform="translate(280 700) rotate(-6)"><rect x="-130" y="-160" width="260" height="320" rx="10" fill="#f1ead8" stroke="${OL}" stroke-width="6"/><text y="-60" font-size="40" text-anchor="middle" fill="#c8242f">ВЕРНИТЕ</text><text y="0" font-size="40" text-anchor="middle" fill="#c8242f">ВЕДРО!</text></g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#cfe3a0"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#8aa04a"/>
+    <g id="ra5">${Array.from({ length: 40 }, (_, i) => `<g class="u"><circle r="18" fill="#c8242f" stroke="${OL}" stroke-width="4"/><circle cy="-22" r="12" fill="#9aa3ad" stroke="${OL}" stroke-width="3"/></g>`).join("")}</g>
+    <g id="ya5">${Array.from({ length: 10 }, (_, i) => `<g class="u"><circle r="18" fill="#d9a83a" stroke="${OL}" stroke-width="4"/><circle cy="-22" r="12" fill="#9aa3ad" stroke="${OL}" stroke-width="3"/></g>`).join("")}</g>`;
+  $("#a6").innerHTML = paperBg() + cat("m6", MOD) + bucket("bk6", .7) + `<g id="cf6"></g>`;
+  $("#a7").innerHTML = `<rect width="${W}" height="${H}" fill="#cfe8f5"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#b0a080"/>
+    <g transform="translate(540 ${GR})"><rect x="-130" y="-900" width="260" height="900" fill="#e8dcc0" stroke="${OL}" stroke-width="8"/><path d="M-130 -900 L0 -1080 L130 -900Z" fill="#c9a87a" stroke="${OL}" stroke-width="8"/>${[0, 1, 2, 3].map((i) => `<rect x="-30" y="${-840 + i * 190}" width="60" height="100" rx="30" fill="#3a2a1a"/>`).join("")}
+    <rect x="-150" y="-300" width="300" height="280" fill="#bfe3f5" opacity=".6" stroke="${OL}" stroke-width="8"/></g>` + bucket("bk7", .7);
+  $("#a8").innerHTML = paperBg() + bucket("bk8", 1.4);
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; at("bk1", 540, 1050 + 10 * Math.sin(t * 2), 1, 1, 4 * Math.sin(t * 1.5)); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { P("m2", 230, hip(1.4) + 10, 1.4, { la: 120 + 10 * Math.sin(t * 6), ra: 30, face: "smug", look: 1 }); P("b2", 850, hip(1.4) + 10, 1.4, { la: 30, ra: 120 + 10 * Math.cos(t * 6), face: "worried", look: -1 }); wag("m2", t); wag("b2", t); },
+  s3(lt, t) {
+    const k = prog(t, 9.0, 12.0), g = t > 12.0, r = prog(t, 12.4, 14.2);
+    P("t3a", g ? lerp(470, -100, r) : lerp(-80, 420, k), hip(1.3), 1.3, { ...walk(t, .8), face: "focus", look: g ? -1 : 1 }); P("t3b", g ? lerp(330, -240, r) : lerp(-220, 280, k), hip(1.3), 1.3, { ...walk(t + .5, .8), face: "smug" }); wag("t3a", t); wag("t3b", t);
+    at("bk3", g ? lerp(520, -50, r) : 540, g ? hip(1.3) - 140 : GR - 160 - 0, 1);
+  },
+  s4(lt, t) { P("b4", 300, hip(1.6), 1.6, { la: 30, ra: 110, face: "worried", look: 1 }); P("m4", 800, hip(1.6), 1.6, { la: -40, ra: 30, face: "smug", tilt: t > 16.0 ? 8 * Math.sin(t * 10) : 0 }); at("bk4", 900, GR - 80, 1); wag("b4", t); wag("m4", t); },
+  s5(lt, t) {
+    const k = prog(t, 17.4, 22.4);
+    $$("#ra5 .u").forEach((u, i) => u.setAttribute("transform", `translate(${(40 + (i % 8) * 50 + 200 * k + 6 * Math.sin(t * 8 + i)).toFixed(0)} ${(700 + Math.floor(i / 8) * 90).toFixed(0)})`));
+    $$("#ya5 .u").forEach((u, i) => u.setAttribute("transform", `translate(${(1000 - (i % 4) * 50 - 160 * k + 6 * Math.sin(t * 9 + i)).toFixed(0)} ${(800 + Math.floor(i / 4) * 90).toFixed(0)})`));
+    $("#v5a").innerHTML = `${Math.round(30000 * easeOut(prog(t, 19.0, 20.4))).toLocaleString("ru")}<small>БОЛОНЬЯ</small>`; $("#v5b").innerHTML = `${Math.round(7000 * easeOut(prog(t, 20.8, 22.0))).toLocaleString("ru")}<small>МОДЕНА</small>`;
+  },
+  s6(lt, t) {
+    P("m6", 540, hip(1.8), 1.8, { la: 160, ra: 160, face: "happy" }); wag("m6", t, 2); at("bk6", 540, hip(1.8) - 300 - 20 * Math.abs(Math.sin(t * 5)), 1);
+    $("#cf6").innerHTML = Array.from({ length: 24 }, (_, i) => { const q = (t * .6 + hash(i)) % 1; return `<rect x="${(hash(i + 5) * W).toFixed(0)}" y="${(q * 1300).toFixed(0)}" width="16" height="26" fill="${["#ffd23f", "#2b4a8a", "#c8242f"][i % 3]}" transform="rotate(${(q * 500).toFixed(0)} ${(hash(i + 5) * W).toFixed(0)} ${(q * 1300).toFixed(0)})"/>`; }).join("");
+  },
+  s7(lt, t) { const e = $("#a7"); e.style.transformOrigin = "540px 1020px"; e.style.transform = `scale(${lerp(1, 1.6, easeInOut(prog(t, 25.8, 27.6)))})`; at("bk7", 540, GR - 60, 1); },
+  s8(lt, t) { at("bk8", 540, 1080 + 10 * Math.sin(t * 2), 1, 1, 4 * Math.sin(t * 1.5)); },
+  s9(lt, t) { loopTo(U, t, 30.8, 32.6, "540px 900px"); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, sfx.boom); for (let t = 9.1; t < 12.0; t += .45) add(t, (a) => sfx.noise(a, .05, "lowpass", 300, 1, .2, .005)); add(12.0, (a) => sfx.noise(a, .15, "bandpass", 1500, 4, .3, .01));
+  add(16.0, sfx.no); for (let t = 17.5; t < 22.4; t += .35) add(t, (a) => sfx.noise(a, .1, "bandpass", 2500, 5, .15, .005)); add(17.6, sfx.boom); add(19.0, sfx.boom);
+  add(22.7, sfx.ok); add(22.7, sfx.ding); add(25.9, sfx.ding);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(30.85, sfx.whooshDown); add(32.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
