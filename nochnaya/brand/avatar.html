@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#000}svg{display:block}</style></head><body>
+<svg width="800" height="800" viewBox="0 0 800 800">
+<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05070f"/><stop offset="1" stop-color="#1b2740"/></linearGradient>
+<radialGradient id="mg" cx=".5" cy=".5" r=".5"><stop offset=".25" stop-color="#e8f0ff" stop-opacity=".45"/><stop offset="1" stop-color="#e8f0ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="lg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset=".4" stop-color="#ffb84a" stop-opacity=".35"/><stop offset="1" stop-color="#ffb84a" stop-opacity="0"/></radialGradient>
+<radialGradient id="vg" cx=".5" cy=".5" r=".6"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient></defs>
+<rect width="800" height="800" fill="url(#sk)"/>
+<g fill="#fff">STARS</g>
+<circle cx="590" cy="190" r="170" fill="url(#mg)"/>
+<path d="M590 130 a62 62 0 1 0 50 104 a52 52 0 1 1 -50 -104Z" fill="#eef3ff"/>
+<g fill="#070b12">PINES</g>
+<!-- фонарь сторожа -->
+<g transform="translate(330 470)">
+  <circle r="230" fill="url(#lg)"/>
+  <path d="M-10 -170 Q0 -215 10 -170" fill="none" stroke="#12131a" stroke-width="12"/>
+  <rect x="-70" y="-160" width="140" height="34" rx="8" fill="#2b2b2b" stroke="#12131a" stroke-width="8"/>
+  <path d="M-62 -126 L62 -126 L54 70 L-54 70Z" fill="#ffcf6a" stroke="#12131a" stroke-width="10"/>
+  <path d="M-58 -60 H58 M-56 10 H56 M0 -126 V70" stroke="#12131a" stroke-width="8"/>
+  <ellipse cx="0" cy="-20" rx="16" ry="30" fill="#fff6d8"/>
+  <rect x="-76" y="70" width="152" height="36" rx="8" fill="#2b2b2b" stroke="#12131a" stroke-width="8"/>
+</g>
+<rect width="800" height="800" fill="url(#vg)"/>
+</svg>
+<script>
+const h=(n)=>{const x=Math.sin(n*127.1)*43758.5453;return x-Math.floor(x)};
+const s=document.querySelector('svg').innerHTML.replace('STARS',Array.from({length:50},(_,i)=>`<circle cx="${(h(i)*800).toFixed(0)}" cy="${(h(i+60)*420).toFixed(0)}" r="${(1+2*h(i+7)).toFixed(1)}" opacity="${(.3+.6*h(i+3)).toFixed(2)}"/>`).join(''))
+ .replace('PINES',[[60,800,420],[170,800,330],[640,800,380],[760,800,460],[520,800,260]].map(([x,y,hh])=>`<path d="M${x} ${y-hh} L${x-hh*.3} ${y-hh*.45} L${x-hh*.15} ${y-hh*.45} L${x-hh*.38} ${y} L${x+hh*.38} ${y} L${x+hh*.15} ${y-hh*.45} L${x+hh*.3} ${y-hh*.45} Z"/>`).join(''));
+document.querySelector('svg').innerHTML=s;
+</script></body></html>
