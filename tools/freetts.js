@@ -25,7 +25,7 @@ const text = fs.readFileSync(textFile, 'utf8').trim();
   if (!ok) { console.error('freetts.ru не открылся'); process.exit(2); }
   // выбор голоса
   await p.locator('button').filter({ hasText: 'Язык' }).first().click();
-  const card = p.locator('p.voice-name', { hasText: new RegExp(`^${voice}$`) }).first();
+  const card = p.locator('p.voice-name', { hasText: new RegExp(`^${voice.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`) }).first();
   await card.waitFor({ timeout: 20000 });
   await card.locator('xpath=ancestor::*[.//button[contains(., "Выбрать")]][1]').locator('button', { hasText: 'Выбрать' }).first().click();
   await p.waitForTimeout(800);
