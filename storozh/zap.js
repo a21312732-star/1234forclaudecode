@@ -42,3 +42,12 @@ const nightWin = (id, x = 290, y = 380, w = 500, h = 640) => `<defs><clipPath id
     <g id="${id}H" opacity="0"><ellipse cx="${x + w * .45}" cy="${y + h * .45}" rx="50" ry="62" fill="#fff" opacity=".5"/>${[-36, -14, 8, 30].map((dx, i) => `<rect x="${x + w * .45 + dx - 9}" y="${y + h * .45 - 130 + (i % 3) * 6}" width="18" height="70" rx="9" fill="#fff" opacity=".5"/>`).join("")}</g>
     <rect id="${id}F" x="${x}" y="${y}" width="${w}" height="${h}" fill="#dfe8f0" opacity="0"/></g>
   <path d="M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}" stroke="#c9c2a8" stroke-width="22"/>`;
+// дверь подвала: id+D створка, id+K ключ, id+C царапины, id+G свечение из-под двери
+const cellarDoor = (id) => `<rect width="1080" height="1920" fill="#232a36"/><rect y="1180" width="1080" height="740" fill="#1c1e26"/><rect y="760" width="1080" height="420" fill="#17332c"/>
+  <g stroke="${OL}" stroke-width="8"><rect x="300" y="420" width="480" height="760" fill="#14161c"/>
+  <g id="${id}D"><rect x="300" y="420" width="480" height="760" fill="#3a2c26"/>${[0, 1, 2].map((i) => `<rect x="340" y="${470 + i * 230}" width="400" height="190" fill="none" stroke="#2a1f1a" stroke-width="8"/>`).join("")}
+    <rect x="690" y="760" width="50" height="90" rx="8" fill="#8a7a5a"/><circle cx="715" cy="790" r="9" fill="#111"/></g>
+  <rect x="390" y="320" width="300" height="80" rx="8" fill="#c9c2a8"/><text x="540" y="378" font-family="Montserrat" font-weight="900" font-size="48" text-anchor="middle" fill="#7a2020" stroke="none">ПОДВАЛ</text></g>
+  <g id="${id}K" transform="translate(715 805)"><rect x="-6" y="0" width="12" height="70" fill="#d9c25a" stroke="${OL}" stroke-width="4"/><circle cy="90" r="24" fill="none" stroke="#d9c25a" stroke-width="10"/></g>
+  <g id="${id}C" stroke="#d8cfc0" stroke-width="5" opacity="0">${Array.from({ length: 5 }, (_, i) => `<path d="M${420 + i * 22} 700 l${10 + i * 2} 160"/>`).join("")}${Array.from({ length: 4 }, (_, i) => `<path d="M${560 + i * 24} 900 l${-8} 130"/>`).join("")}</g>
+  <ellipse id="${id}G" cx="540" cy="1185" rx="260" ry="26" fill="#ff3b30" opacity="0"/><rect width="1080" height="1920" fill="url(#gVig)"/>`;
