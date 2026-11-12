@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#000}svg{display:block}</style></head><body>
+<svg width="1280" height="720" viewBox="0 0 1920 1080" id="v"></svg>
+
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script>
+let s=DEFS+platform("p",{lampX:520,signX:1500})+`<g transform="translate(-2300 470)">${trainOut("t",{dark:true,body:"#0a0a0c"})}</g>`+[0,1,2,3,4].map(i=>faceless(-2300+760*3+83+i*112,590)).join("")
+ +`<g>${person("w",{coat:"#7a7a80",coat2:"#5a5a60",hair:"#d0d0d0",pants:"#3a3a40",hat:"#5a5a60",hat2:"#7a7a80"})}</g>`+vig
+ +`<text x="70" y="200" font-family="Montserrat" font-weight="900" font-size="150" fill="#f1ead8" stroke="#000" stroke-width="14" paint-order="stroke">СТАНЦИИ</text>`
+ +`<text x="70" y="360" font-family="Montserrat" font-weight="900" font-size="150" fill="#ff3b30" stroke="#000" stroke-width="14" paint-order="stroke">НЕТ НА КАРТЕ</text>`;
+document.getElementById("v").innerHTML=s; at("w",1180,860-88*1.25,1.25,.8,0); setPose("w",{la:10,ra:10,face:"worried",look:-1});
+</script></body></html>
