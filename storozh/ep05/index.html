@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правила ночного сторожа — Серия 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+.card{position:absolute;left:70px;right:70px;height:180px;border-radius:30px;background:rgba(18,20,30,.92);border:3px solid #3a3f52;display:flex;align-items:center;gap:30px;padding:0 30px;z-index:6;color:#fff}
+.card .n{flex:none;width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:900 80px var(--head)}
+.card b{display:block;font:900 50px/1.05 var(--head)} .card span{display:block;font:800 34px var(--head);color:#9fb4c8;margin-top:8px}
+.list{position:absolute;left:140px;right:140px;top:300px;z-index:6;font:700 62px/1.25 Caveat;color:#1f2a44}
+.list div{position:relative;opacity:0} .list s{text-decoration:none;position:relative} .list s::after{content:"";position:absolute;left:-6px;right:-6px;top:52%;height:6px;background:#1f2a44;transform:rotate(-2deg)}
+.list em{font-style:normal;font-size:44px;color:#7a1a1a;margin-left:18px}
+.list .me{color:#1a3aaa;text-shadow:0 0 14px rgba(80,120,255,.6)}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">СЕРИЯ 5</div><div class="ttl" id="h1" style="top:170px">ВЫ ВЫБРАЛИ:<br><i>ДОЧИТАТЬ ЖУРНАЛ 📖</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="list" id="L3">
+      <div><s>Петров Н. И. · 1986</s><em>спустился</em></div><div><s>Ковальчук А. С. · 1991</s><em>спустился</em></div><div><s>Зуев В. П. · 1999</s><em>спустился</em></div>
+      <div><s>Лисицын Г. Е. · 2008</s><em>спустился</em></div><div><s>Мартынов О. Б. · 2017</s><em>спустился</em></div><div><s>Сорокин Д. А. · 2025</s><em>спустился</em></div>
+      <div class="me" id="me3">Александр · 2026</div></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="list" style="top:620px;font-size:110px;text-align:center"><div class="me" id="me4" style="opacity:1">Александр</div></div></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="ttl" id="q5" style="top:240px">ЧТО МНЕ <i>ДЕЛАТЬ?</i></div>
+    <div class="card" id="c5a" style="top:470px"><div class="n" style="background:#c8242f">1</div><div><b>СЖЕЧЬ ЖУРНАЛ 🔥</b><span>и вместе с ним список</span></div></div>
+    <div class="card" id="c5b" style="top:690px"><div class="n" style="background:#2f6fd6">2</div><div><b>ПОЗВОНИТЬ ☎</b><span>по номеру на обложке</span></div></div>
+    <div class="bdg" id="b5a" style="top:930px;background:#fff;color:#111">💬 ПИШИ ЦИФРУ В КОММЕНТЫ</div>
+    <div class="bdg" id="b5b" style="top:1060px;background:#c8242f;color:#fff">СЕРИЯ 6 — РЕШАЕШЬ ТЫ</div></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script src="../zap.js"></script>
+<script>
+"use strict";
+const DUR = 37.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [37.3, 37.3]];
+const SCENES = [{ id: "s1", s: 0, e: 6.4 }, { id: "s2", s: 6.4, e: 10.4 }, { id: "s3", s: 10.4, e: 22.0 }, { id: "s4", s: 22.0, e: 27.8 }, { id: "s5", s: 27.8, e: 37.0 }, { id: "s6", s: 37.0, e: 37.3 }];
+const SPEAK = [], DROP = ["подписывайся"], SHAKES = [24.0], FLASHES = [];
+const clockText = (t) => (t >= 6.4 && t < 27.8 ? "ПРАВИЛА НОЧНОГО СТОРОЖА · СЕРИЯ 5" : null);
+const CAPS = [
+  [0.1, "Вы выбрали: {y:запереть подвал и дочитать журнал.}"],
+  [2.6, "Я повернул ключ два раза и вернулся на вахту."], [4.8, "Колыбельная за спиной {r:ещё долго не стихала.}"],
+  [6.4, "Я открыл журнал на последних страницах."], [8.4, "{y:Там был список.}"], [9.4, "Имена сторожей санатория за сорок лет."],
+  [11.8, "Каждое имя аккуратно зачёркнуто,"], [13.6, "а рядом подпись: {r:спустился.}"],
+  [15.4, "Предпоследним был {y:тот самый прошлый сторож.}"], [18.0, "А последнее имя {r:ещё не было зачёркнуто.}"],
+  [20.4, "{r:Это было моё имя.}"], [22.0, "И чернила на нём {r:были свежие.}"],
+  [27.8, "Что мне делать?"], [29.0, "{y:Один} — сжечь журнал."], [30.4, "{y:Два} — позвонить по номеру на обложке."], [33.0, "Пиши {y:цифру} в комменты."], [34.4, "Решать тебе."], [37.0, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 27.8, "pad", .6], [27.8, 37.3, "pad", .35]] };
+function build() {
+  $("#a1").innerHTML = DEFS + cellarDoor("x1") + `<g id="hn1"><ellipse rx="70" ry="54" fill="${SKIN2}" stroke="${OL}" stroke-width="8"/><rect x="30" y="-30" width="300" height="70" rx="20" fill="${COAT}" stroke="${OL}" stroke-width="8"/></g>`;
+  $("#a2").innerHTML = DEFS + journal("j2") + `<g id="nt2" font-size="80" fill="#bfc8e0"></g>`;
+  $("#a3").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#e8dcbc"/>${Array.from({ length: 24 }, (_, i) => `<path d="M80 ${360 + i * 78} H1000" stroke="#9cb4c9" stroke-width="2" opacity=".6"/>`).join("")}<path d="M120 0 V1920" stroke="#d98a8a" stroke-width="3"/><rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a4").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#e8dcbc"/>${Array.from({ length: 24 }, (_, i) => `<path d="M80 ${360 + i * 78} H1000" stroke="#9cb4c9" stroke-width="2" opacity=".6"/>`).join("")}<g id="dr4"></g><rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a5").innerHTML = DEFS + `<g filter="url(#fBlur)">${journal("j5")}</g><rect width="1080" height="1920" fill="#05060a" opacity=".6"/>`;
+}
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const U = {
+  s1(lt, t) { zoom("#a1", 1 + .02 * t, 700, 820); const k = easeInOut(prog(t, 2.6, 3.4)), k2 = easeInOut(prog(t, 3.6, 4.4)); $("#x1K").setAttribute("transform", `translate(715 805) rotate(${-90 * (k + k2)})`);
+    $("#hn1").setAttribute("transform", `translate(790 900)`); $("#hn1").setAttribute("opacity", t < 4.8 ? 1 : 0); const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`; },
+  s2(lt, t) { zoom("#a2", 1 + .05 * lt, 540, 900); $("#nt2").innerHTML = [0, 1, 2].map((i) => { const q = (t * .3 + i / 3) % 1; return `<text x="${(300 + 400 * hash(i)).toFixed(0)}" y="${(600 - q * 400).toFixed(0)}" opacity="${(Math.sin(q * Math.PI) * (1 - prog(t, 6.4, 10.4))).toFixed(2)}">♪</text>`; }).join(""); },
+  s3(lt, t) { $$("#L3 > div").forEach((d, i) => { const a = i < 6 ? 10.6 + i * .7 : 18.0; d.style.opacity = prog(t, a, a + .4); }); const me = $("#me3"); me.style.transform = t > 20.4 ? `scale(${1 + .06 * Math.sin(t * 6)})` : "";
+    $$("#L3 > div")[5].style.background = t > 15.4 && t < 18 ? "rgba(255,210,63,.4)" : ""; zoom("#a3", 1 + .03 * lt, 540, 700); },
+  s4(lt, t) { zoom("#a4", 1 + .1 * lt, 540, 700); const me = $("#me4"); me.style.transform = `scale(${1 + .04 * Math.sin(t * 4)})`;
+    $("#dr4").innerHTML = t > 22.6 ? [0, 1, 2].map((i) => { const q = prog(t, 22.6 + i * .5, 26 + i * .5); return `<path d="M${380 + i * 150} 760 v${(q * 260).toFixed(0)}" stroke="#1a3aaa" stroke-width="10" stroke-linecap="round" opacity=".8"/><circle cx="${380 + i * 150}" cy="${(770 + q * 260).toFixed(0)}" r="12" fill="#1a3aaa" opacity="${q > 0 ? .8 : 0}"/>`; }).join("") : ""; },
+  s5(lt, t) { show($("#q5"), t, 27.85); show($("#c5a"), t, 29.0, .3, 60); show($("#c5b"), t, 30.4, .3, 60); show($("#b5a"), t, 33.0); show($("#b5b"), t, 34.4);
+    if (t < 29.0) $("#c5a").style.opacity = 0; if (t < 30.4) $("#c5b").style.opacity = 0; if (t < 33.0) $("#b5a").style.opacity = 0; if (t < 34.4) $("#b5b").style.opacity = 0; },
+  s6(lt, t) { const s = $("#s5"); s.style.display = "block"; s.style.opacity = 1; U.s5(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  [2.7, 3.7].forEach((t) => add(t, (a) => sfx.noise(a, .1, "highpass", 1800, 2, .35, .005))); for (let i = 0; i < 6; i++) add(4.9 + i * .6, (a) => sfx.osc("sine", [392, 349, 330, 294, 330, 262][i], a, .08, .03, .55));
+  add(6.5, (a) => sfx.noise(a, .4, "highpass", 3000, 1, .12, .05)); for (let i = 0; i < 6; i++) add(10.7 + i * .7, (a) => sfx.noise(a, .25, "bandpass", 3500, 3, .08, .02));
+  for (let t = 18.0; t < 27.8; t += .55) add(t, (a) => sfx.heart(a, .8)); add(20.4, sfx.boom); add(22.0, (a) => sfx.riser(a, 1.6)); add(24.0, sfx.hit);
+  [29.0, 30.4].forEach((t) => add(t, sfx.ding)); [33.0, 34.4].forEach((t) => add(t, sfx.pop));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
