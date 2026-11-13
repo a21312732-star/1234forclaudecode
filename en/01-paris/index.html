@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer — Day 1: Paris</title>
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>#stage{background:#f6efdf}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg><div class="card" id="cd1">Day 1 · Paris 🇫🇷</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../pencil.js"></script>
+<script>
+"use strict";
+const NOGLITCH = true;
+const DUR = 24.8;
+const WARP = [[0, 0], [24.8, 24.8]];
+const SCENES = [{ id: "s1", s: 0, e: 4.2 }, { id: "s2", s: 4.2, e: 10.2 }, { id: "s3", s: 10.2, e: 15.4 }, { id: "s4", s: 15.4, e: 21.4 }, { id: "s5", s: 21.4, e: 24.5 }, { id: "s6", s: 24.5, e: 24.8 }];
+const SPEAK = [], DROP = [], SHAKES = [], FLASHES = [];
+const clockText = () => null;
+const CAPS = [[0.3, "Packing for my first trip…"], [4.2, "Bonjour, Paris!"], [10.2, "My first croissant ever."], [15.4, "The tower sparkles at night ✨"], [21.4, "Where should I go next? 👇"], [24.5, ""]];
+const MUSIC = { bpm: 84, root: 55, parts: [] };
+const GR = 1450;
+// ---------- сцены ----------
+const map = () => fillP(px(0, 0, W, H), "#cfe3ec") + bothP("M80 620 Q160 470 330 520 Q420 430 520 520 Q600 480 640 600 Q560 720 600 830 Q470 900 400 1010 Q330 900 250 960 Q160 860 200 760 Q90 720 80 620Z", "#c9dca0", 6, true) +
+  bothP("M700 560 Q820 470 980 560 Q1040 700 960 820 Q860 900 760 840 Q680 720 700 560Z", "#e6d29a", 6, true) + bothP("M300 1200 Q420 1120 560 1180 Q600 1320 520 1420 Q400 1460 320 1380 Q260 1300 300 1200Z", "#d9c0a0", 6, true) +
+  lineP("M520 1300 C 600 1050, 420 900, 440 700", 5, "#b8402a").replace('stroke-linejoin="round"/>', 'stroke-linejoin="round" stroke-dasharray="4 22"/>') + bothP(circ(440, 690, 18), "#c8242f", 4);
+const building = (x, w, h, c) => bothP(px(x, GR - h, w, h), c, 5, true) + bothP(`M${x - 10} ${GR - h} L${x + w / 2} ${GR - h - 70} L${x + w + 10} ${GR - h}Z`, "#6a7a8a", 5) +
+  Array.from({ length: Math.floor(h / 120) }, (_, r) => [0, 1].map((k) => bothP(px(x + 24 + k * (w / 2), GR - h + 40 + r * 120, w / 2 - 48, 70), "#a8d0e6", 3)).join("")).join("");
+const eiffel = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${bothP("M-150 0 L-40 -420 L-20 -700 L20 -700 L40 -420 L150 0 L90 0 Q0 -140 -90 0Z", "#8a6a4a", 6, true)}${lineP("M-80 -300 H80 M-50 -520 H50 M0 -700 V-780", 6)}<g class="tw"></g></g>`;
+function build() {
+  $("#a1").innerHTML = PDEFS + map() + hero("h1", { pack: 1 }) + paperOver();
+  $("#a2").innerHTML = PDEFS + sky("#f6d3a8", "#fbe8c6", GR) + `<g transform="translate(0 0)">${eiffel(700, 1000, .9)}</g>` + `<g id="bl2">${[0, 1, 2, 3, 4, 5].map((i) => building(i * 260 - 60, 220, 420 + 120 * (i % 3), ["#f0d2b0", "#e6c6a0", "#f3dcc0"][i % 3])).join("")}</g>` +
+    fillP(px(0, GR, W, H - GR), "#b9b3a6") + lineP(`M0 ${GR} H${W}`, 6) + `<g id="bk2"></g>` + hero("h2", { pack: 1 }) + paperOver();
+  $("#a3").innerHTML = PDEFS + fillP(px(0, 0, W, H), "#f3e2c8") + bothP(px(140, 480, 800, 560), "#bfe0f0", 8) + `<g transform="translate(540 1040) scale(.55)">${eiffel(0, 0, 1)}</g>` + lineP("M540 480 V1040 M140 760 H940", 10) + bothP("M0 300 H1080 V380 H0Z", "#c8242f", 5) + Array.from({ length: 9 }, (_, i) => fillP(px(i * 130, 300, 65, 80), "#fff")).join("") +
+    bothP(px(140, 1180, 800, 40), "#8a5a3a", 6, true) + bothP(px(500, 1220, 80, 500), "#7a4a2a", 5) + hero("h3") + `<g id="cr3">${bothP("M560 1170 Q620 1100 700 1150 Q740 1180 700 1180 Q640 1150 600 1180Z", "#e8a85a", 5, true)}</g>` +
+    bothP(ell(420, 1170, 50, 14), "#fff", 4) + bothP("M395 1170 v-50 h50 v50", "#fff", 4) + paperOver();
+  $("#a4").innerHTML = PDEFS + `<g id="sk4">${sky("#3a3a7a", "#f2a070", GR)}</g>` + `<g id="st4"></g>` + eiffel(540, GR, 1.5) + fillP(px(0, GR, W, H - GR), "#4a6a4a") +
+    bothP(px(620, GR - 90, 300, 26), "#7a5a3a", 5) + hero("h4") + paperOver();
+  $("#a5").innerHTML = PDEFS + sky("#20234a", "#3a3a7a", GR) + `<g id="st5">${Array.from({ length: 30 }, (_, i) => fillP(circ(60 + hash(i) * 960, 80 + hash(i + 30) * 900, 4 + 4 * hash(i + 5)), "#fff6c0")).join("")}</g>` +
+    eiffel(320, GR, 1.1) + fillP(px(0, GR, W, H - GR), "#2e4a3a") + hero("h5", { pack: 1 }) + paperOver();
+}
+const spark = (g, t, n = 22) => { g.innerHTML = Array.from({ length: n }, (_, i) => (Math.sin(t * 9 + i * 2.7) > .4 ? `<circle cx="${(-110 + 220 * hash(i)) * (1 - hash(i + 9) * .5)}" cy="${-700 * hash(i + 9)}" r="6" fill="#fff6a0"/>` : "")).join(""); };
+const U = {
+  s1(lt, t) { const k = prog(t, .4, 3.6); setHero("h1", lerp(520, 440, k), lerp(1360, 690, k) - Math.abs(Math.sin(t * 6)) * 40, .45, { walk: 1, happy: t > 3.2 }, t); $("#a1").style.transform = ""; },
+  s2(lt, t) { $("#bl2").setAttribute("transform", `translate(${-((t - 4.2) * 90) % 260} 0)`);
+    const bx = 470, by = GR - 10; $("#bk2").innerHTML = [-170, 170].map((dx) => `<g transform="translate(${bx + dx} ${by - 70}) rotate(${t * 220})">${lineP(circ(0, 0, 70), 7)}${lineP("M-70 0 H70 M0 -70 V70", 4)}</g>`).join("") + lineP(`M${bx - 170} ${by - 70} L${bx - 40} ${by - 190} L${bx + 120} ${by - 190} L${bx + 170} ${by - 70} M${bx - 40} ${by - 190} L${bx} ${by - 70}`, 7);
+    setHero("h2", bx, by - 150, .85, { bob: 1, happy: t > 6 }, t); },
+  s3(lt, t) { setHero("h3", 760, 1180, 1.05, { armUp: t > 11 && t < 13.5, happy: t > 13.5 }, t); const bites = Math.min(3, Math.floor(prog(t, 11.5, 14.5) * 4)); $("#cr3").setAttribute("transform", `translate(${700 * (bites / 3) * 0} 0) scale(${1 - bites * .25})`); $("#cr3").setAttribute("opacity", bites >= 3 ? 0 : 1); },
+  s4(lt, t) { const k = prog(t, 15.4, 21.0); $("#sk4").setAttribute("opacity", 1); $("#a4").querySelector("#sk4").style.filter = `brightness(${lerp(1.15, .75, k)})`; setHero("h4", 770, GR - 90, .8, { happy: t > 18 }, t);
+    spark($("#a4").querySelector(".tw"), t, t > 17 ? 22 : 0); },
+  s5(lt, t) { setHero("h5", 760, GR, 1.0, { wave: true, happy: true }, t); spark($("#a5").querySelector(".tw"), t); },
+  s6() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) { lullaby(sfx, add, DUR, 3); add(4.3, (a) => sfx.osc("sine", 1320, a, .005, .06, .5)); add(4.4, (a) => sfx.osc("sine", 1760, a, .005, .05, .5)); [11.6, 12.6, 13.6].forEach((x) => add(x, (a) => sfx.noise(a, .08, "bandpass", 2500, 2, .12, .005))); }
+ENGINE.start();
+</script>
+</body>
+</html>
