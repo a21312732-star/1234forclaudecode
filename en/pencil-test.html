@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><style>body{margin:0;background:#000}svg{display:block}</style></head><body>
+<svg id="v" width="1080" height="1920" viewBox="0 0 1080 1920">
+<defs>
+  <!-- бумага: шум + лёгкие волокна -->
+  <filter id="paper" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="4" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .42  0 0 0 -1.4 .9" result="g"/>
+    <feComposite in="g" in2="SourceGraphic" operator="in"/>
+  </filter>
+  <!-- карандашная линия: дрожание + зернистость -->
+  <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="2" result="w"/>
+    <feDisplacementMap in="SourceGraphic" in2="w" scale="9" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="9" result="g"/>
+    <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 2.5 -.35" result="ga"/>
+    <feComposite in="d" in2="ga" operator="in"/>
+  </filter>
+  <!-- заливка цветным карандашом: дрожащие края + пятнистость -->
+  <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="5" result="w"/>
+    <feDisplacementMap in="SourceGraphic" in2="w" scale="7" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".5 .08" numOctaves="2" seed="7" result="g"/>
+    <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 3 -.45" result="ga"/>
+    <feComposite in="d" in2="ga" operator="in"/>
+  </filter>
+  <!-- штриховка -->
+  <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M0 7 H14" stroke="#3a2a1a" stroke-width="2.2" opacity=".45"/></pattern>
+  <pattern id="hatchW" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)"><path d="M0 9 H18" stroke="#fff" stroke-width="2" opacity=".35"/></pattern>
+</defs>
+<g id="scene"></g>
+</svg>
+<script>
+const W = 1080, H = 1920, INK = "#3a2a20";
+const fill = (d, c, extra = "") => `<g filter="url(#crayon)"><path d="${d}" fill="${c}" ${extra}/></g>`;
+const line = (d, w = 5, c = INK) => `<g filter="url(#pencil)"><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" transform="translate(3 -2)" fill="none" stroke="${c}" stroke-width="${w * .5}" opacity=".5" stroke-linecap="round"/></g>`;
+const both = (d, c, w = 5) => fill(d, c) + line(d, w);
+const circ = (cx, cy, r) => `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0`;
+let s = `<rect width="${W}" height="${H}" fill="#f6efdf"/>`;
+// небо: два слоя заливки (цветной карандаш ложится неравномерно)
+s += fill(`M0 0 H${W} V1250 H0Z`, "#f6d9a8") + fill(`M0 0 H${W} V700 H0Z`, "#f2b98a", 'opacity=".55"');
+// солнце со штриховкой
+s += both(circ(780, 420, 150), "#f4b23a", 6) + `<path d="${circ(780, 420, 150)}" fill="url(#hatch)" filter="url(#pencil)"/>`;
+// горы
+s += both("M-40 1250 L220 820 L380 1020 L560 760 L820 1080 L940 940 L1120 1250Z", "#b9a6d6", 6);
+s += `<path d="M-40 1250 L220 820 L380 1020 L560 760 L820 1080 L940 940 L1120 1250Z" fill="url(#hatch)" filter="url(#pencil)"/>`;
+s += both("M500 840 L560 760 L615 830 L585 820 L560 845 L530 820Z", "#fff", 4);
+// море + блики
+s += both(`M0 1250 H${W} V1920 H0Z`, "#7fb6d6", 6) + `<path d="M0 1250 H${W} V1920 H0Z" fill="url(#hatchW)" filter="url(#pencil)"/>`;
+for (let i = 0; i < 9; i++) s += line(`M${80 + (i * 137) % 900} ${1330 + i * 60} q30 -14 60 0 q30 14 60 0`, 4, "#fff");
+// лодочка из бумаги
+s += both("M250 1500 L830 1500 L740 1620 L340 1620Z", "#f4efe2", 6) + both("M540 1500 L540 1240 L700 1480Z", "#fffaf0", 5) + line("M540 1500 V1220", 6);
+// персонаж — оранжевый кубик
+s += `<g id="hero">${both("M420 1290 Q410 1180 520 1180 L600 1180 Q680 1180 670 1290 L668 1440 Q666 1500 600 1500 L490 1500 Q424 1500 422 1440Z", "#e8833a", 6)}
+  <path d="M420 1290 Q410 1180 520 1180 L600 1180 Q680 1180 670 1290 L668 1440 Q666 1500 600 1500 L490 1500 Q424 1500 422 1440Z" fill="url(#hatch)" filter="url(#pencil)"/>
+  ${line("M498 1310 q14 -16 28 0", 6)}${line("M566 1310 q14 -16 28 0", 6)}${line("M520 1370 q26 22 52 0", 6)}
+  ${fill(circ(482, 1350, 18), "#f2a0a0", 'opacity=".7"')}${fill(circ(610, 1350, 18), "#f2a0a0", 'opacity=".7"')}
+  ${both("M410 1380 q-50 -30 -40 -90", "none", 14)}${both("M680 1380 q50 -30 40 -90", "none", 14)}
+  ${both("M545 1180 L560 1120 L575 1180 L630 1150 L585 1195Z", "#f6d24a", 4)}</g>`;
+// бумага поверх всего
+s += `<rect width="${W}" height="${H}" fill="#f3ead6" filter="url(#paper)" opacity=".18" style="mix-blend-mode:multiply"/>`;
+s += `<rect width="${W}" height="${H}" fill="none" stroke="#e8dcc0" stroke-width="40"/>`;
+document.getElementById("scene").innerHTML = s;
+</script>
+</body></html>
