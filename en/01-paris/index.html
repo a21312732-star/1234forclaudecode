@@ -38,10 +38,10 @@ const map = () => { const pr = geoProj(-11, 62.5, 40, 520, 40), P = (arr) => arr
   ["main", "scand", "gb", "ie", "sic", "sar", "cor"].forEach((k) => (g += bothP(smoothPath(P(EU[k])), "#e9dcb4", 5, k === "main")));
   g += fillP(smoothPath(P([[-1.8,43.4],[1.4,42.6],[3.2,42.4],[3.2,41.6],[0.9,41.0],[-3,40.5],[-7.5,41.5],[-7.5,43.4]])), "#e9dcb4");
   g += bothP(smoothPath(P(EU.fr)), "#e8a0a0", 6, true);
-  const [fx, fy] = pr([1.0, 46.6]); g += `<text x="${fx}" y="${fy}" font-family="Caveat" font-weight="700" font-size="58" fill="#7a1a1a" text-anchor="middle">FRANCE</text>`;
-  const [px0, py0] = pr([2.35, 48.86]); g += bothP(circ(px0, py0, 14), "#c8242f", 4) + `<text x="${px0 + 24}" y="${py0 - 14}" font-family="Caveat" font-weight="700" font-size="52" fill="#3a2a20">Paris</text>`;
+  const [fx, fy] = pr([1.0, 46.6]); g += `<text x="${fx}" y="${fy}" style="font-family:Caveat;font-weight:700" font-size="58" fill="#7a1a1a" text-anchor="middle">FRANCE</text>`;
+  const [px0, py0] = pr([2.35, 48.86]); g += bothP(circ(px0, py0, 14), "#c8242f", 4) + `<text x="${px0 + 24}" y="${py0 - 14}" style="font-family:Caveat;font-weight:700" font-size="52" fill="#3a2a20">Paris</text>`;
   const [sx, sy] = pr([27.5, 53.9]); g += lineP(`M${sx} ${sy} Q${(sx + px0) / 2} ${Math.min(sy, py0) - 220} ${px0} ${py0}`, 5, "#b8402a").replace('stroke-linejoin="round"/>', 'stroke-linejoin="round" stroke-dasharray="4 22"/>');
-  g += `<g transform="translate(940 1500)">${lineP("M0 -70 V70 M-70 0 H70", 4)}${bothP("M0 -70 L14 -14 L0 0 L-14 -14Z", "#c8242f", 3)}<text y="-84" font-family="Caveat" font-weight="700" font-size="44" text-anchor="middle" fill="#3a2a20">N</text></g>`;
+  g += `<g transform="translate(940 1500)">${lineP("M0 -70 V70 M-70 0 H70", 4)}${bothP("M0 -70 L14 -14 L0 0 L-14 -14Z", "#c8242f", 3)}<text y="-84" style="font-family:Caveat;font-weight:700" font-size="44" text-anchor="middle" fill="#3a2a20">N</text></g>`;
   MAPP = { sx, sy, px: px0, py: py0 }; return g; };
 let MAPP = {};
 const eiffel = (x, y, s) => eiffelReal(x, y, s * .78);
