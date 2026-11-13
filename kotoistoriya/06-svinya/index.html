@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #6 — Суд над свиньёй</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#e8dcc0}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:92px">СВИНЬЮ<br><b>СУДИЛИ</b> КАК ЧЕЛОВЕКА</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 29.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [29.3, 29.3]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.0 }, { id: "s2", s: 2.0, e: 7.0 }, { id: "s3", s: 7.0, e: 11.4 }, { id: "s4", s: 11.4, e: 15.8 },
+  { id: "s5", s: 15.8, e: 24.4 }, { id: "s6", s: 24.4, e: 27.2 }, { id: "s7", s: 27.2, e: 29.0 }, { id: "s8", s: 29.0, e: 29.3 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [11.4], FLASHES = [];
+const clockText = (t) => (t >= 2.0 && t < 27.2 ? "КОТОИСТОРИЯ · 1386" : null);
+const CAPS = [
+  [0.1, "{y:Свинью судили, как человека.}"],
+  [2.0, "Тысяча триста восемьдесят шестой год, {y:французский город Фалез.}"], [5.0, "Свинья ранила ребёнка, и её арестовали."],
+  [7.0, "Был настоящий суд: {y:судья, свидетели, адвокат} и приговор."],
+  [9.6, "Свинью признали виновной"], [11.4, "и казнили на площади, {r:а перед этим одели в куртку и штаны.}"],
+  [15.8, "В средние века в Европе {y:так судили многих животных:}"], [18.4, "свиней, быков, {r:даже крыс и насекомых.}"],
+  [20.8, "Иногда у животных был свой адвокат, {g:и он выигрывал дело.}"],
+  [24.4, "Пиши в комменты, какую историю рассказать дальше."], [27.2, "Вот так и вышло, что…"], [29.0, ""]
+];
+const MUSIC = { bpm: 96, root: 49, parts: [[0, 7.0, "pulse", .7], [7.0, 24.4, "pad", .6], [24.4, 27.2, "pad", .5], [27.2, 29.3, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇫🇷 ФАЛЕЗ, 1386", 2.1, 99, -2, "font-size:56px"],
+  ["s3", "e3a", "badge b-wht", "c", 220, "⚖ СУДЬЯ · СВИДЕТЕЛИ · АДВОКАТ", 7.1, 99, 2, "font-size:40px"],
+  ["s3", "e3b", "badge b-red", "c", 1060, "🔨 ВИНОВНА!", 9.7, 99, -3, "font-size:60px"],
+  ["s4", "e4a", "badge b-yel", "c", 220, "👕 В КУРТКЕ И ШТАНАХ", 12.4, 99, -2, "font-size:50px"],
+  ["s5", "e5a", "badge b-wht", "c", 220, "🐂 🐀 🐛 ТОЖЕ ПОД СУДОМ", 18.5, 99, 2, "font-size:46px"],
+  ["s5", "e5b", "badge b-grn", "c", 1060, "🏆 АДВОКАТ ВЫИГРАЛ!", 22.0, 99, -2, "font-size:52px"],
+  ["s6", "m6a", "cmt", 90, 1000, "суд над крысами?! 🐀😂", 24.5, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "давай ещё средневековье! ⚔", 24.9, 99, 2],
+];
+const GR = 1180;
+const JUDGE = { fur: "#f1f1ea", fur2: "#c9c9c0", coat: "#1a1a24", coat2: "#0a0a12", beard: "#e8e8e8" }, LAW = { fur: "#3a3a3a", fur2: "#1a1a1a", coat: "#6a3a8a", coat2: "#4a2a6a" }, WIT = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#a8743a", coat2: "#7a5232", hat: "slouch" };
+const pig = (id, dressed = 0) => `<g id="${id}"><ellipse cx="0" cy="-80" rx="130" ry="80" fill="#f2a6b0" stroke="${OL}" stroke-width="7"/>${dressed ? `<path d="M-100 -130 Q0 -170 100 -130 L110 -60 Q0 -30 -110 -60Z" fill="#3a6a8a" stroke="${OL}" stroke-width="6"/>` : ""}
+  ${[-80, -30, 30, 80].map((x) => `<rect x="${x - 14}" y="-20" width="28" height="30" rx="8" fill="${dressed ? "#7a5232" : "#f2a6b0"}" stroke="${OL}" stroke-width="5"/>`).join("")}
+  <g transform="translate(-130 -110)"><circle r="56" fill="#f2a6b0" stroke="${OL}" stroke-width="7"/><path d="M-20 -50 L-36 -86 L4 -56Z M20 -50 L36 -86 L-4 -56Z" fill="#f2a6b0" stroke="${OL}" stroke-width="5"/><ellipse cx="-36" cy="12" rx="26" ry="20" fill="#e8909c" stroke="${OL}" stroke-width="5"/><circle cx="-44" cy="12" r="5" fill="${OL}"/><circle cx="-28" cy="12" r="5" fill="${OL}"/><circle cx="-6" cy="-16" r="7" fill="${OL}"/><circle cx="22" cy="-16" r="7" fill="${OL}"/></g>
+  <path d="M130 -100 q30 -10 20 20 q-10 20 20 10" fill="none" stroke="${OL}" stroke-width="6"/></g>`;
+const court = () => `<rect width="${W}" height="${H}" fill="#c9a87a"/>${Array.from({ length: 12 }, (_, i) => `<rect x="${i * 90}" y="0" width="80" height="${GR}" fill="#b8956a"/>`).join("")}<rect y="${GR}" width="${W}" height="${H - GR}" fill="#7a5232"/>
+  <g transform="translate(540 380)"><circle r="90" fill="#d9a83a" stroke="${OL}" stroke-width="8"/><path d="M0 -60 V60 M-60 -20 H60 M-60 -20 l-20 50 h40Z M60 -20 l-20 50 h40Z" stroke="${OL}" stroke-width="7" fill="#f1e6c8"/></g>
+  <rect x="340" y="${GR - 420}" width="400" height="200" fill="#5a3a22" stroke="${OL}" stroke-width="8"/>`;
+const town = () => `<rect width="${W}" height="${H}" fill="#cfe3f0"/>${[[60, 220, 420, "#e8d29a"], [300, 200, 520, "#d9c0a0"], [540, 240, 460, "#c9b8a0"], [810, 220, 400, "#e8d29a"]].map(([x, w, h, c]) => `<rect x="${x}" y="${GR - h}" width="${w}" height="${h}" fill="${c}" stroke="${OL}" stroke-width="6"/><path d="M${x - 10} ${GR - h} L${x + w / 2} ${GR - h - 90} L${x + w + 10} ${GR - h}Z" fill="#8a3a2a" stroke="${OL}" stroke-width="6"/><rect x="${x + w / 2 - 30}" y="${GR - h + 60}" width="60" height="70" fill="#5a3a22"/>`).join("")}<rect y="${GR}" width="${W}" height="${H - GR}" fill="#a8a094"/>${Array.from({ length: 12 }, (_, i) => `<path d="M${i * 100} ${GR} V${H}" stroke="#968e82" stroke-width="5"/>`).join("")}`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = court() + cat("j1", JUDGE) + pig("pg1");
+  $("#a2").innerHTML = town() + pig("pg2") + cat("g2", { fur: "#9a9a9a", fur2: "#6a6a6a", coat: "#7a7a80", coat2: "#5a5a60", hat: "helmet" });
+  $("#a3").innerHTML = court() + cat("j3", JUDGE) + cat("l3", LAW) + cat("w3", WIT) + pig("pg3") + `<g id="gv3" transform="translate(700 ${GR - 400})"><rect x="-20" y="-80" width="40" height="80" rx="8" fill="#7a4a2a" stroke="${OL}" stroke-width="5"/><rect x="-60" y="-110" width="120" height="44" rx="10" fill="#8a5a32" stroke="${OL}" stroke-width="5"/></g>`;
+  $("#a4").innerHTML = town() + `<g transform="translate(540 ${GR})"><rect x="-260" y="-100" width="520" height="100" fill="#7a5232" stroke="${OL}" stroke-width="8"/></g>` + pig("pg4", 1) + Array.from({ length: 6 }, (_, i) => cat("c4_" + i, [WIT, LAW, JUDGE][i % 3])).join("");
+  $("#a5").innerHTML = court() + cat("j5", JUDGE) + cat("l5", LAW) + `<g id="dk5"><g transform="translate(220 ${GR - 30}) scale(.9)"><ellipse cx="0" cy="-100" rx="140" ry="90" fill="#7a5a3a" stroke="${OL}" stroke-width="7"/><path d="M-120 -170 l-40 -50 M120 -170 l40 -50" stroke="#e8e2cc" stroke-width="16" stroke-linecap="round"/></g>
+    <g transform="translate(850 ${GR - 20})"><ellipse rx="70" ry="34" fill="#8a8a8a" stroke="${OL}" stroke-width="6"/><circle cx="-62" cy="-10" r="20" fill="#8a8a8a" stroke="${OL}" stroke-width="5"/><path d="M70 0 q60 0 80 -40" stroke="#c9a0a0" stroke-width="7" fill="none"/></g></g>`;
+  $("#a6").innerHTML = court() + pig("pg6", 1);
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; P("j1", 540, GR - 420 - 88 * .9 + 60, 1.2, { la: 20, ra: 120 + 10 * Math.sin(t * 8), face: "focus" }); at("pg1", 760, GR + 60, 1.2); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { const k = prog(t, 5.0, 6.8); at("pg2", lerp(1100, 640, k), GR + 160, 1.1); P("g2", 300, GR + 160 - 88 * 1.5, 1.5, { la: 20, ra: k > .5 ? 100 : 20, face: "focus", look: 1 }); wag("g2", t); },
+  s3(lt, t) { P("j3", 540, GR - 420 - 88 * .9 + 60, 1.2, { la: 20, ra: 20, face: "focus" }); P("l3", 200, GR + 200 - 88 * 1.3, 1.3, { la: 20, ra: 110, face: "worried", look: 1 }); P("w3", 880, GR + 200 - 88 * 1.3, 1.3, { la: 110, ra: 20, face: "panic", look: -1 });
+    at("pg3", 640, GR + 300, 1.0); const h = t > 9.6 ? Math.max(0, Math.sin((t - 9.6) * 10)) * 40 : 0; $("#gv3").setAttribute("transform", `translate(700 ${GR - 400 + h}) rotate(${-30 + h})`); wag("l3", t); wag("w3", t); },
+  s4(lt, t) { at("pg4", 600, GR - 100, 1.1); for (let i = 0; i < 6; i++) P("c4_" + i, 100 + i * 180, GR + 280 - 88 * 1.2, 1.2, { la: 30, ra: 30, face: ["shock", "worried", "calm"][i % 3], look: i < 3 ? 1 : -1 }); },
+  s5(lt, t) { P("j5", 540, GR - 420 - 88 * .9 + 60, 1.2, { la: 20, ra: 20, face: "focus" }); const win = t > 22.0; P("l5", 540, GR + 220 - 88 * 1.4, 1.4, { la: win ? 160 : 20, ra: win ? 160 : 100, face: win ? "happy" : "focus" }); wag("l5", t, win ? 3 : 1);
+    $("#dk5").setAttribute("opacity", t > 18.4 ? 1 : 0); },
+  s6(lt, t) { at("pg6", 640, GR + 60, 1.3); },
+  s7(lt, t) { loopTo(U, t, 27.2, 29.0); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, sfx.hit); add(5.1, (a) => sfx.noise(a, .3, "bandpass", 600, 3, .3, .02, 300)); [9.7, 10.2, 10.7].forEach((t) => add(t, sfx.hit)); add(11.4, sfx.boom); add(12.5, sfx.pop); add(18.5, sfx.ding); add(22.1, sfx.ok);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(27.25, sfx.whooshDown); add(28.4, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

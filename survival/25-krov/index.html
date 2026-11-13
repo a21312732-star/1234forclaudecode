@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #25 — Сильное кровотечение</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#e8eef2}
+.phone{position:absolute;left:340px;top:330px;width:400px;height:680px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:92px">КРОВЬ<br><b>ТЕЧЁТ РУЧЬЁМ</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg><div class="cnt" id="tm6" style="top:240px;font-size:120px;color:#111;text-shadow:none"></div></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="phone" id="ph7"><div class="num">112</div><div class="st" id="st7">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q8">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 38.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [38.9, 38.9]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.0 }, { id: "s2", s: 3.0, e: 12.4 }, { id: "s3", s: 12.4, e: 14.2 }, { id: "s4", s: 14.2, e: 18.2 },
+  { id: "s5", s: 18.2, e: 24.4 }, { id: "s6", s: 24.4, e: 28.0 }, { id: "s7", s: 28.0, e: 30.0 }, { id: "s8", s: 30.0, e: 35.9 },
+  { id: "s9", s: 35.9, e: 38.6 }, { id: "s10", s: 38.6, e: 38.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.4], FLASHES = [12.4];
+const clockText = (t) => (t >= 3.0 && t < 35.9 ? "ВЫЖИВИ #25 · КРОВОТЕЧЕНИЕ" : null);
+const CAPS = [
+  [0.1, "Друг глубоко порезал руку, и {r:кровь течёт ручьём.}"],
+  [3.0, "Что делаешь?"], [4.0, "{y:А} — промываешь рану и ждёшь."], [5.8, "{y:Б} — поднимаешь руку повыше и всё."], [7.8, "{y:В} — сильно прижимаешь рану тканью и давишь."],
+  [10.4, "{r:Три, два, один!}"], [12.4, "Правильный ответ — {g:В.}"],
+  [14.2, "Промывать сейчас некогда, а просто поднятая рука"], [16.6, "{r:сильное кровотечение не остановит.}"],
+  [18.2, "{g:Прижми рану чистой тканью} и дави изо всех сил, не отпуская."], [21.6, "{y:Пропиталась — не снимай,} клади сверху ещё."],
+  [24.4, "Если кровь алая и бьёт фонтаном,"], [26.0, "{r:наложи жгут выше раны} и запомни время."],
+  [28.0, "И сразу звони {g:сто двенадцать.}"],
+  [30.0, "А ты что выбрал?"], [31.2, "{y:Пиши букву в комменты}"], [32.8, "и запомни это,"], [35.9, "потому что {r:если однажды...}"], [38.6, ""]
+];
+const MUSIC = { bpm: 116, root: 52, parts: [[0, 12.4, "pulse", .8], [12.4, 30.0, "drive", .5], [30.0, 35.9, "pad", .6], [35.9, 38.9, "pulse", .8]] };
+const OPTS = [["🚿", "ПРОМЫВАЮ И ЖДУ", "А"], ["🙋", "ПОДНИМАЮ РУКУ", "Б"], ["🤲", "ДАВЛЮ ТКАНЬЮ", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 1090, "🩸 ГЛУБОКИЙ ПОРЕЗ", 0.4, 99, -2, "font-size:52px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [4.0, 5.8, 7.8]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ПРОМЫВАЮ И ЖДУ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ПОДНИМАЮ РУКУ", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "ДАВЛЮ ТКАНЬЮ", "В"], 12.45, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 12.7, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "tile x", 150, 250, ["🚿", "НЕКОГДА"], 14.2, 99, -3], ["s4", "e4b", "tile x", 630, 250, ["🙋", "НЕ ОСТАНОВИТ"], 16.6, 99, 3],
+  ["s5", "e5a", "badge b-grn", 60, 200, "🤲 ДАВИ ИЗО ВСЕХ СИЛ", 18.3, 99, -2, "font-size:46px"], ["s5", "e5b", "badge b-yel", 60, 310, "➕ ПРОПИТАЛАСЬ — ЕЩЁ СЛОЙ", 21.7, 99, 2, "font-size:42px"],
+  ["s6", "e6a", "badge b-red", "c", 1060, "⛓ ЖГУТ ВЫШЕ РАНЫ · ЗАПОМНИ ВРЕМЯ", 26.1, 99, -1, "font-size:34px"],
+  ...OPTS3("s8", ["o8a", "o8b", "o8c"], 520, OPTS, [31.2, 31.45, 31.7]),
+  ["s8", "m8a", "cmt", 110, 1060, "В, давить! 😎", 32.8, 99, -3], ["s8", "m8b", "cmt", 520, 1120, "я бы промыл… 💀", 33.2, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" }, FR = { coat: "#3a7bd5", coat2: "#24539a", hair: "#6b3e1f", pants: "#2d3a4f" };
+const W = 1080, H = 1920, FL = 1150;
+const garage = () => `<rect width="${W}" height="${H}" fill="#e8eef2"/><rect y="${FL}" width="${W}" height="${H - FL}" fill="#9aa4ac"/><rect x="600" y="${FL - 260}" width="440" height="40" fill="#8a5a3a" stroke="#000" stroke-width="7"/>
+  <rect x="620" y="${FL - 220}" width="30" height="220" fill="#6a4a2a"/><rect x="990" y="${FL - 220}" width="30" height="220" fill="#6a4a2a"/><rect x="740" y="${FL - 300}" width="160" height="40" fill="#bbb" stroke="#000" stroke-width="5"/>`;
+// предплечье крупно: горизонтально, кисть справа; рана в (0,0)
+const arm = (id) => `<g id="${id}"><rect x="-460" y="-90" width="700" height="180" rx="80" fill="#f4c7a1" stroke="#000" stroke-width="9"/><path d="M240 -100 Q380 -110 400 -40 Q420 40 380 90 Q300 120 240 95Z" fill="#f4c7a1" stroke="#000" stroke-width="9"/>
+  <path d="M-60 -10 L60 10" stroke="#8a0a0a" stroke-width="14" stroke-linecap="round"/><g class="bl"></g><g class="pad"><rect x="-130" y="-120" width="260" height="170" rx="20" fill="#fff" stroke="#000" stroke-width="7"/><g class="sk"></g></g>
+  <g class="hn"><rect x="-120" y="-200" width="240" height="110" rx="50" fill="#e8b48e" stroke="#000" stroke-width="7"/>${[-80, -30, 20, 70].map((x) => `<rect x="${x}" y="-110" width="40" height="70" rx="20" fill="#e8b48e" stroke="#000" stroke-width="6"/>`).join("")}</g>
+  <g class="tq"><rect x="-260" y="-110" width="50" height="220" rx="12" fill="#2a2a2a" stroke="#000" stroke-width="6"/><rect x="-280" y="-150" width="90" height="40" rx="10" fill="#c8242f"/></g></g>`;
+const hip = (s) => FL - 88 * s;
+const drops = (t, x, y, n = 6, fountain = 0) => Array.from({ length: n }, (_, i) => { const q = (t * 1.4 + i / n) % 1; return fountain ? `<circle cx="${(x + 140 * q * (i % 2 ? 1 : -.4)).toFixed(0)}" cy="${(y - 220 * Math.sin(q * Math.PI) + 120 * q).toFixed(0)}" r="14" fill="#c8102e"/>` : `<ellipse cx="${(x + 30 * Math.sin(i * 2)).toFixed(0)}" cy="${(y + q * 300).toFixed(0)}" rx="12" ry="18" fill="#c8102e" opacity="${(1 - q).toFixed(2)}"/>`; }).join("");
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = garage() + person("f1", FR) + `<g id="dp1"></g>` + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#3a1218"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#f0e8e8"/><g transform="translate(560 1050)">${arm("ar4")}</g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#f0e8e8"/><g transform="translate(560 1050)">${arm("ar5")}</g>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#f0e8e8"/><g transform="translate(560 1050)">${arm("ar6")}</g>`;
+  $("#a7").innerHTML = garage() + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`;
+  $("#a8").innerHTML = `<rect width="${W}" height="${H}" fill="#eef2f4"/>`;
+  ["ar4", "ar5", "ar6"].forEach((a) => { $(`#${a} .tq`).setAttribute("opacity", 0); });
+}
+const armState = (a, t, pad, hand, tq, flow, fountain = 0) => { $(`#${a} .pad`).setAttribute("opacity", pad); $(`#${a} .hn`).setAttribute("opacity", hand); $(`#${a} .tq`).setAttribute("opacity", tq);
+  $(`#${a} .bl`).innerHTML = flow ? drops(t, 0, 20, 8, fountain) : ""; };
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; P("f1", 640, hip(1.6), 1.6, { la: -60, ra: 40, face: "panic", look: -1 }); $("#dp1").innerHTML = drops(t, 560, hip(1.6) - 120, 6);
+    P("p1", 280, hip(1.6), 1.6, { la: 30, ra: 70, face: "shock", look: 1 }); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { show($("#q2"), t, 3.05); countdown($("#c2"), t, 10.4); },
+  s3() {},
+  s4(lt, t) { armState("ar4", t, 0, 0, 0, 1); },
+  s5(lt, t) { const p = prog(t, 18.3, 18.8), more = t > 21.7; armState("ar5", t, p, p, 0, t < 18.8); $("#ar5 .hn").setAttribute("transform", `translate(0 ${6 * Math.sin(t * 8)})`);
+    $("#ar5 .sk").innerHTML = more ? `<rect x="-120" y="-150" width="240" height="40" rx="12" fill="#f4f4f4" stroke="#000" stroke-width="6"/><ellipse cx="0" cy="-30" rx="60" ry="30" fill="#c8102e" opacity=".5"/>` : `<ellipse cx="0" cy="-30" rx="${30 + 40 * prog(t, 19, 21.5)}" ry="${15 + 20 * prog(t, 19, 21.5)}" fill="#c8102e" opacity=".55"/>`; },
+  s6(lt, t) { const k = prog(t, 26.0, 26.6); armState("ar6", t, k, 0, k, t < 26.6, 1); $("#ar6 .sk").innerHTML = `<ellipse cx="0" cy="-30" rx="50" ry="26" fill="#c8102e" opacity=".5"/>`;
+    $("#tm6").textContent = t > 26.8 ? "⏱ 17:42" : ""; },
+  s7(lt, t) { show($("#ph7"), t, 28.05, .35, 60); $("#st7").textContent = t > 29.3 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3); },
+  s8(lt, t) { show($("#q8"), t, 30.05); },
+  s9(lt, t) { loopTo(U, t, 35.9, 38.6); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0.4, sfx.hit); add(.6, (a) => sfx.breath(a, 1)); for (let t = 3.4; t < 10.4; t += .45) add(t, (a) => sfx.heart(a, .7)); add(14.3, sfx.no); add(16.7, sfx.no);
+  add(18.4, sfx.ok); add(21.8, sfx.pop); add(26.1, (a) => sfx.noise(a, .3, "bandpass", 1500, 3, .3, .02)); add(26.8, sfx.ding);
+  for (let t = 28.2; t < 29.3; t += .4) add(t, sfx.beep); add(29.3, sfx.ok);
+  choiceSound(sfx, add, { tick: [3.4, 10.4], cd: 10.4, ans: 12.4, loop: [35.9, 38.6] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>

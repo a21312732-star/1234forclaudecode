@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #5 — Наполеон и кролики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#dff0d0}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">НАПОЛЕОНА<br>АТАКОВАЛИ <b>КРОЛИКИ</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 30.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [30.9, 30.9]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.0 }, { id: "s2", s: 2.0, e: 6.8 }, { id: "s3", s: 6.8, e: 11.0 }, { id: "s4", s: 11.0, e: 18.0 },
+  { id: "s5", s: 18.0, e: 23.4 }, { id: "s6", s: 23.4, e: 26.0 }, { id: "s7", s: 26.0, e: 28.8 }, { id: "s8", s: 28.8, e: 30.6 }, { id: "s9", s: 30.6, e: 30.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [15.2], FLASHES = [];
+const clockText = (t) => (t >= 2.0 && t < 28.8 ? "КОТОИСТОРИЯ · 1807" : null);
+const CAPS = [
+  [0.1, "{r:Наполеона атаковали кролики.}"],
+  [2.0, "Тысяча восемьсот седьмой год."], [3.6, "Император решил отпраздновать мир {y:и устроить охоту на кроликов.}"],
+  [6.8, "Его помощник собрал {y:сотни кроликов в клетках.}"], [9.0, "Но купил он {r:не диких, а домашних.}"],
+  [11.0, "Когда клетки открыли, кролики не разбежались."], [13.4, "Они решили, что их пришли кормить,"], [15.2, "и {r:всей толпой бросились прямо к Наполеону.}"],
+  [18.0, "Они лезли под ноги {y:и запрыгивали на сапоги.}"], [20.4, "Император {r:отступил к карете,} а кролики не отставали."],
+  [23.4, "Так рассказывают {y:мемуары одного из его генералов.}"],
+  [26.0, "Пиши в комменты, какую историю рассказать дальше."], [28.8, "Вот так и вышло, что…"], [30.6, ""]
+];
+const MUSIC = { bpm: 118, root: 52, parts: [[0, 6.8, "pulse", .7], [6.8, 23.4, "drive", .5], [23.4, 28.8, "pad", .6], [28.8, 30.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🎉 ОХОТА В ЧЕСТЬ МИРА", 3.7, 99, -2, "font-size:50px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "🐰 ДОМАШНИЕ, А НЕ ДИКИЕ", 9.1, 99, 2, "font-size:46px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🥕 «НАС ПРИШЛИ КОРМИТЬ!»", 13.5, 99, -2, "font-size:46px"],
+  ["s5", "e5a", "badge b-yel", "c", 220, "🏃 ОТСТУПАЕМ К КАРЕТЕ", 20.5, 99, 2, "font-size:48px"],
+  ["s7", "m7a", "cmt", 90, 1000, "непобедимый, но не для кроликов 😂", 26.1, 99, -3], ["s7", "m7b", "cmt", 360, 1100, "а про свинью в суде? 🐷", 26.5, 99, 2],
+];
+const GR = 1180;
+const NAP = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#2b4a8a", coat2: "#1a2f5a", hat: "bicorne", medal: 1, belt: "#f4f1e6", pants: "#f4f1e6" };
+const AIDE = { fur: "#9a9a9a", fur2: "#6a6a6a", coat: "#2e6a3a", coat2: "#1a4a2a", hat: "cap", hatC: "#2e6a3a" };
+const rabbit = (c = "#fff") => `<g class="rb"><ellipse cx="0" cy="-30" rx="44" ry="34" fill="${c}" stroke="${OL}" stroke-width="5"/><circle cx="-36" cy="-60" r="24" fill="${c}" stroke="${OL}" stroke-width="5"/>
+  <ellipse cx="-44" cy="-104" rx="9" ry="30" fill="${c}" stroke="${OL}" stroke-width="4"/><ellipse cx="-28" cy="-106" rx="9" ry="30" fill="${c}" stroke="${OL}" stroke-width="4"/><circle cx="-44" cy="-64" r="5" fill="${OL}"/><circle cx="-58" cy="-56" r="4" fill="#f2a6a0"/><circle cx="44" cy="-30" r="12" fill="#fff" stroke="${OL}" stroke-width="3"/></g>`;
+const RC = ["#fff", "#e8d8c0", "#c9b8a0", "#9a8a7a"];
+const herd = (id, n) => `<g id="${id}">${Array.from({ length: n }, (_, i) => `<g class="h">${rabbit(RC[i % 4])}</g>`).join("")}</g>`;
+const meadow = () => `<rect width="${W}" height="${H}" fill="#bfe3f5"/><path d="M0 ${GR - 200} Q300 ${GR - 320} 600 ${GR - 230} T1080 ${GR - 260} V${GR} H0Z" fill="#8cc87a"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#6aa84a"/>
+  ${Array.from({ length: 30 }, (_, i) => `<path d="M${(i * 37) % W} ${GR + 40 + (i * 53) % 500} l8 -22 l8 22" stroke="#4a8a3a" stroke-width="5" fill="none"/>`).join("")}`;
+const cage = (x, y, open = 0) => `<g transform="translate(${x} ${y})"><rect x="-90" y="-140" width="180" height="140" fill="none" stroke="#7a5232" stroke-width="8"/>${[-50, -10, 30, 70].map((dx) => `<path d="M${dx} -140 V0" stroke="#7a5232" stroke-width="6"/>`).join("")}<rect x="-90" y="-150" width="180" height="16" fill="#7a5232"/>
+  <g transform="rotate(${-80 * open} -90 0)"><rect x="-94" y="-140" width="10" height="140" fill="#5a3a22"/></g></g>`;
+const carriage = () => `<g transform="translate(860 ${GR})"><rect x="-200" y="-320" width="400" height="220" rx="30" fill="#2b4a8a" stroke="${OL}" stroke-width="8"/><rect x="-140" y="-290" width="120" height="100" fill="#bfe3f5" stroke="${OL}" stroke-width="6"/>
+  <circle cx="-120" cy="-60" r="60" fill="none" stroke="${OL}" stroke-width="12"/><circle cx="120" cy="-60" r="60" fill="none" stroke="${OL}" stroke-width="12"/><path d="M-180 -60 H180" stroke="${OL}" stroke-width="6"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = meadow() + cat("n1", NAP) + herd("r1", 10);
+  $("#a2").innerHTML = meadow() + `<g transform="translate(200 300)">${["#c8242f", "#ffd23f", "#3a7bd5"].map((c, i) => `<path d="M${i * 300} 0 l40 -60 l40 60" fill="${c}" stroke="${OL}" stroke-width="5"/>`).join("")}<path d="M-100 0 H800" stroke="${OL}" stroke-width="4"/></g>` + cat("n2", NAP) + `<g id="hn2" transform="translate(700 ${GR - 300})"><path d="M0 0 Q60 -10 100 -60 L120 -40 Q80 20 0 30Z" fill="#d9a83a" stroke="${OL}" stroke-width="6"/></g>`;
+  $("#a3").innerHTML = meadow() + [0, 1, 2, 3, 4].map((i) => cage(160 + (i % 3) * 360 + (i > 2 ? 180 : 0), GR - (i > 2 ? 200 : 0))).join("") + herd("r3", 5) + cat("ad3", AIDE);
+  $("#a4").innerHTML = meadow() + [0, 1, 2].map((i) => cage(160 + i * 160, GR, 1)).join("") + herd("r4", 18) + cat("n4", NAP);
+  $("#a5").innerHTML = meadow() + carriage() + cat("n5", NAP) + herd("r5", 16);
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#3a2a1a"/><g transform="translate(540 820) rotate(-3)"><rect x="-420" y="-300" width="840" height="600" rx="12" fill="#7a2a1a" stroke="${OL}" stroke-width="8"/><rect x="-400" y="-280" width="390" height="560" fill="#f1e6c8"/><rect x="10" y="-280" width="390" height="560" fill="#f6ecd2"/>
+    ${Array.from({ length: 9 }, (_, i) => `<path d="M-370 ${-230 + i * 54} H-40 M40 ${-230 + i * 54} H${i === 8 ? 200 : 370}" stroke="#7a6a50" stroke-width="8"/>`).join("")}<g transform="translate(205 -40) scale(.6)">${rabbit("#9a8a7a")}</g><text x="-205" y="250" font-size="34" text-anchor="middle" fill="#5a3a22">МЕМУАРЫ</text></g>`;
+  $("#a7").innerHTML = meadow() + cat("n7", NAP) + herd("r7", 6);
+}
+const placeHerd = (id, t, fn) => $$(`#${id} .h`).forEach((h, i) => { const [x, y, s] = fn(i); const hop = Math.abs(Math.sin(t * 9 + i)) * 26; h.setAttribute("transform", `translate(${x.toFixed(0)} ${(y - hop).toFixed(0)}) scale(${s})`); });
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; P("n1", 540, GR - 88 * 1.9, 1.9, { la: 150, ra: 150, face: "shock" }, 4 * Math.sin(t * 9)); wag("n1", t, 3);
+    placeHerd("r1", t, (i) => { const a = i / 10 * 6.283 + t * .8; return [540 + Math.cos(a) * 330, GR + 80 + Math.sin(a) * 80, 1.1]; }); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { P("n2", 540, GR - 88 * 1.9, 1.9, { la: 20, ra: 120, face: "smug" }); wag("n2", t); },
+  s3(lt, t) { placeHerd("r3", t, (i) => [160 + (i % 3) * 360 + (i > 2 ? 180 : 0), GR - (i > 2 ? 200 : 0) - 10, .8]); P("ad3", 540, GR + 200 - 88 * 1.4, 1.4, { la: 20, ra: 100, face: t > 9.0 ? "worried" : "happy" }); wag("ad3", t); },
+  s4(lt, t) { const k = easeInOut(prog(t, 13.4, 17.8)); P("n4", 860, GR - 88 * 1.6, 1.6, { la: k > .3 ? 150 : 20, ra: k > .3 ? 150 : 20, face: k > .3 ? "shock" : "smug", look: -1 }); wag("n4", t, 3);
+    placeHerd("r4", t, (i) => [lerp(160 + (i % 3) * 160, 560 + (i % 6) * 60, k), lerp(GR - 20, GR + 80 + Math.floor(i / 6) * 70, k), .9]); },
+  s5(lt, t) { const k = prog(t, 18.0, 23.2); P("n5", lerp(500, 820, k), GR - 88 * 1.6 - (t > 22 ? 160 * prog(t, 22.2, 23) : 0), 1.6, { ...walk(t, 2), face: "panic", look: -1 }); wag("n5", t, 3);
+    placeHerd("r5", t, (i) => [lerp(260, 600, k) + (i % 6) * 55 - 120, GR + 60 + Math.floor(i / 6) * 60 - (i === 0 ? 120 : 0), .85]); },
+  s6(lt, t) { $("#a6").style.transformOrigin = "540px 820px"; $("#a6").style.transform = `scale(${1 + .05 * lt})`; },
+  s7(lt, t) { P("n7", 540, GR - 88 * 1.9, 1.9, { la: 20, ra: 20, face: "worried" }); placeHerd("r7", t, (i) => [200 + i * 140, GR + 120, 1]); },
+  s8(lt, t) { loopTo(U, t, 28.8, 30.6); },
+  s9() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  const hop = (a) => sfx.noise(a, .04, "lowpass", 400, 1, .25, .003);
+  for (let t = .1; t < 2; t += .15) add(t, hop); add(3.7, (a) => sfx.osc("triangle", 523, a, .02, .08, .4)); add(4.1, (a) => sfx.osc("triangle", 659, a, .02, .08, .5));
+  add(9.1, sfx.no); add(11.1, (a) => sfx.noise(a, .2, "bandpass", 1400, 3, .3, .01)); for (let t = 13.5; t < 23; t += .18) add(t, hop); add(15.2, sfx.boom); add(23.5, (a) => sfx.noise(a, .3, "highpass", 3000, 1, .12, .05));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(28.85, sfx.whooshDown); add(30.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

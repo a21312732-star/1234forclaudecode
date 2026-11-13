@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #9 — Исчезнут комары</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#2b2350}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">ЧТО ЕСЛИ<br><b>ИСЧЕЗНУТ КОМАРЫ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg></div>
+  <div class="scene" id="s8"></div>
+  <div class="scene" id="s9"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 30.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [30.7, 30.7]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 5.4 }, { id: "s3", s: 5.4, e: 9.4 }, { id: "s4", s: 9.4, e: 16.4 },
+  { id: "s5", s: 16.4, e: 19.0 }, { id: "s6", s: 19.0, e: 25.0 }, { id: "s7", s: 25.0, e: 27.4 }, { id: "s8", s: 27.4, e: 30.4 }, { id: "s9", s: 30.4, e: 30.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [];
+const clockText = (t) => (t >= 2.4 && t < 27.4 ? "ЕСЛИ ВДРУГ · #9" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:исчезнут все комары?}"],
+  [2.4, "Звучит как мечта: {g:никаких укусов и писка над ухом.}"],
+  [5.4, "А ещё комары разносят {r:малярию,}"], [7.2, "от которой каждый год {r:умирают сотни тысяч людей.}"],
+  [9.4, "Но у комаров есть и своя работа."], [11.0, "Их личинки — {y:еда для рыб и лягушек,}"], [13.4, "а на севере огромные тучи комаров {y:кормят птиц.}"],
+  [16.4, "Некоторые комары {g:даже опыляют цветы.}"],
+  [19.0, "Учёные до сих пор спорят:"], [20.4, "одни говорят, что {g:природа быстро найдёт замену,}"], [22.6, "другие — что {r:пострадают целые цепочки животных.}"],
+  [25.0, "Пиши в комменты, {y:что проверить дальше.}"], [27.4, "А пока представь:"], [28.6, "{y:что будет, если...}"], [30.4, ""]
+];
+const MUSIC = { bpm: 104, root: 52, parts: [[0, 9.4, "pulse", .7], [9.4, 25.0, "drive", .45], [25.0, 27.4, "pad", .6], [27.4, 30.7, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-grn", "c", 220, "😌 НИ ОДНОГО УКУСА", 2.5, 99, -2, "font-size:52px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "🦟 МАЛЯРИЯ — СОТНИ ТЫСЯЧ ЖЕРТВ", 5.5, 99, -2, "font-size:40px"],
+  ["s4", "e4a", "badge b-yel", "c", 220, "🐟 🐸 🐦 ЕДА ДЛЯ ДРУГИХ", 11.1, 99, 2, "font-size:48px"],
+  ["s5", "e5a", "badge b-grn", "c", 220, "🌼 ОПЫЛЯЮТ ЦВЕТЫ", 16.5, 99, -2, "font-size:54px"],
+  ["s6", "e6a", "badge b-grn", "c", 220, "✅ НАЙДЁТСЯ ЗАМЕНА?", 20.5, 99, -2, "font-size:50px"], ["s6", "e6b", "badge b-red", "c", 340, "⚠ ИЛИ ЦЕПНАЯ РЕАКЦИЯ?", 22.7, 99, 2, "font-size:48px"],
+  ["s7", "m7a", "cmt", 90, 1000, "а если исчезнут пчёлы? 🐝", 25.1, 99, -3], ["s7", "m7b", "cmt", 330, 1100, "а если исчезнут деньги? 💸", 25.5, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", hair: "#3b2a1e", pants: "#3b3f58" };
+const mosq = (id, s = 1) => `<g id="${id}"><g transform="scale(${s})"><ellipse rx="40" ry="12" fill="#5a4a3a" stroke="#111" stroke-width="4"/><circle cx="-44" cy="-4" r="14" fill="#5a4a3a" stroke="#111" stroke-width="4"/><path d="M-56 0 L-100 14" stroke="#111" stroke-width="4"/>
+  ${[-20, 0, 20].map((x) => `<path d="M${x} 8 l-10 40 M${x} 8 l12 40" stroke="#111" stroke-width="3"/>`).join("")}<ellipse class="wg" cx="0" cy="-26" rx="34" ry="14" fill="#fff" opacity=".7" stroke="#111" stroke-width="3"/></g></g>`;
+const flyM = (id, t, x, y, i = 0) => { at(id, x + 60 * Math.sin(t * 2 + i), y + 40 * Math.sin(t * 3.1 + i * 2), 1, 1, 10 * Math.sin(t * 5 + i)); $(`#${id} .wg`).setAttribute("ry", 14 * Math.abs(Math.sin(t * 50 + i))); };
+const fish = (x, y, c = "#ff8a3d") => `<g transform="translate(${x} ${y})"><ellipse rx="70" ry="36" fill="${c}" stroke="#111" stroke-width="6"/><path d="M60 0 l50 -30 v60Z" fill="${c}" stroke="#111" stroke-width="6"/><circle cx="-36" cy="-8" r="8" fill="#111"/></g>`;
+const frog = (x, y) => `<g transform="translate(${x} ${y})"><ellipse rx="90" ry="60" fill="#46c46a" stroke="#111" stroke-width="7"/><circle cx="-40" cy="-60" r="28" fill="#46c46a" stroke="#111" stroke-width="6"/><circle cx="40" cy="-60" r="28" fill="#46c46a" stroke="#111" stroke-width="6"/><circle cx="-40" cy="-62" r="10" fill="#111"/><circle cx="40" cy="-62" r="10" fill="#111"/><path d="M-40 10 Q0 40 40 10" stroke="#111" stroke-width="6" fill="none"/></g>`;
+const bird = (x, y) => `<g transform="translate(${x} ${y})"><ellipse rx="60" ry="44" fill="#3a7bd5" stroke="#111" stroke-width="6"/><circle cx="50" cy="-30" r="30" fill="#3a7bd5" stroke="#111" stroke-width="6"/><path d="M76 -30 l30 8 l-30 8Z" fill="#ffd23f" stroke="#111" stroke-width="4"/><circle cx="58" cy="-36" r="6" fill="#111"/><path class="wb" d="M-10 -20 Q-60 -90 -100 -40" fill="#5a9be5" stroke="#111" stroke-width="5"/></g>`;
+const flower = (x, y) => `<g transform="translate(${x} ${y})"><path d="M0 0 V200" stroke="#2e7d32" stroke-width="12"/>${Array.from({ length: 6 }, (_, i) => `<ellipse cx="${50 * Math.cos(i * 1.047)}" cy="${50 * Math.sin(i * 1.047)}" rx="34" ry="22" transform="rotate(${i * 60} ${50 * Math.cos(i * 1.047)} ${50 * Math.sin(i * 1.047)})" fill="#fff" stroke="#111" stroke-width="5"/>`).join("")}<circle r="30" fill="#ffd23f" stroke="#111" stroke-width="5"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = `<rect width="${W}" height="${H}" fill="#2b2350"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#3a2f5a"/>` + person("p1", HERO) + Array.from({ length: 6 }, (_, i) => mosq("m1_" + i, 1.2)).join("") + `<g id="x1" opacity="0"><path d="M300 400 L780 1000 M780 400 L300 1000" stroke="#ff3b47" stroke-width="40" stroke-linecap="round"/></g>`;
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#3a2f6a"/><rect x="200" y="${GR - 160}" width="680" height="120" rx="20" fill="#5a7ad5" stroke="#111" stroke-width="8"/><rect x="200" y="${GR - 220}" width="200" height="80" rx="30" fill="#fff" stroke="#111" stroke-width="7"/>` + person("p2", HERO) + `<g id="z2" font-size="90" fill="#cfd8ff"></g>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#14182a"/><g transform="translate(540 820)"><circle r="320" fill="#3a1a1a" stroke="#ff3b47" stroke-width="12"/>${mosq("m3", 4)}</g>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#cfe9f7"/><rect y="1000" width="${W}" height="920" fill="#2b7bbf"/>${fish(300, 1350)}${fish(700, 1550, "#ffd23f")}${frog(820, 980)}<g id="lv4">${Array.from({ length: 10 }, (_, i) => `<path class="lv" d="M0 0 q8 20 0 40" stroke="#5a4a3a" stroke-width="10" fill="none"/>`).join("")}</g><g id="bd4">${bird(260, 500)}</g>` + Array.from({ length: 5 }, (_, i) => mosq("m4_" + i, .7)).join("");
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#dff3d8"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#6aa84a"/>${flower(380, GR - 220)}${flower(700, GR - 300)}` + mosq("m5", 1.4);
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#f2ead8"/><g transform="translate(540 820) scale(.9)"><g id="ch6">${["🦟", "🐸", "🐍", "🦅"].map((e, i) => `<g transform="translate(0 ${-360 + i * 240})"><circle r="90" fill="#fff" stroke="#111" stroke-width="8"/><text y="34" font-size="100" text-anchor="middle" font-family="Noto Color Emoji">${e}</text></g>${i < 3 ? `<path d="M0 ${-260 + i * 240} V${-160 + i * 240}" stroke="#111" stroke-width="10"/>` : ""}`).join("")}</g></g>`;
+  $("#a7").innerHTML = `<rect width="${W}" height="${H}" fill="#2b2350"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#3a2f5a"/>` + person("p7", HERO);
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; for (let i = 0; i < 6; i++) flyM("m1_" + i, t, 200 + (i % 3) * 330, 500 + Math.floor(i / 3) * 280, i); P("p1", 540, GR - 88 * 1.8, 1.8, { la: 150 + 20 * Math.sin(t * 14), ra: 150 + 20 * Math.cos(t * 13), face: "panic" });
+    $("#x1").setAttribute("opacity", 0); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { P("p2", 520, GR - 170, 1.5, { la: 20, ra: 20, face: "happy" }, -90); $("#z2").innerHTML = [0, 1, 2].map((i) => { const k = (t * .6 + i / 3) % 1; return `<text x="${560 + 60 * k + i * 20}" y="${GR - 360 - 200 * k}" opacity="${1 - k}">Z</text>`; }).join(""); },
+  s3(lt, t) { $("#m3 .wg").setAttribute("ry", 14 * Math.abs(Math.sin(t * 50))); },
+  s4(lt, t) { for (let i = 0; i < 5; i++) flyM("m4_" + i, t, 500 + i * 100, 700 + (i % 2) * 120, i); $$("#lv4 .lv").forEach((l, i) => l.setAttribute("transform", `translate(${120 + i * 90} ${1060 + 30 * Math.sin(t * 3 + i)})`));
+    $("#bd4").setAttribute("transform", `translate(${(t * 120) % 600} ${30 * Math.sin(t * 2)})`); },
+  s5(lt, t) { flyM("m5", t, 400 + 200 * Math.sin(t * .8), GR - 420, 0); },
+  s6(lt, t) { $$("#ch6 > g").forEach((g, i) => g.setAttribute("opacity", t > 22.6 ? 1 - .7 * prog(t, 22.8 + i * .5, 23.3 + i * .5) : 1)); },
+  s7(lt, t) { P("p7", 540, GR - 88 * 1.8, 1.8, { la: 20, ra: 130, face: "happy" }); },
+  s8(lt, t) { loopTo(U, t, 27.4, 30.4); },
+  s9() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.osc("sawtooth", 620, a, .05, .03, 2.3, 700)); add(5.5, sfx.no); add(9.5, (a) => sfx.bubbles(a, 6)); add(16.5, sfx.ding); add(22.7, sfx.no);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(27.45, sfx.whooshDown); add(29.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

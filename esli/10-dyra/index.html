@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #10 — Упасть в чёрную дыру</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#05030f}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">УПАСТЬ<br>В <b>ЧЁРНУЮ ДЫРУ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 29.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [29.7, 29.7]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 9.2 }, { id: "s3", s: 9.2, e: 13.6 }, { id: "s4", s: 13.6, e: 16.4 },
+  { id: "s5", s: 16.4, e: 24.0 }, { id: "s6", s: 24.0, e: 26.4 }, { id: "s7", s: 26.4, e: 29.4 }, { id: "s8", s: 29.4, e: 29.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [];
+const clockText = (t) => (t >= 2.4 && t < 26.4 ? "ЕСЛИ ВДРУГ · #10" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:упасть в чёрную дыру?}"],
+  [2.4, "Всё зависит от её размера."], [3.8, "Если дыра маленькая, {r:приливные силы начнут растягивать тебя,}"], [7.0, "{r:как макаронину.}"],
+  [8.0, "Учёные так и называют это — {y:спагеттификация.}"],
+  [9.2, "А в огромной чёрной дыре"], [10.6, "ты пересечёшь её границу {y:и даже не заметишь.}"],
+  [13.6, "Но обратного пути уже не будет:"], [15.0, "{r:оттуда не выбраться даже свету.}"],
+  [16.4, "А для друга, который смотрит издалека,"], [18.4, "ты будешь {y:всё медленнее подлетать к краю,}"], [21.0, "краснеть и тускнеть,"], [22.4, "{r:пока совсем не исчезнешь.}"],
+  [24.0, "Пиши в комменты, {y:что проверить дальше.}"], [26.4, "А пока представь:"], [27.6, "{y:что будет, если...}"], [29.4, ""]
+];
+const MUSIC = { bpm: 80, root: 41, parts: [[0, 9.2, "pad", .7], [9.2, 24.0, "pad", .6], [24.0, 29.7, "pulse", .7]] };
+const E = [
+  ["s2", "e2a", "badge b-red", "c", 220, "🍝 СПАГЕТТИФИКАЦИЯ", 8.1, 99, -2, "font-size:52px"],
+  ["s3", "e3a", "badge b-yel", "c", 220, "🕳 ГОРИЗОНТ СОБЫТИЙ", 10.7, 99, 2, "font-size:52px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🚫 ДАЖЕ СВЕТУ НЕ ВЫБРАТЬСЯ", 15.1, 99, -2, "font-size:42px"],
+  ["s5", "e5a", "badge b-wht", "c", 220, "🔭 ВИД ДРУГА ИЗДАЛЕКА", 16.5, 99, -2, "font-size:48px"],
+  ["s6", "m6a", "cmt", 90, 1000, "а если Солнце станет чёрной дырой? 🌑", 24.1, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "а если жить на Луне? 🌙", 24.5, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", hair: "#3b2a1e", pants: "#3b3f58" };
+const stars = () => `<rect width="${W}" height="${H}" fill="#05030f"/>${Array.from({ length: 110 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const hole = (id, r = 220) => `<g id="${id}"><g class="disk">${[0, 1, 2, 3].map((i) => `<ellipse rx="${r * (2.4 - i * .25)}" ry="${r * (.5 - i * .05)}" fill="none" stroke="${["#ff6a1a", "#ffb03a", "#ffd27a", "#fff1c0"][i]}" stroke-width="${30 - i * 5}" opacity=".9"/>`).join("")}</g>
+  <circle r="${r * 1.15}" fill="#ffb03a" opacity=".25"/><circle r="${r}" fill="#000"/><circle r="${r}" fill="none" stroke="#ffd27a" stroke-width="6" opacity=".6"/>
+  <path d="M${-r * 2.4} 0 A${r * 2.4} ${r * .5} 0 0 0 ${r * 2.4} 0" fill="none" stroke="#ffb03a" stroke-width="30" opacity=".9"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = stars() + `<g transform="translate(540 1050)">${hole("bh1", 200)}</g>` + person("p1", HERO);
+  $("#a2").innerHTML = stars() + `<g transform="translate(540 1300)">${hole("bh2", 120)}</g>` + `<g id="sp2"><g transform="translate(540 700)">${person("p2", HERO)}</g></g>` + `<g id="nd2" opacity="0">${Array.from({ length: 5 }, (_, i) => `<path d="M${380 + i * 80} 300 C ${400 + i * 70} 700, ${520 + i * 10} 900, 540 1240" fill="none" stroke="#ffd27a" stroke-width="16" stroke-linecap="round"/>`).join("")}</g>`;
+  $("#a3").innerHTML = stars() + `<g transform="translate(540 1500) scale(3.5)">${hole("bh3", 200)}</g>` + `<g id="pp3">${person("p3", HERO)}</g>` + `<path id="hz3" d="M0 1050 Q540 980 1080 1050" stroke="#ffd27a" stroke-width="8" stroke-dasharray="20 16" fill="none"/>`;
+  $("#a4").innerHTML = stars() + `<g transform="translate(540 1050)">${hole("bh4", 260)}</g>` + `<g id="ry4"></g>`;
+  $("#a5").innerHTML = stars() + `<g transform="translate(700 1150)">${hole("bh5", 150)}</g>` + person("p5", HERO) + `<g transform="translate(150 500)"><circle r="70" fill="#9aa3ad" stroke="#111" stroke-width="6"/><rect x="40" y="-20" width="120" height="40" rx="10" fill="#5a6672" stroke="#111" stroke-width="5"/></g>` + person("f5", { coat: "#3a7bd5", coat2: "#24539a", hair: "#222", pants: "#2d3a4f" });
+  $("#a6").innerHTML = stars() + `<g transform="translate(540 1050)">${hole("bh6", 200)}</g>`;
+}
+const spin = (id, t) => $(`#${id} .disk`).setAttribute("transform", `rotate(${4 * Math.sin(t)})`);
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; spin("bh1", t); P("p1", 540 + 30 * Math.sin(t * 2), 620 + 20 * Math.sin(t * 3), 1.2, { la: 160, ra: 140, face: "shock" }, 30 * Math.sin(t)); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { spin("bh2", t); const k = prog(t, 3.8, 7.2); $("#sp2").setAttribute("transform", `translate(540 ${700 + 300 * k}) scale(${1 - .75 * k} ${1 + 2.6 * k}) translate(-540 -700)`); P("p2", 0, 0, 1.2, { la: 175, ra: 175, face: "panic" });
+    $("#nd2").setAttribute("opacity", prog(t, 7.8, 8.4)); $("#sp2").setAttribute("opacity", 1 - prog(t, 7.8, 8.2)); },
+  s3(lt, t) { spin("bh3", t); const k = prog(t, 10.6, 13.4); P("p3", 540, lerp(600, 1250, k), 1.3, { la: 30, ra: 30, face: "calm" }, 10 * Math.sin(t)); },
+  s4(lt, t) { spin("bh4", t); $("#ry4").innerHTML = Array.from({ length: 12 }, (_, i) => { const a = i / 12 * 6.283, q = ((t * .4 + i / 12) % 1), r = 700 - 420 * q; return `<path d="M${540 + Math.cos(a) * r} ${1050 + Math.sin(a) * r} l${-Math.cos(a) * 60} ${-Math.sin(a) * 60}" stroke="#fff6c8" stroke-width="10" stroke-linecap="round" opacity="${(1 - q).toFixed(2)}"/>`; }).join(""); },
+  s5(lt, t) { spin("bh5", t); const k = 1 - Math.exp(-(t - 16.4) * .35); P("p5", lerp(380, 600, k), lerp(800, 1080, k), 1.1 * (1 - .4 * k), { la: 160, ra: 160, face: "calm" }, 0, 1 - prog(t, 21.0, 23.6) * .95);
+    const g = document.getElementById("p5"); g.style.filter = `sepia(${prog(t, 19, 23)}) hue-rotate(-30deg) saturate(${1 + 2 * prog(t, 19, 23)})`; P("f5", 150, 480 - 20, .6, { la: 20, ra: 90, face: "worried", look: 1 }); },
+  s6(lt, t) { spin("bh6", t); },
+  s7(lt, t) { loopTo(U, t, 26.4, 29.4, "540px 900px"); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.noise(a, 2.4, "lowpass", 120, 1, .5, .5)); add(3.9, (a) => sfx.osc("sawtooth", 200, a, .1, .05, 3.3, 900)); add(8.1, sfx.pop); add(10.7, sfx.whooshDown);
+  add(15.1, sfx.no); add(16.5, (a) => sfx.osc("sine", 440, a, .2, .06, 7, 120));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(26.45, sfx.whooshDown); add(28.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

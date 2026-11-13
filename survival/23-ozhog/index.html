@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #23 — Ожог кипятком</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#f2e6d8}
+.phone{position:absolute;left:340px;top:330px;width:400px;height:680px;border-radius:56px;background:#111;border:10px solid #333;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:120px;color:#fff}
+.phone .num{font:900 130px var(--head)} .phone .st{font:800 30px var(--mono);margin-top:14px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:96px">ОБВАРИЛСЯ<br><b>КИПЯТКОМ</b> 🔥</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg><div class="cnt" id="tm5" style="top:250px;font-size:150px;color:#3aa0ff">20:00</div></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a7"></svg>
+    <div class="phone" id="ph7"><div class="num">112</div><div class="st" id="st7">ВЫЗОВ…</div></div></div>
+  <div class="scene" id="s8"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a8"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q8">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s9"></div>
+  <div class="scene" id="s10"></div>
+</div></div></div>
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 39.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [39.5, 39.5]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.0 }, { id: "s2", s: 3.0, e: 11.6 }, { id: "s3", s: 11.6, e: 13.4 }, { id: "s4", s: 13.4, e: 19.2 },
+  { id: "s5", s: 19.2, e: 22.6 }, { id: "s6", s: 22.6, e: 28.8 }, { id: "s7", s: 28.8, e: 32.6 }, { id: "s8", s: 32.6, e: 36.5 },
+  { id: "s9", s: 36.5, e: 39.2 }, { id: "s10", s: 39.2, e: 39.5 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.5], FLASHES = [11.6];
+const clockText = (t) => (t >= 3.0 && t < 36.5 ? "ВЫЖИВИ #23 · ОЖОГ" : null);
+const CAPS = [
+  [0.1, "Ты обварил руку кипятком, и {r:кожа сразу покраснела.}"],
+  [3.0, "Что делаешь?"], [4.0, "{y:А} — мажешь маслом."], [5.4, "{y:Б} — прикладываешь лёд."], [7.0, "{y:В} — держишь руку под прохладной водой."],
+  [9.6, "{r:Три, два, один!}"], [11.6, "Правильный ответ — {g:В.}"],
+  [13.4, "Масло {r:держит жар внутри,} и ожог становится глубже."], [16.4, "А лёд {r:повреждает обожжённую кожу} ещё сильнее."],
+  [19.2, "Держи руку под {g:прохладной проточной водой двадцать минут.}"],
+  [22.6, "{y:Сними кольца и часы,} пока не началась отёчность."], [25.6, "{r:Пузыри не прокалывай,} накрой ожог чистой плёнкой."],
+  [28.8, "Если ожог большой или обжёгся ребёнок —"], [30.8, "сразу звони {g:сто двенадцать.}"],
+  [32.6, "А ты что выбрал?"], [33.8, "{y:Пиши букву в комменты}"], [35.4, "и запомни это,"], [36.5, "потому что {r:если однажды...}"], [39.2, ""]
+];
+const MUSIC = { bpm: 112, root: 52, parts: [[0, 11.6, "pulse", .8], [11.6, 32.6, "drive", .5], [32.6, 36.5, "pad", .6], [36.5, 39.5, "pulse", .8]] };
+const OPTS = [["🧈", "МАЖУ МАСЛОМ", "А"], ["🧊", "ПРИКЛАДЫВАЮ ЛЁД", "Б"], ["🚰", "ПРОХЛАДНАЯ ВОДА", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 1090, "♨ 100 °C", 0.4, 99, -2, "font-size:56px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [4.0, 5.4, 7.0]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "МАЖУ МАСЛОМ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["❌", "ПРИКЛАДЫВАЮ ЛЁД", "Б"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3c", "opt", 0, 810, ["✅", "ПРОХЛАДНАЯ ВОДА", "В"], 11.65, 99, -2, "background:#7ee08a"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 11.9, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "tile x", 150, 250, ["🧈", "ДЕРЖИТ ЖАР"], 13.4, 99, -3], ["s4", "e4b", "tile x", 630, 250, ["🧊", "ПОВРЕЖДАЕТ КОЖУ"], 16.4, 99, 3],
+  ["s5", "e5a", "badge b-grn", "c", 1060, "🚰 20 МИНУТ ПОД ВОДОЙ", 19.3, 99, -2, "font-size:48px"],
+  ["s6", "e6a", "badge b-yel", 60, 200, "💍 СНИМИ КОЛЬЦА", 22.7, 99, -2, "font-size:46px"],
+  ["s6", "e6b", "badge b-red", 60, 310, "🫧 ПУЗЫРИ НЕ ТРОГАЙ", 25.7, 99, 2, "font-size:46px"],
+  ["s6", "e6c", "badge b-grn", 60, 420, "🎞 НАКРОЙ ПЛЁНКОЙ", 27.0, 99, -2, "font-size:46px"],
+  ["s7", "e7a", "badge b-red", "c", 1060, "👶 РЕБЁНОК ИЛИ БОЛЬШОЙ ОЖОГ", 29.0, 99, -1, "font-size:38px"],
+  ...OPTS3("s8", ["o8a", "o8b", "o8c"], 520, OPTS, [33.8, 34.05, 34.3]),
+  ["s8", "m8a", "cmt", 110, 1060, "В, под воду 😎", 35.4, 99, -3], ["s8", "m8b", "cmt", 520, 1120, "бабушка мазала маслом 💀", 35.8, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" };
+const W = 1080, H = 1920, FL = 1150;
+const kitchen = () => `<rect width="${W}" height="${H}" fill="#f2e6d8"/>${Array.from({ length: 10 }, (_, i) => `<path d="M0 ${300 + i * 85} H${W}" stroke="#e6d6c2" stroke-width="4"/>`).join("")}
+  <rect y="${FL}" width="${W}" height="${H - FL}" fill="#c9a87a"/><rect x="520" y="${FL - 260}" width="560" height="260" fill="#e8e2cc" stroke="#000" stroke-width="8"/><rect x="540" y="${FL - 300}" width="520" height="40" fill="#555" stroke="#000" stroke-width="6"/>`;
+const kettle = (id) => `<g id="${id}"><path d="M-90 0 Q-110 -150 0 -160 Q110 -150 90 0Z" fill="#c8242f" stroke="#000" stroke-width="8"/><path d="M80 -110 Q170 -130 160 -40" fill="none" stroke="#000" stroke-width="18"/><path d="M-90 -80 L-170 -150" stroke="#000" stroke-width="22" stroke-linecap="round"/><rect x="-40" y="-190" width="80" height="34" rx="12" fill="#333"/></g>`;
+// большая кисть руки (ладонь вниз), центр запястья в 0,0
+const hand = (id, red = 1) => `<g id="${id}"><rect x="-90" y="-20" width="180" height="300" rx="40" fill="#f4c7a1" stroke="#000" stroke-width="8"/>
+  <path d="M-110 -40 Q-130 -260 -40 -280 L60 -290 Q140 -280 130 -60 Q120 0 90 -10 L-90 -10 Q-110 0 -110 -40Z" fill="#f4c7a1" stroke="#000" stroke-width="8"/>
+  ${[-90, -40, 10, 60].map((x, i) => `<rect x="${x}" y="${-420 + (i % 3) * 20}" width="44" height="160" rx="22" fill="#f4c7a1" stroke="#000" stroke-width="7"/>`).join("")}
+  <path d="M120 -150 Q200 -170 210 -110 Q200 -70 130 -80" fill="#f4c7a1" stroke="#000" stroke-width="7"/>
+  <ellipse class="bn" cx="10" cy="-170" rx="120" ry="110" fill="#ff5a4a" opacity="${.55 * red}"/><g class="rg"><rect x="-44" y="-300" width="52" height="20" rx="8" fill="#ffd23f" stroke="#000" stroke-width="5"/></g></g>`;
+const steam = (id) => `<g id="${id}" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round" opacity=".8"></g>`;
+const setSteam = (id, t, x, y) => { $("#" + id).innerHTML = [0, 1, 2].map((i) => { const q = (t * .7 + i / 3) % 1; return `<path d="M${x - 40 + i * 40} ${y - q * 260} q-24 -40 0 -80 q24 -40 0 -80" opacity="${(1 - q).toFixed(2)}"/>`; }).join(""); };
+const hip = (s) => FL - 88 * s;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = kitchen() + kettle("kt1") + steam("sm1") + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#3a1a10"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#fbe9e4"/><g transform="translate(540 1220) scale(.9)">${hand("h4")}</g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#dff0f8"/><rect x="0" y="1300" width="${W}" height="620" fill="#c9d4dc" stroke="#000" stroke-width="8"/>
+    <g transform="translate(540 520)"><rect x="-60" y="-120" width="120" height="120" fill="#aab4bc" stroke="#000" stroke-width="8"/><path d="M0 0 V80 Q0 120 40 120 H60" fill="none" stroke="#aab4bc" stroke-width="44"/><path d="M0 0 V80 Q0 120 40 120 H60" fill="none" stroke="#000" stroke-width="4"/></g>
+    <g id="wt5"></g><g transform="translate(600 1180) rotate(-20) scale(.75)">${hand("h5", .6)}</g>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#fbe9e4"/><g transform="translate(540 1250) scale(.95)">${hand("h6")}</g><g id="bl6">${[[-30, -150], [40, -190], [10, -110]].map(([x, y]) => `<circle cx="${540 + x}" cy="${1250 + y}" r="22" fill="#fff" opacity=".85" stroke="#d07070" stroke-width="4"/>`).join("")}</g>
+    <rect id="fm6" x="380" y="830" width="320" height="300" rx="20" fill="#cfe8f5" opacity="0" stroke="#7ab" stroke-width="6"/>`;
+  $("#a7").innerHTML = kitchen() + `<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`;
+  $("#a8").innerHTML = `<rect width="${W}" height="${H}" fill="#f2ead8"/>`;
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; at("kt1", 700, FL - 300, 1.1); setSteam("sm1", t, 760, FL - 520);
+    P("p1", 360 + 6 * Math.sin(t * 20), hip(1.7), 1.7, { la: 20, ra: 110 + 30 * Math.sin(t * 16), face: "panic", look: 1, tilt: 6 * Math.sin(t * 13) }); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { show($("#q2"), t, 3.05); countdown($("#c2"), t, 9.6); },
+  s3() {},
+  s4(lt, t) { $("#h4 .bn").setAttribute("opacity", .45 + .2 * Math.sin(t * 4)); },
+  s5(lt, t) { $("#wt5").innerHTML = Array.from({ length: 10 }, (_, i) => { const q = (t * 1.6 + i / 10) % 1; return `<rect x="${590 + 8 * Math.sin(i)}" y="${640 + q * 520}" width="26" height="60" rx="13" fill="#3aa0ff" opacity=".8"/>`; }).join("");
+    $("#h5 .bn").setAttribute("opacity", .4 * (1 - prog(t, 19.2, 22.4))); const s = Math.round(1200 * (1 - prog(t, 19.6, 22.4))); $("#tm5").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; },
+  s6(lt, t) { $("#h6 .rg").setAttribute("transform", `translate(0 ${-260 * easeInOut(prog(t, 22.8, 24.0))})`); $("#h6 .rg").setAttribute("opacity", 1 - prog(t, 23.8, 24.2));
+    $("#bl6").setAttribute("opacity", t > 25.6 ? 1 : 0); $("#fm6").setAttribute("opacity", .6 * prog(t, 27.0, 27.6)); },
+  s7(lt, t) { show($("#ph7"), t, 28.85, .35, 60); $("#st7").textContent = t > 31.0 ? "СОЕДИНЕНО ✅" : "ВЫЗОВ" + ".".repeat(1 + Math.floor(t * 3) % 3); },
+  s8(lt, t) { show($("#q8"), t, 32.65); },
+  s9(lt, t) { loopTo(U, t, 36.5, 39.2); },
+  s10() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(0, (a) => sfx.noise(a, 2.5, "bandpass", 3000, 2, .12, .3)); add(0.5, sfx.hit); add(0.6, (a) => sfx.breath(a, .8)); add(13.5, sfx.no); add(16.5, sfx.no);
+  add(19.3, (a) => sfx.noise(a, 3.2, "bandpass", 1800, 1, .18, .3)); add(23.6, sfx.pop); add(27.0, sfx.ok);
+  for (let t = 31.0; t < 32.4; t += .4) add(t, sfx.beep);
+  choiceSound(sfx, add, { tick: [3.5, 9.6], cd: 9.6, ans: 11.6, loop: [36.5, 39.2] });
+}
+ENGINE.start();
+</script>
+</body>
+</html>
