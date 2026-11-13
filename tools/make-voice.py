@@ -34,6 +34,8 @@ REF_KEY = "|".join(f"{os.path.basename(r)}:{os.path.getsize(r)}" for r in REFS)
 os.makedirs(CACHE, exist_ok=True)
 
 VOICE = "aleksandr-hq"
+VLANG = os.environ.get("VLANG", "ru")             # язык озвучки: ru | en
+LETTERS = "[^a-z ]" if VLANG == "en" else "[^а-я ]"
 RATE = int(os.environ.get("RATE", 98))            # естественный темп (~5 слогов в секунду)
 TARGET_F0 = float(os.environ.get("TARGET_F0", 109.0))    # медиана высоты голоса, Гц
 RANGE = 1.15         # 1.0 = исходная выразительность, меньше = ровнее
@@ -102,15 +104,15 @@ def synth_xtts():
     from num2words import num2words
     def norm(w):  # Whisper пишет числа цифрами — переводим в слова, чтобы сравнивать с текстом
         w = w.lower().replace("ё", "е")
-        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
-        return re.sub(r"[^а-я ]", "", w).strip()
+        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang=VLANG) + " ", w)
+        return re.sub(LETTERS, "", w).strip()
 
     def check(path, text):
         """-> (схожесть с текстом 0..1, время конца последнего нужного слова или None)"""
         pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "s16le", "-ac", "1", "-ar", "16000", "-"],
                              capture_output=True, check=True).stdout
         audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768
-        segs, _ = asr.transcribe(audio, language="ru", word_timestamps=True, beam_size=5)  # без подсказки, иначе не слышит лишнее
+        segs, _ = asr.transcribe(audio, language=VLANG, word_timestamps=True, beam_size=5)  # без подсказки, иначе не слышит лишнее
         heard = [(x, w.end) for sg in segs for w in sg.words for x in norm(w.word).split()]
         want = [x for w in text.split() for x in norm(w).split()]
         cut, extra = None, 99  # конец последнего ожидаемого слова и сколько слов после него
@@ -198,8 +200,8 @@ def from_file():
     # 2. слова в каждом кусочке
     def norm(w):
         w = w.lower().replace("ё", "е")
-        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang="ru") + " ", w)
-        return re.sub(r"[^а-я ]", "", w.replace("-", " ")).split()  # «Ковчег-четыре» — два слова, как слышит Whisper
+        w = re.sub(r"\d+", lambda m: " " + num2words(int(m.group()), lang=VLANG) + " ", w)
+        return re.sub(LETTERS, "", w.replace("-", " ")).split()  # «Ковчег-четыре» — два слова, как слышит Whisper
     asr = WhisperModel("medium", device="cpu", compute_type="int8")
     # фразы, которые надо вырезать из записи (реклама, лишняя концовка): const DROP = [...] в index.html ролика
     _dr = re.search(r"const DROP = (\[.*?\]);", src, re.S)
@@ -208,7 +210,7 @@ def from_file():
     heard = []  # (слово, кусочек, начало, конец)
     for pi, x in enumerate(pieces):
         x16 = np.interp(np.arange(int(len(x) * 16000 / SR)) * SR / 16000, np.arange(len(x)), x).astype(np.float32)
-        segs, _ = asr.transcribe(x16, language="ru", word_timestamps=True, beam_size=5)  # Whisper ждёт 16 кГц
+        segs, _ = asr.transcribe(x16, language=VLANG, word_timestamps=True, beam_size=5)  # Whisper ждёт 16 кГц
         ws = [(t, pi, w.start, w.end) for sg in segs for w in sg.words for t in norm(w.word)]
         said = " ".join(w[0] for w in ws)
         raw = " ".join(w.word.lower() for sg in segs for w in sg.words)  # латиница («VPN») в norm() пропадает
