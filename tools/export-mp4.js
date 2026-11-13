@@ -9,7 +9,7 @@ const PROJ = require('path').resolve(__dirname, '..', process.argv[3] || '.');
   const p = await b.newPage({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2 });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto('file://' + require('path').join(PROJ, process.argv[4] || 'index.html') + '?capture', { waitUntil: 'load' });
-  await p.waitForTimeout(1000);
+  await p.waitForTimeout(1000); await p.evaluate(() => document.fonts.ready);
   const DUR = await p.evaluate(() => window.__DUR);
   // горизонтальный ролик (window.__SIZE = [1920, 1080]) — кадр 1920×1080
   const SIZE = await p.evaluate(() => window.__SIZE || null);
