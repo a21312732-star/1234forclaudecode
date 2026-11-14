@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer — Day 4: New York</title>
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>#stage{background:#f6efdf}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg><div class="card" id="cd1">Day 4 · New York 🇺🇸</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../pencil.js"></script>
+<script src="../geo.js"></script>
+<script src="../world.js"></script>
+<script>
+"use strict";
+const NOGLITCH = true;
+const DUR = 25.0;
+const WARP = [[0, 0], [25.0, 25.0]];
+const SCENES = [{ id: "s1", s: 0, e: 4.4 }, { id: "s2", s: 4.4, e: 10.4 }, { id: "s3", s: 10.4, e: 15.6 }, { id: "s4", s: 15.6, e: 21.6 }, { id: "s5", s: 21.6, e: 24.7 }, { id: "s6", s: 24.7, e: 25.0 }];
+const SPEAK = [], DROP = [], SHAKES = [], FLASHES = [];
+const clockText = () => null;
+const CAPS = [[0.3, "Across the ocean! ✈️"], [4.4, "Hello, New York! 🚕"], [10.4, "A pizza slice bigger than me 🍕"], [15.6, "Hi, Statue of Liberty! 🗽"], [21.6, "Where should I go next? 👇"], [24.7, ""]];
+const MUSIC = { bpm: 84, root: 55, parts: [] };
+const GR = 1450;
+let RT = {};
+const USA = [[-124.7, 48.4], [-95, 49], [-83, 46], [-82.5, 42], [-79, 43.3], [-75, 45], [-67, 45], [-70, 41.8], [-74, 40.5], [-76, 37], [-75.5, 35.2], [-81, 31.5], [-80, 25.2], [-83, 29.5],
+  [-89.5, 30.2], [-97.3, 26], [-99.5, 27.5], [-104.5, 29.5], [-106.5, 31.8], [-111, 31.3], [-117.1, 32.5], [-120.6, 34.5], [-122.5, 37.8], [-124.2, 40.4]];
+// ---------- рисунки ----------
+const sky_ = (x, w, h, c, lit = .45, top = 0) => { let g = bothP(px(x, GR - h, w, h), c, 5, true);
+  if (top === 1) g += bothP(`M${x + 10} ${GR - h} L${x + w / 2} ${GR - h - 120} L${x + w - 10} ${GR - h}Z`, c, 5) + lineP(`M${x + w / 2} ${GR - h - 120} V${GR - h - 200}`, 5);
+  if (top === 2) g += bothP(px(x + w * .2, GR - h - 80, w * .6, 80), c, 5) + bothP(px(x + w * .35, GR - h - 150, w * .3, 70), c, 5) + lineP(`M${x + w / 2} ${GR - h - 150} V${GR - h - 240}`, 5);
+  for (let r = 0; r < Math.floor(h / 70) - 1; r++) for (let k = 0; k < Math.floor(w / 50); k++) g += `<g class="win" data-i="${r * 7 + k + x}">${fillP(px(x + 14 + k * 50, GR - h + 30 + r * 70, 26, 36), hash(r * 5 + k + x) > lit ? "#ffe9a0" : "#5a5a7a")}</g>`;
+  return g; };
+const skyline = (dark) => { const c1 = dark ? "#3a3a5a" : "#9aa6b8", c2 = dark ? "#2e2e48" : "#8a96aa", c3 = dark ? "#44445e" : "#aab4c4";
+  return sky_(-20, 200, 760, c1) + sky_(170, 170, 1040, c2, .45, 1) + sky_(330, 240, 640, c3) + sky_(560, 180, 1180, c2, .45, 2) + sky_(730, 210, 820, c1) + sky_(930, 180, 560, c3); };
+const taxi = (id, inner = "") => `<g id="${id}">${bothP("M-330 -60 Q-330 -150 -250 -150 L-170 -150 L-110 -250 H140 L220 -150 H300 Q340 -150 340 -60 V0 H-330Z", "#f6c830", 6, true)}${inner}
+  ${["M-150 -158 L-100 -236 H10 V-158Z", "M30 -158 V-236 H130 L190 -158Z"].map((d) => fillP(d, "#bfe0f0", 'fill-opacity=".3"') + lineP(d, 4)).join("")}${bothP("M-330 -60 Q-330 -150 -250 -150 H300 Q340 -150 340 -60 V0 H-330Z", "#f6c830", 6, true)}${bothP(px(-40, -290, 90, 40), "#fffaf0", 4)}
+  ${[...Array(8)].map((_, i) => fillP(px(-300 + i * 76, -70, 38, 22), i % 2 ? INK : "#fffaf0")).join("")}${bothP(px(310, -110, 30, 30), "#fff6a0", 3)}
+  <g class="wh">${[-200, 200].map((x) => `<g transform="translate(${x} 0)">${bothP(circ(0, 0, 62), "#3a3a3a", 6)}${bothP(circ(0, 0, 26), "#bbb", 4)}${lineP("M-26 0 H26 M0 -26 V26", 4)}</g>`).join("")}</g></g>`;
+const slice = () => bothP("M0 0 L-230 -620 Q0 -700 230 -620Z", "#f4c460", 6, true) + bothP("M-230 -620 Q0 -700 230 -620 Q240 -660 200 -690 Q0 -760 -200 -690 Q-240 -660 -230 -620Z", "#c8843a", 6) +
+  [[-90, -500], [70, -470], [-20, -340], [50, -220], [-110, -600], [120, -590]].map(([x, y]) => bothP(circ(x, y, 34), "#c8342f", 4)).join("") + lineP("M-60 -420 q20 10 30 -6 M90 -360 q20 10 30 -6", 4, "#3a7a3a");
+const liberty = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${bothP("M-170 0 L-140 -260 H140 L170 0Z", "#b8a888", 6, true)}${bothP("M-110 -260 L-90 -420 H90 L110 -260Z", "#c8b898", 5)}
+  ${bothP("M-70 -420 Q-80 -620 -40 -760 L40 -760 Q80 -620 70 -420Z", "#7ab8a0", 6, true)}${bothP("M30 -720 L90 -800 L80 -930 L110 -930 L120 -790 L60 -700Z", "#7ab8a0", 5)}
+  ${bothP("M80 -930 h40 l-6 -30 h-28Z", "#7ab8a0", 4)}${bothP("M100 -960 Q80 -1010 100 -1040 Q120 -1010 100 -960Z", "#f0c040", 4)}${bothP(circ(0, -800, 46), "#7ab8a0", 5)}
+  ${[-60, -30, 0, 30, 60].map((a) => lineP(`M0 -830 L${Math.sin(a * Math.PI / 180) * 90} ${-830 - Math.cos(a * Math.PI / 180) * 90}`, 7, "#5a9a80")).join("")}${bothP("M-80 -640 l-40 10 l10 80 l40 -10Z", "#6aa890", 4)}</g>`;
+const waves = (id, y, c) => `<g id="${id}">${[0, 1].map((k) => fillP(`M${k * 1200 - 40} ${y} q75 -26 150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 V1960 H${k * 1200 - 40}Z`, c)).join("")}${[0, 1].map((k) => lineP(`M${k * 1200 - 40} ${y} q75 -26 150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0 t150 0`, 4)).join("")}</g>`;
+const ferry = () => `<g id="fr4">${bothP("M-330 0 L-290 90 H290 L340 0Z", "#fffaf0", 6, true)}${bothP(px(-240, -110, 380, 110), "#e8e4d8", 5)}${[0, 1, 2, 3, 4].map((i) => bothP(px(-220 + i * 72, -90, 46, 46), "#a8d0e6", 3)).join("")}
+  ${bothP(px(-60, -190, 90, 80), "#f6a030", 5)}${lineP("M-330 0 H340", 5)}${hero("h4")}</g>`;
+function build() {
+  const m = routeMap({ view: [-100, 60, 620, 8.55, 35], from: [31.2, 30.0, "Cairo", -24], to: [-74.0, 40.7, "New York", 26], hlPoly: USA, hlName: "USA", hlAt: [-92, 37], bend: 240 });
+  RT = m.route; $("#a1").innerHTML = PDEFS + m.svg + plane("pl1") + hero("h1", { pack: 1 }) + paperOver();
+  $("#a2").innerHTML = PDEFS + sky("#bfe0f0", "#f6e6d0", GR) + `<g id="sk2">${skyline(false)}<g transform="translate(1100 0)">${skyline(false)}</g></g>` + fillP(px(0, GR, W, H - GR), "#6a6a72") + lineP(`M0 ${GR} H${W}`, 6) +
+    `<g id="ln2">${Array.from({ length: 10 }, (_, i) => fillP(px(i * 240, GR + 230, 130, 18), "#f6e6a0")).join("")}</g>` + `<g id="tx2">${taxi("cab2", hero("h2"))}</g>` + paperOver();
+  $("#a3").innerHTML = PDEFS + fillP(px(0, 0, W, H), "#f3e2c8") + Array.from({ length: 8 }, (_, i) => Array.from({ length: 5 }, (_, j) => fillP(px(j * 240 - (i % 2) * 120, 260 + i * 120, 120, 120), "#e6a0a0"))).flat().join("") +
+    bothP(px(60, 1260, 960, 50), "#8a5a3a", 6, true) + fillP(px(60, 1310, 960, 700), "#b88a5a") + hero("h3") + `<g id="sl3">${slice()}</g><g id="ch3"></g>` + paperOver();
+  $("#a4").innerHTML = PDEFS + sky("#9fd0ec", "#f6e6d0", 1250) + cloudP(240, 380, .8) + `<g opacity=".55">${skyline(false)}</g>` + liberty(800, 1270, .95) + waves("wv4a", 1260, "#7ab0cc") + ferry() + waves("wv4b", 1640, "#5a98bc") + paperOver();
+  $("#a5").innerHTML = PDEFS + sky("#1c2048", "#3a3a7a", GR) + `<g id="st5">${Array.from({ length: 22 }, (_, i) => fillP(circ(60 + hash(i) * 960, 80 + hash(i + 30) * 360, 3 + 4 * hash(i + 5)), "#fff6c0")).join("")}</g>` +
+    `<g id="sk5">${skyline(true)}</g>` + fillP(px(0, GR, W, H - GR), "#3a3a4a") + lineP(`M0 ${GR} H${W}`, 6) + hero("h5", { pack: 1 }) + paperOver();
+}
+const U = {
+  s1(lt, t) { const k = easeInOut(prog(t, .4, 3.4)); planeOn("pl1", RT, k); setHero("h1", RT.tx, RT.ty - Math.abs(Math.sin(t * 6)) * 20, k < 1 ? 0.001 : .34, { happy: true }, t); },
+  s2(lt, t) { const d = t - 4.4; $("#sk2").setAttribute("transform", `translate(${-(d * 140) % 1100} 0)`); $("#ln2").setAttribute("transform", `translate(${-(d * 600) % 240} 0)`);
+    const bob = 4 * Math.sin(t * 20); $("#cab2").setAttribute("transform", `translate(520 ${GR + 170 + bob})`); $$("#cab2 .wh > g").forEach((w, i) => w.setAttribute("transform", `translate(${[-200, 200][i]} 0) rotate(${t * 600})`));
+    setHero("h2", 80, -108, .42, { happy: t > 6.4, armUp: t > 7.5 && t < 9 }, t); },
+  s3(lt, t) { const lift = easeInOut(prog(t, 10.6, 11.8)), chew = t > 12.2 && t < 14.4 ? Math.max(0, Math.sin((t - 12.2) * 9)) : 0;
+    setHero("h3", 720, 1270, 1.15, { happy: t > 14.2 || chew > .5 }, t);
+    const ox = lerp(300, 560, lift) - 50 * chew, oy = lerp(1250, 1010, lift) + 10 * chew; $("#sl3").setAttribute("transform", `translate(${ox} ${oy}) rotate(${lerp(-20, -62, lift)}) scale(${1 - .12 * Math.min(3, Math.floor(prog(t, 12.2, 14.4) * 3.5))})`);
+    $("#ch3").innerHTML = chew > .05 ? [0, 1].map((i) => lineP(`M${ox + 6 * i} ${oy + 4 * i} Q${(ox + 600) / 2} ${oy + 40 + 20 * i} 600 ${1000 + 8 * i}`, 6, "#f4dc90")).join("") : ""; },
+  s4(lt, t) { const d = t - 15.6; $("#wv4a").setAttribute("transform", `translate(${-(d * 60) % 1200} 0)`); $("#wv4b").setAttribute("transform", `translate(${-(d * 120) % 1200} 0)`);
+    const bob = 10 * Math.sin(t * 2.4); $("#fr4").setAttribute("transform", `translate(${lerp(300, 380, prog(t, 15.6, 21.6))} ${1600 + bob}) rotate(${1.5 * Math.sin(t * 2)})`);
+    setHero("h4", 40, -110, .55, { wave: t > 17.2, happy: t > 17.2 }, t); },
+  s5(lt, t) { setHero("h5", 780, GR + 200, 1.0, { wave: true, happy: true }, t); $$("#sk5 .win").forEach((w, i) => w.setAttribute("opacity", Math.sin(t * 2 + i * 1.7) > -.7 ? 1 : .2)); },
+  s6() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) { lullaby(sfx, add, DUR, 5); add(.5, (a) => sfx.noise(a, 3, "bandpass", 500, 1, .05, .8)); add(4.6, (a) => sfx.osc("square", 440, a, .01, .04, .18)); add(4.85, (a) => sfx.osc("square", 440, a, .01, .04, .25));
+  [12.6, 13.2, 13.8].forEach((x) => add(x, (a) => sfx.noise(a, .08, "bandpass", 2500, 2, .12, .005))); add(17.2, (a) => sfx.osc("sine", 196, a, .1, .08, 1.2)); }
+ENGINE.start();
+</script>
+</body>
+</html>

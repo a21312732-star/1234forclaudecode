@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer — Day 3: Egypt</title>
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>#stage{background:#f6efdf}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg><div class="card" id="cd1">Day 3 · Egypt 🇪🇬</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../pencil.js"></script>
+<script src="../geo.js"></script>
+<script src="../world.js"></script>
+<script>
+"use strict";
+const NOGLITCH = true;
+const DUR = 25.0;
+const WARP = [[0, 0], [25.0, 25.0]];
+const SCENES = [{ id: "s1", s: 0, e: 4.4 }, { id: "s2", s: 4.4, e: 10.4 }, { id: "s3", s: 10.4, e: 15.6 }, { id: "s4", s: 15.6, e: 21.6 }, { id: "s5", s: 21.6, e: 24.7 }, { id: "s6", s: 24.7, e: 25.0 }];
+const SPEAK = [], DROP = [], SHAKES = [], FLASHES = [];
+const clockText = () => null;
+const CAPS = [[0.3, "From Tokyo to the desert! ✈️"], [4.4, "My first camel ride! 🐪"], [10.4, "The pyramids are HUGE 😮"], [15.6, "Wait… is that me on the wall?! 😄"], [21.6, "Where should I go next? 👇"], [24.7, ""]];
+const MUSIC = { bpm: 84, root: 55, parts: [] };
+const GR = 1450, SAND = "#e8c88a", SAND2 = "#d9b070";
+let RT = {};
+const EGYPT = [[25, 31.6], [32.3, 31.3], [34.3, 31.3], [34.9, 29.5], [33.5, 27.5], [35.5, 24], [36.9, 22], [25, 22]];
+// ---------- рисунки ----------
+const dunes = (y, c, amp, id) => `<g id="${id}">${[0, 1].map((k) => fillP(`M${k * 1400 - 40} ${y} q175 ${-amp} 350 0 t350 0 t350 0 t350 0 V1960 H${k * 1400 - 40}Z`, c)).join("")}${[0, 1].map((k) => lineP(`M${k * 1400 - 40} ${y} q175 ${-amp} 350 0 t350 0 t350 0 t350 0`, 4)).join("")}</g>`;
+const pyr = (x, y, w, h, c = SAND2) => bothP(`M${x - w / 2} ${y} L${x} ${y - h} L${x + w / 2} ${y}Z`, c, 6, true) + fillP(`M${x} ${y - h} L${x + w / 2} ${y} L${x + w * .1} ${y}Z`, "#b8905a") + lineP(`M${x} ${y - h} L${x + w * .1} ${y}`, 4) +
+  Array.from({ length: 7 }, (_, i) => { const yy = y - h * (i + 1) / 8, hw = (w / 2) * (1 - (i + 1) / 8); return lineP(`M${x - hw} ${yy} H${x + hw}`, 2); }).join("");
+const sphinx = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${bothP("M-260 0 V-80 Q-250 -120 -180 -120 H60 V-230 Q60 -300 130 -300 Q200 -300 200 -230 V-120 H230 V0Z", SAND2, 6, true)}
+  ${bothP("M50 -250 L40 -150 H80 V-230Z M210 -250 L220 -150 H180 V-230Z", "#c8a060", 4)}${bothP(px(100, -250, 60, 60), "#d8b878", 4)}${lineP("M110 -230 h14 M136 -230 h14 M120 -205 h20", 4)}${lineP("M-200 0 V-50 M150 0 V-60 M250 -8 H340", 5)}</g>`;
+const camel = (id) => `<g id="${id}"><g class="lg">${[-150, -100, 60, 110].map((x, i) => `<g class="c${i}">${bothP(px(x, -180, 30, 180), "#c89a60", 4)}</g>`).join("")}</g>
+  ${bothP("M-190 -170 Q-200 -260 -120 -270 Q-80 -380 -10 -280 Q40 -360 100 -270 Q170 -260 160 -170Z", "#d8aa6a", 6, true)}${bothP("M130 -240 Q200 -280 210 -380 L250 -380 Q250 -250 170 -190Z", "#d8aa6a", 5)}
+  ${bothP("M200 -390 Q215 -430 270 -420 Q320 -410 320 -380 Q300 -360 250 -365Z", "#d8aa6a", 5)}${bothP(circ(262, -400, 6), INK, 2)}${lineP("M-190 -200 q-30 30 -20 80", 5)}
+  ${bothP("M-110 -300 Q-60 -330 -30 -290 L-40 -270 H-120Z", "#c8242f", 4)}</g>`;
+const GLY = [
+  (x, y) => lineP(`M${x - 40} ${y} Q${x} ${y - 40} ${x + 40} ${y} Q${x} ${y + 30} ${x - 40} ${y}Z`, 5) + bothP(circ(x, y - 4, 13), INK, 3) + lineP(`M${x - 10} ${y + 22} L${x - 20} ${y + 52}`, 4),
+  (x, y) => lineP(`M${x - 40} ${y + 30} Q${x - 20} ${y - 40} ${x + 20} ${y - 30} L${x + 40} ${y - 40} L${x + 26} ${y - 20} Q${x + 30} ${y + 20} ${x - 40} ${y + 30} M${x - 10} ${y + 28} V${y + 52} M${x + 10} ${y + 25} V${y + 52}`, 5),
+  (x, y) => lineP(`M${x - 45} ${y - 20} l15 -12 l15 12 l15 -12 l15 12 l15 -12 l15 12 M${x - 45} ${y + 10} l15 -12 l15 12 l15 -12 l15 12 l15 -12 l15 12`, 5, "#2a6aa8"),
+  (x, y) => lineP(`M${x} ${y - 10} Q${x - 26} ${y - 30} ${x} ${y - 54} Q${x + 26} ${y - 30} ${x} ${y - 10} M${x - 34} ${y - 4} H${x + 34} M${x} ${y - 10} V${y + 50}`, 6, "#c8242f"),
+  (x, y) => bothP(circ(x, y, 30), "#f0c040", 5) + bothP(circ(x, y, 8), INK, 3),
+  (x, y) => lineP(`M${x - 40} ${y + 40} V${y - 10} Q${x - 40} ${y - 40} ${x - 10} ${y - 40} Q${x + 20} ${y - 40} ${x + 20} ${y - 10} M${x + 20} ${y - 10} L${x + 44} ${y + 40}`, 5),
+];
+const meGlyph = (x, y) => `<g transform="translate(${x} ${y})">${bothP(px(-48, -40, 96, 74), "#d97757", 5)}${bothP(px(-26, -26, 12, 24), INK, 2)}${bothP(px(14, -26, 12, 24), INK, 2)}${[-40, -16, 8, 32].map((lx) => bothP(px(lx, 34, 12, 26), "#d97757", 3)).join("")}</g>`;
+function build() {
+  const m = routeMap({ view: [8, 55, 620, 8.6, 30], from: [139.7, 35.7, "Tokyo", -24], to: [31.2, 30.0, "Cairo", -26], hlPoly: EGYPT, hlName: "EGYPT", hlAt: [30, 18], bend: 230 });
+  RT = m.route; $("#a1").innerHTML = PDEFS + m.svg + plane("pl1") + hero("h1", { pack: 1 }) + paperOver();
+  $("#a2").innerHTML = PDEFS + sky("#f2b26a", "#fbe6c0", 1300) + bothP(circ(800, 520, 110), "#f6d050", 6) + `<g id="py2">${pyr(250, 1240, 320, 210, "#d0a868") + pyr(480, 1240, 220, 150, "#d0a868")}</g>` +
+    dunes(1260, "#e8c890", 70, "d2a") + dunes(1450, SAND, 110, "d2b") + `<g id="cm2">${camel("cam2")}</g>` + hero("h2", { pack: 1 }) + dunes(1720, SAND2, 80, "d2c") + paperOver();
+  $("#a3").innerHTML = PDEFS + `<g id="wz3">` + sky("#9fd0ec", "#fbe6c0", 1300) + pyr(780, 1300, 700, 560) + pyr(330, 1300, 560, 440) + pyr(80, 1300, 260, 190) + fillP(px(0, 1290, W, H - 1290), SAND) + lineP("M0 1300 H1080", 6) +
+    sphinx(330, 1500, .9) + hero("h3") + `</g>` + paperOver();
+  let wall = fillP(px(0, 0, W, H), "#e6c28a") + `<path d="M0 0 H${W} V${H} H0Z" fill="url(#hatch)" filter="url(#pencil)" opacity=".4"/>`;
+  for (let c = 0; c < 4; c++) wall += lineP(`M${130 + c * 270} 300 V1300`, 3, "#8a6a40");
+  for (let r = 0; r < 6; r++) for (let c = 0; c < 3; c++) { const x = 265 + c * 270, y = 380 + r * 160; wall += r === 3 && c === 2 ? `<g id="me4">${meGlyph(x, y)}</g>` : GLY[(r * 4 + c * 5) % GLY.length](x, y); }
+  $("#a4").innerHTML = PDEFS + wall + fillP(px(0, 1300, W, H - 1300), SAND2) + lineP("M0 1300 H1080", 6) + `<g id="ring4"></g>` + hero("h4") + paperOver();
+  $("#a5").innerHTML = PDEFS + sky("#1c2048", "#4a3a6a", 1300) + `<g id="st5">${Array.from({ length: 34 }, (_, i) => fillP(circ(60 + hash(i) * 960, 80 + hash(i + 30) * 1000, 3 + 4 * hash(i + 5)), "#fff6c0")).join("")}</g>` +
+    bothP("M820 300 a90 90 0 1 0 60 160 a70 70 0 1 1 -60 -160Z", "#fff2b0", 4) + pyr(330, 1320, 600, 470, "#8a7a6a") + pyr(820, 1320, 420, 320, "#7a6a5a") + fillP(px(0, 1310, W, H - 1310), "#6a5a4a") + lineP("M0 1320 H1080", 6) + hero("h5", { pack: 1 }) + paperOver();
+}
+const U = {
+  s1(lt, t) { const k = easeInOut(prog(t, .4, 3.4)); planeOn("pl1", RT, k); setHero("h1", RT.tx, RT.ty - Math.abs(Math.sin(t * 6)) * 20, k < 1 ? 0.001 : .34, { happy: true }, t); },
+  s2(lt, t) { const d = t - 4.4; [["d2a", 60], ["d2b", 160], ["d2c", 320]].forEach(([id, sp]) => $("#" + id).setAttribute("transform", `translate(${-(d * sp) % 1400} 0)`)); $("#py2").setAttribute("transform", `translate(${-d * 20} 0)`);
+    const bob = Math.abs(Math.sin(t * 5)) * 14, cx = 470, cy = 1560; $("#cam2").setAttribute("transform", `translate(${cx} ${cy - bob}) scale(1.05)`);
+    $$("#cam2 .lg > g").forEach((l, i) => l.setAttribute("transform", `rotate(${16 * Math.sin(t * 5 + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI / 2 : 0))} ${[-135, -85, 75, 125][i]} -180)`));
+    setHero("h2", cx - 70, cy - 300 - bob, .62, { happy: t > 6.5, armUp: t > 8 && t < 9.4 }, t); },
+  s3(lt, t) { const k = easeInOut(prog(t, 10.5, 13.5)), s = lerp(2.4, 1, k); $("#wz3").setAttribute("transform", `translate(${760 - 760 * s + 0} ${1640 - 1640 * s}) scale(${s})`);
+    setHero("h3", 760, 1640, .55, { happy: t > 14, armUp: t > 13.6 && t < 14.4 }, t); },
+  s4(lt, t) { const x = lerp(-120, 500, easeInOut(prog(t, 15.7, 17.4))), found = t > 18.2; setHero("h4", x, 1620, .95, { walk: t < 17.4 ? 1 : 0, armUp: found && t < 20.4, happy: t > 19.2 }, t);
+    $("#ring4").innerHTML = found ? lineP(ell(805, 900, 110 + 6 * Math.sin(t * 8), 90 + 6 * Math.sin(t * 8)), 7, "#c8242f") : ""; $("#me4").setAttribute("transform", `translate(0 ${found ? -6 * Math.abs(Math.sin(t * 8)) : 0})`); },
+  s5(lt, t) { setHero("h5", 780, 1320 + 120, 1.0, { wave: true, happy: true }, t); $$("#st5 > g").forEach((g, i) => g.setAttribute("opacity", .5 + .5 * Math.sin(t * 3 + i))); },
+  s6() { const s1 = $("#s1"); s1.style.display = "block"; s1.style.opacity = 1; U.s1(0, 0); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) { lullaby(sfx, add, DUR, 11); add(.5, (a) => sfx.noise(a, 3, "bandpass", 500, 1, .05, .8));
+  for (let x = 4.6; x < 10.4; x += .63) add(x, (a) => sfx.noise(a, .08, "lowpass", 400, 1, .12, .01)); add(13.6, (a) => sfx.osc("sine", 1320, a, .005, .06, .5)); add(18.2, (a) => sfx.osc("sine", 1568, a, .005, .07, .3)); add(18.4, (a) => sfx.osc("sine", 2093, a, .005, .06, .4)); }
+ENGINE.start();
+</script>
+</body>
+</html>
