@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #7 — Великая вонь</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#d8d0a8}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:88px">ПАРЛАМЕНТ<br>СБЕЖАЛ <b>ОТ ВОНИ</b> 🤢</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 28.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.2, 3.85], [4.6, 5.61], [6.8, 8.64], [8.6, 11.00], [12, 14.41], [14.2, 17.71], [18, 22.17], [21.4, 24.78], [24, 28.39], [26.8, 31.02], [28.6, 32.56], [28.9, 32.86]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.2 }, { id: "s2", s: 2.2, e: 6.8 }, { id: "s3", s: 6.8, e: 14.2 }, { id: "s4", s: 14.2, e: 18.0 },
+  { id: "s5", s: 18.0, e: 24.0 }, { id: "s6", s: 24.0, e: 26.8 }, { id: "s7", s: 26.8, e: 28.6 }, { id: "s8", s: 28.6, e: 28.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [];
+const clockText = (t) => (t >= 2.2 && t < 26.8 ? "КОТОИСТОРИЯ · 1858" : null);
+const CAPS = [
+  [0.1, "{y:Парламент Англии сбежал от вони.}"],
+  [2.2, "Тысяча восемьсот пятьдесят восьмой год, {y:Лондон.}"], [4.6, "Всё, что выливали в городе, {r:текло прямо в Темзу.}"],
+  [6.8, "А тем летом {r:ударила страшная жара.}"], [8.6, "Река начала гнить и вонять так,"], [10.36, "{r:что люди падали в обморок.}"], [12, "Это лето так и назвали — {y:Великая вонь.}"],
+  [14.2, "Депутаты пропитывали шторы в парламенте известью,"], [16.73, "{r:но это не помогало.}"], [18, "И тогда они {g:срочно выделили деньги на канализацию.}"],
+  [21.4, "Её построили, {g:и она работает в Лондоне до сих пор.}"],
+  [24, "Пиши в комменты, какую историю рассказать дальше."], [26.8, "Вот так и вышло, что…"], [28.6, ""]
+];
+const MUSIC = { bpm: 104, root: 49, parts: [[0, 6.8, "pulse", .7], [6.8, 24.0, "drive", .45], [24.0, 26.8, "pad", .6], [26.8, 28.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇬🇧 ЛОНДОН · 1858", 2.3, 99, -2, "font-size:56px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "🌡 ЖАРА + 🤢 ВОНЬ", 6.9, 99, 2, "font-size:54px"], ["s3", "e3b", "badge b-yel", "c", 340, "«ВЕЛИКАЯ ВОНЬ»", 12.1, 99, -2, "font-size:56px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🪟 ШТОРЫ С ИЗВЕСТЬЮ — НЕ ПОМОГЛО", 14.3, 99, -2, "font-size:38px"],
+  ["s5", "e5a", "badge b-grn", "c", 220, "🚇 КАНАЛИЗАЦИЯ — РАБОТАЕТ ДО СИХ ПОР", 21.5, 99, 2, "font-size:36px"],
+  ["s6", "m6a", "cmt", 90, 1000, "лучше бы я этого не знал 🤢", 24.1, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а про пингвина-генерала? 🐧", 24.5, 99, 2],
+];
+const GR = 1180;
+const MP = { fur: "#9a9a9a", fur2: "#6a6a6a", coat: "#1a1a24", coat2: "#0a0a12", hat: "bicorne", hatC: "#1a1a24" }, MP2 = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#3a2a4a", coat2: "#2a1a3a" };
+const london = (dirty = 0) => `<rect width="${W}" height="${H}" fill="${dirty ? "#c8c09a" : "#bfd8e8"}"/><g transform="translate(780 ${GR - 60})"><rect x="-70" y="-640" width="140" height="640" fill="#c9a87a" stroke="${OL}" stroke-width="7"/><path d="M-80 -640 L0 -760 L80 -640Z" fill="#7a5232" stroke="${OL}" stroke-width="7"/>
+  <circle cy="-520" r="52" fill="#f4f1e6" stroke="${OL}" stroke-width="6"/><path d="M0 -520 V-556 M0 -520 L24 -508" stroke="${OL}" stroke-width="6"/></g>
+  <rect x="80" y="${GR - 360}" width="600" height="300" fill="#c9a87a" stroke="${OL}" stroke-width="7"/>${Array.from({ length: 8 }, (_, i) => `<rect x="${110 + i * 70}" y="${GR - 320}" width="40" height="90" rx="20" fill="#5a4a3a"/>`).join("")}
+  <rect y="${GR - 60}" width="${W}" height="60" fill="#8a7a5a"/><path id="RV" d="M0 ${GR} H${W} V${H} H0Z" fill="${dirty ? "#6a6a2a" : "#4a7a9a"}" stroke="${OL}" stroke-width="6"/>`;
+const stink = (id) => `<g id="${id}" stroke="#7a8a2a" stroke-width="12" fill="none" stroke-linecap="round" opacity=".8"></g>`;
+const setStink = (id, t, x0 = 100, x1 = 980, y = GR) => { $("#" + id).innerHTML = Array.from({ length: 7 }, (_, i) => { const q = (t * .5 + i / 7) % 1, x = x0 + (x1 - x0) * i / 6; return `<path d="M${x} ${y - q * 500} q-30 -40 0 -80 q30 -40 0 -80" opacity="${(1 - q).toFixed(2)}"/>`; }).join(""); };
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = london(1) + stink("sk1") + cat("m1", MP) + cat("m1b", MP2);
+  $("#a2").innerHTML = london(0) + `<g id="pp2">${[0, 1, 2, 3].map((i) => `<rect x="${60 + i * 260}" y="${GR - 20}" width="40" height="80" fill="#5a4a3a" stroke="${OL}" stroke-width="5"/>`).join("")}</g><g id="dr2"></g>`;
+  $("#a3").innerHTML = london(1) + `<circle cx="880" cy="250" r="120" fill="#ffd23f"/>` + stink("sk3") + cat("p3", MP2) + `<g transform="translate(540 600)"><text y="0" font-size="110" text-anchor="middle" fill="#7a8a2a" stroke="${OL}" stroke-width="5">ВОНЬ</text></g>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#c9a87a"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#5a3a22"/>${[160, 920].map((x) => `<path d="M${x - 100} 200 Q${x} 600 ${x - 80} ${GR} H${x + 80} Q${x} 600 ${x + 100} 200Z" fill="#8a2a2a" stroke="${OL}" stroke-width="7"/><path d="M${x - 60} 300 V${GR - 40} M${x + 60} 300 V${GR - 40}" stroke="#fff" stroke-width="10" opacity=".5"/>`).join("")}` + stink("sk4") + cat("m4", MP) + cat("m4b", MP2);
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#3a3a3a"/><g transform="translate(540 900)"><circle r="380" fill="#5a4a3a" stroke="${OL}" stroke-width="14"/><circle r="320" fill="#2a2a2a"/>${Array.from({ length: 18 }, (_, i) => { const a = i / 18 * 6.283; return `<rect x="-24" y="-370" width="48" height="50" fill="#8a5a3a" stroke="${OL}" stroke-width="4" transform="rotate(${a * 57.3})"/>`; }).join("")}<path id="fl5" fill="#4a6a9a"/></g>` + cat("e5", { fur: "#3a3a3a", fur2: "#1a1a1a", coat: "#c8a24a", coat2: "#8a6a2a", hat: "helmet", hatC: "#ffd23f" });
+  $("#a6").innerHTML = london(0) + cat("m6", MP);
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; setStink("sk1", t); P("m1", 320, GR - 20 - 88 * 1.6, 1.6, { ...walk(t, 2.2), la: -110, face: "panic", look: -1 }); P("m1b", 620, GR - 20 - 88 * 1.6, 1.6, { ...walk(t + 1, 2.2), ra: -110, face: "worried", look: -1 }); wag("m1", t, 3); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { const k = prog(t, 4.6, 6.6); $("#RV").setAttribute("fill", `rgb(${Math.round(lerp(74, 106, k))},${Math.round(lerp(122, 106, k))},${Math.round(lerp(154, 42, k))})`); $("#dr2").innerHTML = t > 4.6 ? [0, 1, 2, 3].map((i) => Array.from({ length: 3 }, (_, j) => { const q = (t * 1.2 + j / 3) % 1; return `<ellipse cx="${80 + i * 260}" cy="${GR + 60 + q * 120}" rx="14" ry="20" fill="#6a5a2a" opacity="${1 - q}"/>`; }).join("")).join("") : ""; },
+  s3(lt, t) { setStink("sk3", t); const f = prog(t, 10.4, 11.4); P("p3", 540, lerp(GR - 20 - 88 * 1.7, GR - 60, f), 1.7, { la: -100, ra: 20, face: "panic" }, -90 * f); wag("p3", t); },
+  s4(lt, t) { setStink("sk4", t, 300, 780, GR - 100); P("m4", 380, GR - 88 * 1.6, 1.6, { la: -110, ra: 20, face: "worried" }); P("m4b", 700, GR - 88 * 1.6, 1.6, { la: 20, ra: t > 18 ? 130 : -110, face: t > 18 ? "happy" : "panic", look: -1 }); wag("m4", t); wag("m4b", t); },
+  s5(lt, t) { const k = prog(t, 19.6, 24); let d = "M-320 120 "; for (let x = -320; x <= 320; x += 40) d += `L${x} ${(120 + 20 * Math.sin(x / 50 + t * 3)).toFixed(0)} `; $("#fl5").setAttribute("d", d + "L320 320 L-320 320Z"); P("e5", 540, GR + 560 - 88 * 1.5, 1.5, { la: 20, ra: 130, face: "happy" }); wag("e5", t); },
+  s6(lt, t) { P("m6", 540, GR - 20 - 88 * 1.8, 1.8, { la: 20, ra: 140, face: "happy" }); wag("m6", t); },
+  s7(lt, t) { loopTo(U, t, 26.8, 28.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.noise(a, .6, "lowpass", 300, 2, .3, .2, 150)); add(4.7, (a) => sfx.noise(a, 2, "lowpass", 300, 1, .2, .5)); add(6.9, (a) => sfx.noise(a, 4, "bandpass", 2500, 1, .05, 1)); add(10.5, sfx.whooshDown); add(12.1, sfx.ding);
+  add(16.9, sfx.no); add(18.1, sfx.ok); add(19.7, (a) => sfx.noise(a, 4, "lowpass", 500, 1, .25, 1));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(26.85, sfx.whooshDown); add(28.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

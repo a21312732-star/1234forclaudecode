@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #9 — Кошка в космосе</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#140a33}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}
+.alt{position:absolute;right:50px;top:260px;text-align:right;font:900 80px var(--mono);color:#ffd23f;z-index:6;text-shadow:5px 5px 0 #000}
+.alt small{display:block;font:900 34px var(--head);color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">ПЕРВАЯ КОШКА<br><b>В КОСМОСЕ</b> 🚀</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg><div class="alt" id="al3">0<small>КМ</small></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 27.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.6, 3.70], [4.6, 5.31], [8.2, 10.28], [11.6, 15.52], [13, 18.21], [16.6, 22.38], [19.6, 25.69], [22.6, 28.18], [25.4, 30.85], [27.2, 32.36], [27.5, 32.66]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 8.2 }, { id: "s3", s: 8.2, e: 13.0 }, { id: "s4", s: 13.0, e: 17.8 },
+  { id: "s5", s: 17.8, e: 22.6 }, { id: "s6", s: 22.6, e: 25.4 }, { id: "s7", s: 25.4, e: 27.2 }, { id: "s8", s: 27.2, e: 27.5 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [8.4], FLASHES = [8.4];
+const clockText = (t) => (t >= 2.6 && t < 25.4 ? "КОТОИСТОРИЯ · 1963" : null);
+const CAPS = [
+  [0.1, "Первой кошкой в космосе была {y:француженка Фелисетт.}"],
+  [2.6, "Тысяча девятьсот шестьдесят третий год, Франция."], [4.6, "Учёные хотели узнать, как полёт действует на мозг,"], [6.61, "и выбрали {y:спокойную уличную кошку.}"],
+  [8.2, "Её посадили в ракету и отправили {y:на высоту больше ста пятидесяти километров.}"], [11.6, "Полёт длился {y:всего пятнадцать минут.}"],
+  [13, "Фелисетт {y:испытала невесомость,}"], [14.52, "а потом капсула спустилась на парашюте."],
+  [16.6, "{g:Кошка вернулась живой,}"], [17.72, "и учёные получили важные данные."], [19.6, "Сейчас во Франции {y:ей поставили памятник.}"],
+  [22.6, "Пиши в комменты, какую историю рассказать дальше."], [25.4, "Вот так и вышло, что…"], [27.2, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 8.2, "pulse", .7], [8.2, 22.6, "drive", .45], [22.6, 25.4, "pad", .6], [25.4, 27.5, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇫🇷 ФРАНЦИЯ · 1963", 2.7, 99, -2, "font-size:56px"],
+  ["s3", "e3a", "badge b-wht", "c", 1060, "⏱ ПОЛЁТ — 15 МИНУТ", 11.7, 99, 2, "font-size:52px"],
+  ["s4", "e4a", "badge b-blu", "c", 220, "🪶 НЕВЕСОМОСТЬ", 13.1, 99, -2, "font-size:58px"],
+  ["s5", "e5a", "badge b-grn", "c", 220, "✅ ВЕРНУЛАСЬ ЖИВОЙ", 16.7, 99, 2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "космокошка 🐱🚀", 22.7, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а про великую вонь? 🤢", 23.1, 99, 2],
+];
+const GR = 1180;
+const FEL = { fur: "#f1f1ea", fur2: "#3a3a3a", coat: "#f1f1ea", coat2: "#c9c9c0", belly: "#fff" }, SCI = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#f4f4f4", coat2: "#d8d8d8" };
+const stars = () => `<rect width="${W}" height="${H}" fill="#140a33"/>${Array.from({ length: 90 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const rocket = (id) => `<g id="${id}"><path d="M0 -360 Q70 -260 70 -60 L70 120 L-70 120 L-70 -60 Q-70 -260 0 -360Z" fill="#f4f4f4" stroke="${OL}" stroke-width="8"/><path d="M-70 40 L-140 160 L-70 120Z M70 40 L140 160 L70 120Z" fill="#c8242f" stroke="${OL}" stroke-width="7"/>
+  <circle cy="-140" r="40" fill="#bfe3f5" stroke="${OL}" stroke-width="7"/><text y="40" font-size="40" text-anchor="middle" fill="#2b4a8a">FR</text><g class="fl">${[0, 1, 2].map((i) => `<path d="M${-40 + i * 40} 120 q-10 60 0 120 q10 -60 0 -120" fill="${["#ffd23f", "#ff6a1a", "#ffd23f"][i]}"/>`).join("")}</g></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = stars() + `<g transform="translate(860 1150) scale(.7) rotate(12)">${rocket("rk1")}</g>` + `<g transform="translate(470 860)"><circle r="300" fill="#e8e8f0" stroke="${OL}" stroke-width="16"/><circle r="250" fill="#bfe3f5"/></g>` + cat("f1", FEL) + `<g transform="translate(470 860)"><circle r="250" fill="none" stroke="#fff" stroke-width="10" opacity=".4" stroke-dasharray="120 900"/></g>`;
+  $("#a2").innerHTML = paperBg() + cat("s2", SCI) + cat("f2", FEL) + `<g transform="translate(820 600)"><path d="M-80 0 Q-90 -100 0 -110 Q90 -100 80 0 Q60 40 0 40 Q-60 40 -80 0Z" fill="#f2a6b0" stroke="${OL}" stroke-width="7"/><path d="M-40 -60 q20 30 0 60 M10 -80 q20 40 0 80 M50 -50 q-20 30 0 50" stroke="${OL}" stroke-width="5" fill="none"/></g>`;
+  $("#a3").innerHTML = `<rect id="sk3" width="${W}" height="${H}" fill="#8cc8ee"/>` + `<g id="st3" opacity="0">${stars()}</g>` + `<g id="rr3">${rocket("rk3")}</g>` + `<g id="sm3"></g>`;
+  $("#a4").innerHTML = stars() + `<g transform="translate(540 900)"><circle r="300" fill="#e8e8f0" stroke="${OL}" stroke-width="12"/><circle r="260" fill="#cfd8e8"/></g>` + cat("f4", FEL) + `<g id="fx4">${Array.from({ length: 5 }, (_, i) => `<circle r="12" fill="#3aa0ff"/>`).join("")}</g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#8cc8ee"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#6aa84a"/><g id="pc5"><path d="M-260 -200 Q0 -460 260 -200Z" fill="#ff6a1a" stroke="${OL}" stroke-width="8"/>${[-200, -100, 0, 100, 200].map((x) => `<path d="M${x} -210 L0 0" stroke="${OL}" stroke-width="4"/>`).join("")}<circle r="70" fill="#e8e8f0" stroke="${OL}" stroke-width="8"/></g>` + cat("f5", FEL);
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#e8f0f6"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#a8a094"/><rect x="340" y="${GR - 160}" width="400" height="160" fill="#9a9a9a" stroke="${OL}" stroke-width="8"/><rect x="300" y="${GR - 190}" width="480" height="40" fill="#8a8a8a" stroke="${OL}" stroke-width="7"/>` + cat("f6", { ...FEL, fur: "#b8b0a0", fur2: "#7a7060", coat: "#b8b0a0", coat2: "#8a8070", belly: "#c8c0b0" });
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; $$("#rk1 .fl path").forEach((f, i) => f.setAttribute("transform", `scale(1 ${.7 + .3 * Math.sin(t * 20 + i)})`)); P("f1", 470, 860 + 170, 1.5, { la: 20, ra: 140 + 10 * Math.sin(t * 6), face: "happy" }); wag("f1", t); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { P("s2", 300, GR - 88 * 1.7, 1.7, { la: 20, ra: 110, face: "focus", look: 1 }); P("f2", 600, GR - 88 * 1.3, 1.3, { la: 20, ra: 20, face: "calm", look: -1 }); wag("f2", t); },
+  s3(lt, t) { const k = prog(t, 8.3, 12.6); $("#rr3").setAttribute("transform", `translate(540 ${lerp(1500, 800, easeOut(Math.min(1, k * 1.5)))})`); $("#sk3").setAttribute("fill", `rgb(${Math.round(lerp(140, 20, k))},${Math.round(lerp(200, 10, k))},${Math.round(lerp(238, 51, k))})`); $("#st3").setAttribute("opacity", k);
+    $$("#rk3 .fl path").forEach((f, i) => f.setAttribute("transform", `scale(1 ${1 + .5 * Math.sin(t * 25 + i)})`)); $("#al3").innerHTML = `${Math.round(157 * k)}<small>КМ</small>`; },
+  s4(lt, t) { P("f4", 540 + 60 * Math.sin(t * 1.2), 900 + 40 * Math.sin(t * 1.7) + 80, 1.2, { la: 140 + 20 * Math.sin(t * 2), ra: 140, ll: 30, rl: -30, face: "happy" }, 30 * Math.sin(t * .8)); wag("f4", t, .5);
+    $$("#fx4 circle").forEach((c, i) => { c.setAttribute("cx", 540 + 200 * Math.cos(t * .7 + i * 1.3)); c.setAttribute("cy", 900 + 150 * Math.sin(t * .9 + i * 1.7)); }); },
+  s5(lt, t) { const k = easeOut(prog(t, 17.8, 21.0)); $("#pc5").setAttribute("transform", `translate(540 ${lerp(300, GR - 70, k)}) rotate(${6 * Math.sin(t * 2) * (1 - k)})`); P("f5", 760, GR - 88 * 1.4, 1.4, { la: 150, ra: 150, face: "happy" }, 0, k > .9 ? 1 : 0); wag("f5", t, 2); },
+  s6(lt, t) { P("f6", 540, GR - 190 - 88 * 1.6, 1.6, { la: 20, ra: 20, face: "calm" }); },
+  s7(lt, t) { loopTo(U, t, 25.4, 27.2); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.noise(a, 2.4, "lowpass", 200, 1, .3, .5)); add(8.3, sfx.boom); add(8.4, (a) => sfx.noise(a, 4.2, "lowpass", 300, 1, .5, .3)); add(8.4, (a) => sfx.riser(a, 4));
+  add(13.1, (a) => sfx.osc("sine", 880, a, .3, .05, 3, 660)); add(14.7, sfx.whoosh); add(16.7, sfx.ok); add(19.7, sfx.ding);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(25.45, sfx.whooshDown); add(26.6, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

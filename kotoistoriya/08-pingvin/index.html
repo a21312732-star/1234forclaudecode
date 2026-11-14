@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #8 — Пингвин-генерал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#dfe8ef}
+#clock{background:#7a4a1a;color:#fff;box-shadow:0 6px 0 #4a2a0a}
+.rank{position:absolute;left:0;right:0;top:300px;text-align:center;font:900 110px var(--head);color:#ffd23f;z-index:6;text-shadow:6px 6px 0 #000}
+.rank small{display:block;font:900 44px var(--mono);color:#fff}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:92px">ПИНГВИН<br>СТАЛ <b>ГЕНЕРАЛОМ</b> 🐧</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg><div class="rank" id="rk3"></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 28.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.4, 3.86], [8.6, 9.60], [10, 11.21], [14, 16.77], [15.8, 20.04], [18.8, 23.43], [23.8, 28.15], [26.6, 30.59], [28.4, 32.26], [28.7, 32.56]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 8.6 }, { id: "s3", s: 8.6, e: 15.8 }, { id: "s4", s: 15.8, e: 18.8 },
+  { id: "s5", s: 18.8, e: 23.8 }, { id: "s6", s: 23.8, e: 26.6 }, { id: "s7", s: 26.6, e: 28.4 }, { id: "s8", s: 28.4, e: 28.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [];
+const clockText = (t) => (t >= 2.4 && t < 26.6 ? "КОТОИСТОРИЯ · 1972" : null);
+const CAPS = [
+  [0.1, "В Норвегии {y:пингвин получил звание генерала.}"],
+  [2.4, "В тысяча девятьсот семьдесят втором году норвежские гвардейцы"], [5.39, "приехали в зоопарк Эдинбурга {y:и взяли шефство над пингвином.}"],
+  [8.6, "Его назвали {y:Нильс Олав.}"], [10, "Каждый раз, когда гвардия приезжала в Шотландию,"], [12.48, "пингвина {g:повышали в звании.}"],
+  [14, "Капрал, сержант, а в две тысячи восьмом году — {y:рыцарь.}"],
+  [15.8, "Пингвин {y:принимал парад,} гордо проходя мимо строя солдат."],
+  [18.8, "Сейчас это звание носит уже {y:третий Нильс Олав,}"], [22.29, "и он — {g:генерал.}"],
+  [23.8, "Пиши в комменты, какую историю рассказать дальше."], [26.6, "Вот так и вышло, что…"], [28.4, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 8.6, "pulse", .7], [8.6, 23.8, "drive", .45], [23.8, 26.6, "pad", .6], [26.6, 28.7, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-blu", "c", 220, "🏴 ЗООПАРК ЭДИНБУРГА", 5.5, 99, -2, "font-size:50px"],
+  ["s4", "e4a", "badge b-yel", "c", 220, "🎖 ПАРАД В ЧЕСТЬ ПИНГВИНА", 15.9, 99, 2, "font-size:46px"],
+  ["s5", "e5a", "badge b-grn", "c", 220, "⭐ НИЛЬС ОЛАВ III — ГЕНЕРАЛ", 19.9, 99, -2, "font-size:46px"],
+  ["s6", "m6a", "cmt", 90, 1000, "честь отдаю, сэр 🫡🐧", 23.9, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а кошки в космосе были? 🚀", 24.3, 99, 2],
+];
+const GR = 1180;
+const GUARD = { fur: "#3a3a3a", fur2: "#1a1a1a", coat: "#1a2a4a", coat2: "#0a1a3a", hat: "helmet", hatC: "#1a1a1a", belt: "#f4f1e6", pants: "#1a2a4a" }, GUARD2 = { ...GUARD, fur: "#e8a14a", fur2: "#c27a2a" };
+const penguin = (id, medals = 0) => `<g id="${id}"><g class="pb"><ellipse cx="0" cy="-130" rx="90" ry="130" fill="#1a1a24" stroke="${OL}" stroke-width="7"/><ellipse cx="0" cy="-110" rx="62" ry="100" fill="#fff"/>
+  <ellipse class="wl" cx="-86" cy="-130" rx="22" ry="70" fill="#1a1a24" stroke="${OL}" stroke-width="5"/><ellipse class="wr" cx="86" cy="-130" rx="22" ry="70" fill="#1a1a24" stroke="${OL}" stroke-width="5"/>
+  <circle cy="-280" r="62" fill="#1a1a24" stroke="${OL}" stroke-width="7"/><ellipse cx="0" cy="-268" rx="40" ry="34" fill="#fff"/><circle cx="-16" cy="-284" r="8" fill="${OL}"/><circle cx="16" cy="-284" r="8" fill="${OL}"/><path d="M-14 -262 L0 -240 L14 -262Z" fill="#ff9a1a" stroke="${OL}" stroke-width="4"/>
+  <path d="M-30 -330 Q0 -350 30 -330" stroke="#ffd23f" stroke-width="6" fill="none"/><path d="M-40 0 h30 v10 h-30Z M10 0 h30 v10 h-30Z" fill="#ff9a1a" stroke="${OL}" stroke-width="4"/>
+  <g class="md">${Array.from({ length: medals }, (_, i) => `<g transform="translate(${-30 + (i % 3) * 30} ${-170 + Math.floor(i / 3) * 34})"><path d="M-6 -16 h12 v12 h-12Z" fill="#c8242f"/><circle r="10" fill="#ffd23f" stroke="${OL}" stroke-width="3"/></g>`).join("")}</g></g></g>`;
+const parade = () => `<rect width="${W}" height="${H}" fill="#dfe8ef"/><rect y="${GR - 420}" width="${W}" height="420" fill="#b8a890"/>${Array.from({ length: 10 }, (_, i) => `<rect x="${i * 110}" y="${GR - 460}" width="70" height="40" fill="#b8a890" stroke="${OL}" stroke-width="5"/>`).join("")}<rect y="${GR}" width="${W}" height="${H - GR}" fill="#9a9a8a"/>`;
+const RANKS = ["РЯДОВОЙ", "КАПРАЛ", "СЕРЖАНТ", "РЫЦАРЬ"];
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = parade() + Array.from({ length: 4 }, (_, i) => cat("g1_" + i, i % 2 ? GUARD2 : GUARD)).join("") + penguin("pg1", 6);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#cfe9f7"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#e8f2fa"/><path d="M0 ${GR} Q300 ${GR - 60} 600 ${GR} T1080 ${GR}" fill="#9fd4ff"/>` + `<rect x="700" y="${GR - 300}" width="300" height="300" fill="#7fb8d8" stroke="${OL}" stroke-width="6"/>` + penguin("pg2") + cat("g2a", GUARD) + cat("g2b", GUARD2);
+  $("#a3").innerHTML = parade() + penguin("pg3", 0) + `<g id="sw3" transform="translate(760 760)"><path d="M0 0 L120 -160" stroke="#ccc" stroke-width="14" stroke-linecap="round"/><path d="M-20 10 h40" stroke="#ffd23f" stroke-width="14"/></g>`;
+  $("#a4").innerHTML = parade() + Array.from({ length: 6 }, (_, i) => cat("g4_" + i, i % 2 ? GUARD2 : GUARD)).join("") + penguin("pg4", 4);
+  $("#a5").innerHTML = parade() + penguin("pg5", 9) + `<g transform="translate(540 380)">${[-1, 0, 1].map((i) => `<path transform="translate(${i * 90} 0)" d="M0 -40 L12 -12 L42 -12 L18 6 L28 36 L0 18 L-28 36 L-18 6 L-42 -12 L-12 -12Z" fill="#ffd23f" stroke="${OL}" stroke-width="5"/>`).join("")}</g>`;
+  $("#a6").innerHTML = parade() + penguin("pg6", 9);
+}
+const waddle = (id, x, y, s, t, k = 1) => at(id, x, y, s, 1, 6 * Math.sin(t * 8) * k);
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; for (let i = 0; i < 4; i++) P("g1_" + i, 120 + i * 120 + (i > 1 ? 480 : 0), GR - 88 * 1.5, 1.5, { la: 20, ra: 150, face: "focus" }); waddle("pg1", 540, GR + 60, 1.4, t); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { waddle("pg2", 760, GR - 300, .9, t, .5); const k = easeOut(prog(t, 2.6, 5.2)); P("g2a", lerp(-100, 280, k), GR - 88 * 1.6, 1.6, { ...walk(t, 1.6), face: "happy" }); P("g2b", lerp(-260, 460, k), GR - 88 * 1.6, 1.6, { ...walk(t + .5, 1.6), face: "happy" }); },
+  s3(lt, t) { const r = Math.min(3, Math.floor(prog(t, 10.0, 15.0) * 4)); waddle("pg3", 540, GR + 60, 1.7, t, .4); $("#pg3 .md").innerHTML = Array.from({ length: r * 2 }, (_, i) => `<g transform="translate(${-30 + (i % 3) * 30} ${-170 + Math.floor(i / 3) * 34})"><circle r="10" fill="#ffd23f" stroke="${OL}" stroke-width="3"/></g>`).join("");
+    $("#rk3").innerHTML = `${RANKS[r]}<small>${[1972, 1982, 1987, 2008][r]}</small>`; $("#sw3").setAttribute("transform", `translate(760 760) rotate(${t > 14 ? -40 * Math.max(0, Math.sin((t - 14) * 4)) : 0})`); },
+  s4(lt, t) { for (let i = 0; i < 6; i++) P("g4_" + i, 120 + i * 168, GR - 120 - 88 * 1.3, 1.3, { la: 20, ra: 150, face: "focus" }); waddle("pg4", lerp(-100, 1180, prog(t, 15.8, 18.8)), GR + 180, 1.1, t); },
+  s5(lt, t) { waddle("pg5", 540, GR + 60, 1.9, t, .3); },
+  s6(lt, t) { waddle("pg6", 540, GR + 60, 1.7, t, .3); },
+  s7(lt, t) { loopTo(U, t, 26.6, 28.4); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  for (let t = .1; t < 2.4; t += .5) add(t, (a) => sfx.noise(a, .06, "lowpass", 200, 1, .35, .005)); for (let i = 0; i < 4; i++) add(10.0 + i * 1.3, sfx.ding);
+  for (let t = 15.9; t < 18.8; t += .5) add(t, (a) => sfx.noise(a, .06, "lowpass", 200, 1, .35, .005)); add(19.9, sfx.ok); add(21.5, (a) => sfx.osc("triangle", 784, a, .02, .08, .8));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(26.65, sfx.whooshDown); add(27.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

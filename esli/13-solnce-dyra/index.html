@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #13 — Солнце станет чёрной дырой</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#05030f}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:80px">СОЛНЦЕ СТАНЕТ<br><b>ЧЁРНОЙ ДЫРОЙ?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 28.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.6, 3.01], [4.8, 6.12], [9.4, 10.69], [11.4, 13.63], [13.8, 16.36], [16.8, 20.35], [18.4, 22.33], [22.4, 26.74], [24.8, 29.03], [26, 30.52], [27.8, 31.87], [28.1, 32.17]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 4.8 }, { id: "s3", s: 4.8, e: 11.4 }, { id: "s4", s: 11.4, e: 16.8 },
+  { id: "s5", s: 16.8, e: 22.4 }, { id: "s6", s: 22.4, e: 24.8 }, { id: "s7", s: 24.8, e: 27.8 }, { id: "s8", s: 27.8, e: 28.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [2.6];
+const clockText = (t) => (t >= 2.6 && t < 24.8 ? "ЕСЛИ ВДРУГ · #13" : null);
+const CAPS = [
+  [0.1, "Что будет, если {y:Солнце превратится в чёрную дыру?}"],
+  [2.6, "Звучит как конец света, {g:но Землю не засосёт.}"],
+  [4.8, "Если масса останется той же,"], [6.35, "чёрная дыра будет притягивать нас {y:так же, как Солнце.}"], [9.4, "Земля продолжит крутиться по своей орбите."],
+  [11.4, "Проблема в другом: {r:станет темно и холодно.}"], [13.8, "Чёрная дыра такого размера была бы {y:всего несколько километров в поперечнике.}"],
+  [16.8, "Со стороны её почти не видно."], [18.4, "А Земля без солнечного света {r:начнёт замерзать,}"], [20.59, "как будто Солнце просто погасло."],
+  [22.4, "Пиши в комменты, {y:что проверить дальше.}"], [24.8, "А пока представь:"], [26, "{y:что будет, если...}"], [27.8, ""]
+];
+const MUSIC = { bpm: 88, root: 41, parts: [[0, 11.4, "pad", .7], [11.4, 22.4, "pad", .6], [22.4, 28.1, "pulse", .7]] };
+const E = [
+  ["s2", "e2a", "badge b-grn", "c", 220, "✅ ЗЕМЛЮ НЕ ЗАСОСЁТ", 2.7, 99, -2, "font-size:52px"],
+  ["s3", "e3a", "badge b-yel", "c", 220, "⚖ МАССА ТА ЖЕ — ОРБИТА ТА ЖЕ", 6.5, 99, 2, "font-size:42px"],
+  ["s4", "e4a", "badge b-wht", "c", 220, "🔭 ВСЕГО ~6 КМ В ПОПЕРЕЧНИКЕ", 13.9, 99, -2, "font-size:42px"],
+  ["s5", "e5a", "badge b-blu", "c", 220, "🥶 ТЕМНО И ХОЛОДНО", 18.5, 99, 2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "а если Земля перестанет вращаться? 🌍", 22.5, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "а если звезда взорвётся рядом? 💥", 22.9, 99, 2],
+];
+const stars = () => `<rect width="${W}" height="${H}" fill="#05030f"/>${Array.from({ length: 110 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const sunG = (id, r = 160) => `<g id="${id}"><circle class="hl" r="${r * 1.5}" fill="#ffd23f" opacity=".2"/><circle class="sb" r="${r}" fill="#ffd23f" stroke="#111" stroke-width="10"/><circle class="bh" r="${r * .4}" fill="#000" opacity="0"/><circle class="rg" r="${r * .55}" fill="none" stroke="#ffb03a" stroke-width="8" opacity="0"/></g>`;
+const orbit = `<ellipse cx="540" cy="960" rx="420" ry="420" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="14 14" opacity=".4"/>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = stars() + `<g transform="translate(540 820)">${sunG("sn1")}</g>`;
+  $("#a2").innerHTML = stars() + `<g transform="translate(540 820)">${sunG("sn2")}</g>` + `<g transform="translate(860 1320)">${earth("ea2", 100)}</g>`;
+  $("#a3").innerHTML = stars() + orbit + `<g transform="translate(540 960)">${sunG("sn3", 110)}</g>` + `<g id="eo3">${earth("ea3", 70)}</g>`;
+  $("#a4").innerHTML = stars() + `<g transform="translate(540 900)"><circle r="300" fill="none" stroke="#ffb03a" stroke-width="10" stroke-dasharray="20 14" opacity=".5"/><text y="-330" font-size="40" fill="#ffd23f" text-anchor="middle">размер Солнца</text>
+    <circle r="16" fill="#000" stroke="#ffb03a" stroke-width="6"/><circle r="60" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="6 8"/><text y="110" font-size="36" fill="#fff" text-anchor="middle">чёрная дыра ≈ 6 км</text></g>`;
+  $("#a5").innerHTML = stars() + orbit + `<g transform="translate(540 960)"><circle r="16" fill="#000" stroke="#ffb03a" stroke-width="5"/></g>` + `<g id="eo5">${earth("ea5", 90)}</g><g id="ic5" opacity="0"><circle r="96" fill="#dff2ff" opacity=".7" stroke="#9fd4ff" stroke-width="6"/></g>`;
+  $("#a6").innerHTML = stars() + `<g transform="translate(540 820)">${sunG("sn6")}</g>`;
+}
+const toBH = (id, k) => { $(`#${id} .hl`).setAttribute("opacity", .2 * (1 - k)); $(`#${id} .sb`).setAttribute("opacity", 1 - k); $(`#${id} .sb`).setAttribute("transform", `scale(${1 - .6 * k})`); $(`#${id} .bh`).setAttribute("opacity", k); $(`#${id} .rg`).setAttribute("opacity", k); };
+const orb = (id, gid, t, sp = .6) => { const a = t * sp; $("#" + gid).setAttribute("transform", `translate(${540 + 420 * Math.cos(a)} ${960 + 420 * Math.sin(a)})`); setEarth(id, t * 40, "calm"); };
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; toBH("sn1", easeInOut(prog(t, .6, 2.4))); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { toBH("sn2", 1); setEarth("ea2", t * 40, "shock"); },
+  s3(lt, t) { toBH("sn3", 1); orb("ea3", "eo3", t); },
+  s4(lt, t) { const e = $("#a4"); e.style.transformOrigin = "540px 900px"; e.style.transform = `scale(${1 + .3 * prog(t, 13.8, 16.6)})`; },
+  s5(lt, t) { orb("ea5", "eo5", t, .4); const k = prog(t, 18.4, 21.8), a = t * .4; $("#ic5").setAttribute("transform", `translate(${540 + 420 * Math.cos(a)} ${960 + 420 * Math.sin(a)}) scale(${k})`); $("#ic5").setAttribute("opacity", k); },
+  s6(lt, t) { toBH("sn6", 0); },
+  s7(lt, t) { loopTo(U, t, 24.8, 27.8); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.6, (a) => sfx.osc("sawtooth", 300, a, .1, .05, 1.8, 60)); add(2.6, sfx.boom); add(2.7, sfx.ok); add(6.5, sfx.ding); add(13.9, (a) => sfx.whooshDown(a)); add(18.5, (a) => sfx.wind(a, 4, .8));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(24.85, sfx.whooshDown); add(27.2, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
