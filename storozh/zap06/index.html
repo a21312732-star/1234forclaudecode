@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Записки прошлого сторожа №6 — Последняя страница</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>.letter{position:absolute;left:150px;right:60px;top:220px;z-index:6;font:700 86px/1.18 Caveat;color:#1f2a44}
+.letter div{opacity:0} .letter .r{color:#8a1010} .letter .ph{font:800 64px var(--mono);color:#1a3aaa;text-align:center;margin-top:20px}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">ЗАПИСКИ ПРОШЛОГО СТОРОЖА · №6</div><div class="ttl" id="h1" style="top:170px">ПОСЛЕДНЯЯ<br><i>СТРАНИЦА</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="letter" id="L2"><div>Если ты это читаешь —</div><div>ты новый сторож.</div><div>Меня уже нет.</div><div>Не верь голосам.</div><div>Не открывай палату 14.</div></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="letter" id="L3"><div class="r">В подвале нет никакой мамы.</div><div class="r">Там то, что носит</div><div class="r">чужие голоса.</div><div>Оно ждёт, пока</div><div>ты спустишься сам.</div></div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="letter" id="L4"><div>Я продержался 40 ночей.</div><div>Продержись дольше.</div><div class="ph">8 (0xx) xxx-xx-14</div><div style="text-align:center">позвони, если станет совсем страшно</div></div>
+    <div class="ttl" id="q4" style="top:1000px;font-size:66px">ТЫ БЫ<br><i>ПОЗВОНИЛ?</i></div>
+    <div class="bdg" id="b4" style="top:1180px;background:#fff;color:#111">💬 ПИШИ В КОММЕНТЫ</div></div>
+  <div class="scene" id="s5"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script src="../zap.js"></script>
+<script>
+"use strict";
+const DUR = 32.5;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [32.5, 32.5]];
+const SCENES = [{ id: "s1", s: 0, e: 2.0 }, { id: "s2", s: 2.0, e: 12.6 }, { id: "s3", s: 12.6, e: 20.0 }, { id: "s4", s: 20.0, e: 32.2 }, { id: "s5", s: 32.2, e: 32.5 }];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [13.4], FLASHES = [];
+const clockText = () => null;
+const CAPS = [
+  [0.1, "Последняя страница журнала."],
+  [2.0, "«Если ты это читаешь, {y:значит, ты новый сторож.}"], [4.6, "{r:Меня уже нет.}"],
+  [5.8, "Не верь голосам, {r:даже если они знают твоё имя.}"], [8.6, "{r:Не открывай палату четырнадцать.}"],
+  [10.4, "И самое главное:"], [12.6, "{r:в подвале нет никакой мамы.}"], [14.6, "Там то, что {r:носит чужие голоса.}"], [16.8, "Оно ждёт, {r:пока ты спустишься сам.}"],
+  [20.0, "Я продержался {y:сорок ночей.}"], [21.6, "{g:Продержись дольше.»}"],
+  [23.0, "Внизу страницы стоял {y:номер телефона.}"], [25.0, "И подпись: позвони, если станет совсем страшно."], [28.0, "Ты бы позвонил?"], [29.4, "Пиши в комменты."], [32.2, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 32.5, "pad", .6]] };
+const page = () => `<rect width="1080" height="1920" fill="#e8dcbc"/>${Array.from({ length: 22 }, (_, i) => `<path d="M80 ${340 + i * 78} H1000" stroke="#9cb4c9" stroke-width="2" opacity=".6"/>`).join("")}<path d="M120 0 V1920" stroke="#d98a8a" stroke-width="3"/>
+  <path d="M0 1700 Q300 1660 540 1720 T1080 1690 V1920 H0Z" fill="#c9b890" opacity=".6"/><rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+function build() {
+  $("#a1").innerHTML = DEFS + journal("j1");
+  $("#a2").innerHTML = DEFS + page();
+  $("#a3").innerHTML = DEFS + page() + `<g id="sh3" opacity="0"><path d="M700 1300 Q780 1100 880 1300 L900 1700 H680Z" fill="#000" opacity=".35"/></g>`;
+  $("#a4").innerHTML = DEFS + page();
+}
+const zoom = (sel, k, ox = 540, oy = 760) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const lines = (sel, t, ts) => $$(sel + " > div").forEach((d, i) => { d.style.opacity = prog(t, ts[i], ts[i] + .5); });
+const U = {
+  s1(lt, t) { zoom("#a1", 1 + .03 * t, 540, 900); const h = $("#h1"); h.style.opacity = 1; },
+  s2(lt, t) { lines("#L2", t, [2.0, 3.2, 4.6, 5.8, 8.6]); zoom("#a2", 1 + .02 * lt); },
+  s3(lt, t) { lines("#L3", t, [12.6, 14.6, 15.4, 16.8, 17.8]); $("#sh3").setAttribute("opacity", prog(t, 16.8, 18.6)); zoom("#a3", 1 + .03 * lt); },
+  s4(lt, t) { lines("#L4", t, [20.0, 21.6, 23.0, 25.0]); show($("#q4"), t, 28.0); if (t < 28.0) $("#q4").style.opacity = 0; show($("#b4"), t, 29.4); if (t < 29.4) $("#b4").style.opacity = 0; },
+  s5(lt, t) { const s = $("#s4"); s.style.display = "block"; s.style.opacity = 1; U.s4(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.noise(a, .4, "highpass", 3000, 1, .1, .05)); for (let t = 2.2; t < 11; t += .2) add(t, (a) => sfx.noise(a, .05, "bandpass", 3500, 3, .04, .01));
+  add(12.6, sfx.boom); add(13.4, sfx.hit); for (let t = 14.6; t < 20; t += .6) add(t, (a) => sfx.heart(a, .7)); add(16.8, (a) => sfx.breath(a, 1.4));
+  add(23.0, (a) => sfx.osc("sine", 440, a, .02, .08, .5)); add(23.6, (a) => sfx.osc("sine", 440, a, .02, .08, .5)); add(28.0, sfx.ding);
+}
+ENGINE.start();
+</script>
+</body>
+</html>
