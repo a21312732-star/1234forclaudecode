@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #11 — Танцевальная чума</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#f3e2c0}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:80px">ГОРОД НЕ МОГ<br><b>ПЕРЕСТАТЬ ТАНЦЕВАТЬ</b> 💃</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 23.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [23.7, 23.7]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 8.0 }, { id: "s3", s: 8.0, e: 12.0 }, { id: "s4", s: 12.0, e: 15.6 },
+  { id: "s5", s: 15.6, e: 18.2 }, { id: "s6", s: 18.2, e: 20.8 }, { id: "s7", s: 20.8, e: 23.4 }, { id: "s8", s: 23.4, e: 23.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [15.7], FLASHES = [];
+const clockText = (t) => (t >= 2.6 && t < 20.8 ? "КОТОИСТОРИЯ · 1518" : null);
+const CAPS = [
+  [0.1, "{y:Целый город} не мог перестать танцевать."],
+  [2.6, "Тысяча пятьсот восемнадцатый год, Страсбург."], [4.0, "Одна женщина вышла на улицу и начала танцевать."], [5.6, "{r:Без музыки.}"], [6.4, "Остановиться она не могла {r:несколько дней.}"],
+  [8.0, "Через неделю к ней присоединились десятки людей,"], [10.0, "а через месяц, по хроникам, {r:около четырёхсот.}"],
+  [12.0, "Власти решили {y:лечить это танцами:}"], [13.6, "наняли музыкантов и построили сцену."],
+  [15.6, "{r:Стало только хуже.}"], [16.6, "Почему так случилось, {y:учёные спорят до сих пор.}"],
+  [18.2, "Пиши в комменты, какую историю рассказать дальше."], [20.8, "Вот так и вышло, что…"], [23.4, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 8.0, "pulse", .7], [8.0, 18.2, "drive", .45], [18.2, 20.8, "pad", .6], [20.8, 23.7, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🏰 СТРАСБУРГ · 1518", 2.7, 99, -2, "font-size:56px"], ["s2", "e2b", "badge b-red", "c", 340, "🔇 БЕЗ МУЗЫКИ", 5.6, 99, 3, "font-size:54px"],
+  ["s4", "e4a", "badge b-blu", "c", 220, "🎻 ЛЕЧИЛИ… ТАНЦАМИ", 12.1, 99, 2, "font-size:54px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "📉 СТАЛО ТОЛЬКО ХУЖЕ", 15.7, 99, -2, "font-size:52px"], ["s5", "e5b", "badge b-wht", "c", 340, "❓ ПРИЧИНА — ЗАГАДКА", 16.7, 99, 2, "font-size:50px"],
+  ["s6", "m6a", "cmt", 90, 1000, "я бы тоже не остановился 💃", 18.3, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а про кошку Таму? 🐱", 18.7, 99, 2],
+];
+const GR = 1180;
+const LADY = { fur: "#e8a14a", fur2: "#c27a2a", coat: "#c8242f", coat2: "#8a1a1a" };
+const CATS = [{ fur: "#9a9a9a", fur2: "#555", coat: "#3a7bd5", coat2: "#2b5ca8" }, { fur: "#3a3a3a", fur2: "#111", coat: "#6a8a4a", coat2: "#4a6a2a" }, { fur: "#f1f1ea", fur2: "#999", coat: "#8a5ab8", coat2: "#6a3a98" }, { fur: "#d9a066", fur2: "#a06a3a", coat: "#d9a040", coat2: "#a07020" }];
+const town = () => `<rect width="${W}" height="${H}" fill="#bfe3f5"/>${[[-20, 240, 520, "#f0e0c0"], [230, 220, 640, "#e8d0a8"], [460, 260, 560, "#f3e6c8"], [730, 240, 600, "#e8d0a8"], [960, 200, 500, "#f0e0c0"]].map(([x, w, h, c]) =>
+  `<g><rect x="${x}" y="${GR - h}" width="${w}" height="${h}" fill="${c}" stroke="${OL}" stroke-width="7"/><path d="M${x - 20} ${GR - h} L${x + w / 2} ${GR - h - 160} L${x + w + 20} ${GR - h}Z" fill="#a8452a" stroke="${OL}" stroke-width="7"/>
+  <path d="M${x} ${GR - h + 120} H${x + w} M${x} ${GR - h + 280} H${x + w} M${x + w / 2} ${GR - h} V${GR}" stroke="#6a4a2a" stroke-width="10"/>${[0, 1].map((k) => `<rect x="${x + 30 + k * (w / 2)}" y="${GR - h + 150}" width="${w / 2 - 60}" height="90" fill="#bfe3f5" stroke="${OL}" stroke-width="5"/>`).join("")}</g>`).join("")}
+  <rect y="${GR}" width="${W}" height="${H - GR}" fill="#b8a888"/>${Array.from({ length: 30 }, (_, i) => `<ellipse cx="${(i % 10) * 115 + (Math.floor(i / 10) % 2) * 55}" cy="${GR + 40 + Math.floor(i / 10) * 70}" rx="50" ry="26" fill="#a89878" stroke="#8a7a5a" stroke-width="3"/>`).join("")}`;
+const dance = (t, i) => ({ la: 130 + 40 * Math.sin(t * 6 + i), ra: 130 + 40 * Math.cos(t * 6 + i), ll: 25 * Math.sin(t * 6 + i), rl: -25 * Math.sin(t * 6 + i), face: "happy" });
+const tired = (t, i) => ({ la: 90 + 20 * Math.sin(t * 4 + i), ra: 90 + 20 * Math.cos(t * 4 + i), ll: 15 * Math.sin(t * 4 + i), rl: -15 * Math.sin(t * 4 + i), face: "worried" });
+const crowd = (pre, n) => Array.from({ length: n }, (_, i) => cat(pre + i, CATS[i % 4])).join("");
+const setCrowd = (pre, n, t, k, pose) => { for (let i = 0; i < n; i++) { const row = Math.floor(i / 5), x = 110 + (i % 5) * 215 + (row % 2) * 100, y = GR + 60 + row * 150, s = .9 + row * .15;
+  P(pre + i, x, y - 88 * s - Math.abs(Math.sin(t * 6 + i)) * 20, s, pose(t, i), 6 * Math.sin(t * 3 + i), i < k ? 1 : 0); wag(pre + i, t, 2); } };
+const stage = `<g transform="translate(540 ${GR})"><rect x="-420" y="-140" width="840" height="140" fill="#8a5a3a" stroke="${OL}" stroke-width="8"/><path d="M-420 -140 H420" stroke="#6a3a1a" stroke-width="10"/>${[-300, -100, 100, 300].map((x) => `<path d="M${x} 0 V-140" stroke="#6a3a1a" stroke-width="6"/>`).join("")}</g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = town() + crowd("c1_", 5);
+  $("#a2").innerHTML = town() + cat("l2", LADY) + `<g id="sm2"></g>`;
+  $("#a3").innerHTML = town() + crowd("c3_", 10) + `<text id="ct3" x="540" y="760" font-family="Montserrat" font-weight="900" font-size="150" text-anchor="middle" fill="#c8242f" stroke="#fff" stroke-width="12" paint-order="stroke">1</text>`;
+  $("#a4").innerHTML = town() + stage + cat("m4a", CATS[0]) + cat("m4b", CATS[2]) + crowd("c4_", 5) + `<g id="nt4" font-size="80"></g>`;
+  $("#a5").innerHTML = town() + crowd("c5_", 10) + `<rect width="${W}" height="${H}" fill="#3a2a55" opacity=".25"/>`;
+  $("#a6").innerHTML = town() + crowd("c6_", 5);
+}
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; setCrowd("c1_", 5, t, 5, dance); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { const go = t > 4.0; P("l2", 540, GR + 60 - 88 * 1.6 - (go ? Math.abs(Math.sin(t * 6)) * 24 : 0), 1.6, go ? dance(t, 0) : { la: 10, ra: 10, face: "calm" }, go ? 8 * Math.sin(t * 3) : 0); wag("l2", t, 2);
+    $("#sm2").innerHTML = t > 6.4 ? `<g transform="translate(860 700)"><circle r="70" fill="${Math.sin(t * 3) > 0 ? "#ffd23f" : "#e8e8f0"}" stroke="${OL}" stroke-width="6"/></g>` : ""; },
+  s3(lt, t) { const k = Math.round(lerp(1, 10, prog(t, 8.0, 11.0))); setCrowd("c3_", 10, t, k, dance); $("#ct3").textContent = Math.round(lerp(1, 400, Math.pow(prog(t, 8.0, 11.6), 2))); },
+  s4(lt, t) { P("m4a", 380, GR - 140 - 88 * 1.2, 1.2, { la: 70, ra: 110 + 20 * Math.sin(t * 12), face: "focus" }); P("m4b", 700, GR - 140 - 88 * 1.2, 1.2, { la: 120 + 20 * Math.sin(t * 10), ra: 60, face: "happy" });
+    setCrowd("c4_", 5, t, 5, dance); $("#nt4").innerHTML = [0, 1, 2, 3].map((i) => { const q = (t * .6 + i / 4) % 1; return `<text x="${300 + i * 160}" y="${700 - q * 300}" opacity="${Math.sin(q * Math.PI)}">${["♪", "♫", "♪", "♬"][i]}</text>`; }).join(""); },
+  s5(lt, t) { setCrowd("c5_", 10, t, 10, tired); },
+  s6(lt, t) { setCrowd("c6_", 5, t, 5, dance); },
+  s7(lt, t) { loopTo(U, t, 20.8, 23.4); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  for (let x = .2; x < 2.6; x += .45) add(x, sfx.kick); add(5.6, sfx.no); for (let x = 8.1; x < 11.6; x += .3) add(x, sfx.tick);
+  for (let x = 12.1; x < 15.6; x += .5) add(x, (a) => sfx.osc("triangle", [440, 523, 587, 659][Math.floor(x * 2) % 4], a, .01, .06, .4)); add(15.7, sfx.boom);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(20.85, sfx.whooshDown); add(22.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
