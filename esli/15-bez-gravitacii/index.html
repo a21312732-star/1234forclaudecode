@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #15 — Гравитация исчезла</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#5fb6ff}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:76px">ГРАВИТАЦИЯ ИСЧЕЗЛА<br><b>НА 5 СЕКУНД?</b></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 22.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.6, 4.03], [5, 6.02], [7.4, 9.06], [9.6, 12.15], [11.4, 13.92], [14, 16.75], [17, 20.23], [19.6, 22.07], [20.8, 23.10], [22.6, 24.16], [22.9, 24.46]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 5.0 }, { id: "s3", s: 5.0, e: 9.6 }, { id: "s4", s: 9.6, e: 14.0 },
+  { id: "s5", s: 14.0, e: 17.0 }, { id: "s6", s: 17.0, e: 19.6 }, { id: "s7", s: 19.6, e: 22.6 }, { id: "s8", s: 22.6, e: 22.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [14.4], FLASHES = [2.6];
+const clockText = (t) => (t >= 2.6 && t < 19.6 ? "ЕСЛИ ВДРУГ · #15" : null);
+const CAPS = [
+  [0.1, "Что будет, если на Земле {r:на пять секунд исчезнет гравитация?}"],
+  [2.6, "{y:Земля продолжит вращаться,} а ты нет."],
+  [5, "Всё, что не прикреплено, {y:начнёт медленно отрываться от земли.}"], [7.4, "На экваторе за пять секунд ты поднимешься {y:примерно на сорок сантиметров.}"],
+  [9.6, "{y:Вода из стаканов} повиснет в воздухе."], [11.4, "А если в этот момент подпрыгнуть, {r:улетишь метров на пятнадцать.}"],
+  [14, "А потом гравитация вернётся, {r:и всё рухнет вниз разом.}"],
+  [17, "Пиши в комменты, {y:что проверить дальше.}"], [19.6, "А пока представь:"], [20.8, "{y:что будет, если...}"], [22.6, ""]
+];
+const MUSIC = { bpm: 88, root: 41, parts: [[0, 9.6, "pad", .7], [9.6, 17.0, "pulse", .6], [17.0, 22.9, "pulse", .7]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🌍 ЗЕМЛЯ КРУТИТСЯ — ТЫ НЕТ", 2.7, 99, -2, "font-size:46px"],
+  ["s3", "e3a", "badge b-blu", "c", 220, "⬆ +40 СМ ЗА 5 СЕКУНД", 7.5, 99, 2, "font-size:50px"],
+  ["s4", "e4a", "badge b-blu", "c", 220, "💧 ВОДА ВИСИТ В ВОЗДУХЕ", 9.7, 99, -2, "font-size:48px"], ["s4", "e4b", "badge b-red", "c", 340, "🦘 ПРЫЖОК = 15 МЕТРОВ", 11.5, 99, 2, "font-size:50px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "💥 ВСЁ РУХНЕТ РАЗОМ", 14.1, 99, -2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "а если гравитация ×2? 🏋", 17.1, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "а если исчезнет на минуту? 😱", 17.5, 99, 2],
+];
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", pants: "#3a7bd5", hair: "#3b2a1e" };
+const stars = () => `<rect width="${W}" height="${H}" fill="#05030f"/>${Array.from({ length: 110 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const junk = (id) => `<g id="${id}">${["⚽", "📦", "🧢", "🍎", "📱", "🥤"].map((e) => `<text font-size="70" text-anchor="middle">${e}</text>`).join("")}</g>`;
+const drops = (id) => `<g id="${id}">${Array.from({ length: 9 }, () => `<circle r="20" fill="#3aa0ff" stroke="#111" stroke-width="4"/>`).join("")}</g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = skyDay() + city() + junk("j1") + person("p1", HERO);
+  $("#a2").innerHTML = stars() + `<g transform="translate(540 1050)">${earth("ea2", 260)}</g><path d="M540 700 A350 350 0 0 1 890 1050" fill="none" stroke="#ffd23f" stroke-width="12"/><path d="M870 1020 L895 1060 L920 1015Z" fill="#ffd23f"/>` + person("p2", HERO);
+  $("#a3").innerHTML = skyDay() + city() + person("p3", HERO) + `<g id="rl3"><rect x="720" y="${GR - 260}" width="40" height="260" fill="#ffd23f" stroke="#111" stroke-width="5"/>${Array.from({ length: 6 }, (_, i) => `<path d="M720 ${GR - i * 50} h22" stroke="#111" stroke-width="5"/>`).join("")}</g><text id="tm3" x="900" y="${GR - 380}" font-family="JetBrains Mono" font-weight="800" font-size="110" text-anchor="middle" fill="#c8242f">5</text>`;
+  $("#a4").innerHTML = skyDay() + city() + drops("dr4") + person("p4", HERO) + `<g id="mk4" opacity="0"><path d="M150 ${GR} V300" stroke="#fff" stroke-width="6" stroke-dasharray="20 14"/><text x="170" y="320" font-family="Montserrat" font-weight="900" font-size="60" fill="#fff" stroke="#111" stroke-width="8" paint-order="stroke">15 м</text></g>`;
+  $("#a5").innerHTML = skyDay() + city() + junk("j5") + person("p5", HERO) + `<g id="dust5"></g>`;
+  $("#a6").innerHTML = skyDay() + city() + junk("j6") + person("p6", HERO);
+}
+const flyJunk = (gid, t, k) => $$(`#${gid} text`).forEach((e, i) => { const x = 120 + i * 170, y = GR - 20 - k * (120 + 160 * hash(i + 4)) + 20 * Math.sin(t * 2 + i) * k; e.setAttribute("x", x); e.setAttribute("y", y); e.setAttribute("transform", `rotate(${k * 90 * (i % 2 ? 1 : -1)} ${x} ${y})`); });
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; const k = easeOut(prog(t, .6, 2.4)); flyJunk("j1", t, k); P("p1", 540, GR - 88 * 1.6 - 120 * k, 1.6, { la: 120 * k + 20, ra: 110 * k + 20, ll: 20 * k, rl: 15 * k, face: k > .2 ? "shock" : "calm" }, 15 * k);
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { setEarth("ea2", t * 60, "calm"); const k = prog(t, 2.8, 4.9); P("p2", lerp(560, 960, k), lerp(760, 560, k), .7, { la: 140, ra: 120, face: "shock" }, 40 * k); },
+  s3(lt, t) { const k = prog(t, 5.0, 9.4); P("p3", 600, GR - 88 * 1.6 - 120 * k, 1.6, { la: 60 + 60 * k, ra: 50 + 60 * k, ll: 15, rl: 10, face: "shock" }); $("#tm3").textContent = Math.max(0, Math.ceil(5 * (1 - k))); },
+  s4(lt, t) { $$("#dr4 circle").forEach((c, i) => { c.setAttribute("cx", 200 + i * 80 + 20 * Math.sin(t + i)); c.setAttribute("cy", 820 + 60 * Math.sin(t * 1.3 + i * .8)); });
+    const j = easeOut(prog(t, 11.4, 13.8)); P("p4", 540, GR - 88 * 1.6 - 620 * j, 1.6, { la: 160, ra: 160, ll: 25, rl: 25, face: j > .1 ? "panic" : "happy" }); $("#mk4").setAttribute("opacity", j > .3 ? 1 : 0); },
+  s5(lt, t) { const k = easeOut(prog(t, 14.0, 14.5)); flyJunk("j5", 0, 1 - k); P("p5", 540, GR - 88 * 1.6 - 620 * (1 - k), 1.6, { la: 170, ra: 170, ll: 30, rl: 30, face: k < 1 ? "panic" : "worried" }, k >= 1 ? 0 : 20);
+    $("#dust5").innerHTML = t > 14.5 ? Array.from({ length: 8 }, (_, i) => { const q = prog(t, 14.5, 15.6); return `<circle cx="${120 + i * 120}" cy="${GR - 20 * q}" r="${20 + 40 * q}" fill="#c9c2b0" opacity="${1 - q}"/>`; }).join("") : ""; },
+  s6(lt, t) { flyJunk("j6", t, 0); P("p6", 540, GR - 88 * 1.6, 1.6, { la: 20, ra: 20, face: "calm" }); },
+  s7(lt, t) { loopTo(U, t, 19.6, 22.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.6, (a) => sfx.osc("sine", 300, a, .5, .05, 1.8, 600)); add(2.6, sfx.whoosh); add(5.1, (a) => sfx.osc("sine", 220, a, .5, .04, 4, 330)); add(11.5, sfx.whoosh);
+  add(14.1, sfx.boom); add(14.3, sfx.crack); add(14.5, sfx.hit); E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(19.65, sfx.whooshDown); add(22.0, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
