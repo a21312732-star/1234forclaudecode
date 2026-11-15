@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #10 — Кошка-начальник станции</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#bfe3f5}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:84px">КОШКА СПАСЛА<br><b>ЖЕЛЕЗНУЮ ДОРОГУ</b> 🚃</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 25.7;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [25.7, 25.7]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 7.4 }, { id: "s3", s: 7.4, e: 12.6 }, { id: "s4", s: 12.6, e: 17.2 },
+  { id: "s5", s: 17.2, e: 20.4 }, { id: "s6", s: 20.4, e: 23.0 }, { id: "s7", s: 23.0, e: 25.4 }, { id: "s8", s: 25.4, e: 25.7 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [5.6], FLASHES = [];
+const clockText = (t) => (t >= 2.6 && t < 23.0 ? "КОТОИСТОРИЯ · 2007" : null);
+const CAPS = [
+  [0.1, "{y:Кошка спасла} целую железную дорогу."],
+  [2.6, "Две тысячи седьмой год, Япония."], [4.0, "Маленькую станцию Киси {r:собирались закрыть:} пассажиров почти не было."],
+  [7.4, "И тогда {y:начальником станции назначили кошку} по имени Тама."], [10.0, "Ей выдали {y:форменную фуражку,} а зарплату платили кормом."],
+  [12.6, "Туристы поехали со всей страны, чтобы на неё посмотреть."], [14.8, "{g:Пассажиров стало больше, и дорогу спасли.}"],
+  [17.2, "А после смерти Таму объявили {y:богиней-покровительницей станции.}"],
+  [20.4, "Пиши в комменты, какую историю рассказать дальше."], [23.0, "Вот так и вышло, что…"], [25.4, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 7.4, "pulse", .7], [7.4, 20.4, "drive", .45], [20.4, 23.0, "pad", .6], [23.0, 25.7, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇯🇵 ЯПОНИЯ · 2007", 2.7, 99, -2, "font-size:56px"], ["s2", "e2b", "badge b-red", "c", 340, "🚫 СТАНЦИЮ ЗАКРЫВАЮТ", 5.6, 99, 3, "font-size:50px"],
+  ["s3", "e3a", "badge b-blu", "c", 220, "🎖 НАЧАЛЬНИК СТАНЦИИ", 7.5, 99, 2, "font-size:52px"], ["s3", "e3b", "badge b-wht", "c", 340, "🐟 ЗАРПЛАТА — КОРМОМ", 10.6, 99, -2, "font-size:50px"],
+  ["s4", "e4a", "badge b-grn", "c", 220, "📈 ПАССАЖИРОВ БОЛЬШЕ", 14.9, 99, -2, "font-size:52px"],
+  ["s5", "e5a", "badge b-yel", "c", 220, "⛩ БОГИНЯ СТАНЦИИ", 17.3, 99, 2, "font-size:56px"],
+  ["s6", "m6a", "cmt", 90, 1000, "тама лучший начальник 🐱", 20.5, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а про пингвина-генерала? 🐧", 20.9, 99, 2],
+];
+const GR = 1180;
+const TAMA = { fur: "#fbf7ee", fur2: "#e8963a", coat: "#fbf7ee", coat2: "#e0d6c2", belly: "#fff" }, TOUR = [{ fur: "#9a9a9a", fur2: "#555", coat: "#ff8a3d", coat2: "#d96a1f" }, { fur: "#3a3a3a", fur2: "#111", coat: "#3a7bd5", coat2: "#2b5ca8" }, { fur: "#e8a14a", fur2: "#c27a2a", coat: "#c3e88d", coat2: "#8fbf5a" }];
+const platform = (sign = true) => `<rect width="${W}" height="${H}" fill="#bfe3f5"/>${[[160, 380, 220], [420, 340, 260], [760, 360, 240]].map(([x, y, r]) => `<circle cx="${x}" cy="${GR - 260 + y * .1}" r="${r}" fill="#7fb07a"/>`).join("")}
+  <rect y="${GR - 260}" width="${W}" height="40" fill="#8a8a8a"/><rect y="${GR - 240}" width="${W}" height="14" fill="#555"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#c9c2b0"/><rect y="${GR}" width="${W}" height="24" fill="#f0e04a"/>
+  ${sign ? `<g transform="translate(800 ${GR - 470})"><rect x="-6" y="0" width="12" height="220" fill="#555"/><rect x="-150" y="-70" width="300" height="100" rx="10" fill="#fff" stroke="${OL}" stroke-width="8"/><text y="2" font-family="Montserrat" font-weight="900" font-size="58" text-anchor="middle" fill="#1a3a8a">КИСИ</text></g>` : ""}`;
+const train = (id) => `<g id="${id}"><rect x="-420" y="-200" width="840" height="200" rx="40" fill="#fff" stroke="${OL}" stroke-width="8"/><rect x="-420" y="-80" width="840" height="30" fill="#c8242f"/>${[-320, -170, -20, 130, 280].map((x) => `<rect x="${x}" y="-170" width="110" height="80" rx="12" fill="#bfe3f5" stroke="${OL}" stroke-width="6"/>`).join("")}</g>`;
+const torii = `<g transform="translate(540 ${GR})"><rect x="-300" y="-560" width="50" height="560" fill="#d93a2a" stroke="${OL}" stroke-width="8"/><rect x="250" y="-560" width="50" height="560" fill="#d93a2a" stroke="${OL}" stroke-width="8"/>
+  <path d="M-400 -600 Q0 -660 400 -600 L380 -560 L-380 -560Z" fill="#d93a2a" stroke="${OL}" stroke-width="8"/><rect x="-330" y="-490" width="660" height="40" fill="#d93a2a" stroke="${OL}" stroke-width="8"/></g>`;
+const cap = `<g class="cp"><path d="M-40 -18 Q-40 -60 0 -60 Q40 -60 40 -18 Z" fill="#1a2a5a" stroke="${OL}" stroke-width="5"/><rect x="-46" y="-22" width="92" height="12" rx="5" fill="#111"/><circle cy="-40" r="9" fill="#ffd23f"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = platform() + train("tr1") + cat("t1", TAMA) + `<g id="cp1">${cap}</g>`;
+  $("#a2").innerHTML = platform() + cat("t2", TAMA) + `<g id="lf2">${[0, 1, 2, 3].map(() => `<path d="M0 0 q20 -10 30 0 q-10 20 -30 0Z" fill="#c9a24a"/>`).join("")}</g>`;
+  $("#a3").innerHTML = platform(false) + cat("t3", TAMA) + `<g id="cp3">${cap}</g><g transform="translate(760 ${GR + 10})"><ellipse rx="90" ry="30" fill="#4a7ad9" stroke="${OL}" stroke-width="6"/><path d="M-50 -20 q50 -40 100 0" fill="#e8963a"/></g>`;
+  $("#a4").innerHTML = platform() + cat("t4", TAMA) + `<g id="cp4">${cap}</g>` + TOUR.map((c, i) => cat("v4" + i, c)).join("") + `<g id="fl4"></g>`;
+  $("#a5").innerHTML = `<rect width="${W}" height="${H}" fill="#2a1a4a"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#5a4a3a"/>` + torii + `<circle id="hl5" cx="540" cy="${GR - 330}" r="230" fill="#ffd23f" opacity=".35"/>` + cat("t5", TAMA) + `<g id="cp5">${cap}</g>`;
+  $("#a6").innerHTML = platform() + cat("t6", TAMA) + `<g id="cp6">${cap}</g>`;
+}
+// голова кошки (масштаб s) ~ на высоте 136*s над тазом
+const capOn = (gid, x, y, s, k = 1, r = 0) => at(gid, x, y - 136 * s - 30 * s - 400 * (1 - k), s, 1, r);
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; at("tr1", 1600 - ((t * 700) % 2600), GR - 270, 1); P("t1", 360, GR - 88 * 1.6, 1.6, { la: 20, ra: 120 + 15 * Math.sin(t * 6), face: "happy" }); wag("t1", t); capOn("cp1", 360, GR - 88 * 1.6, 1.6);
+    $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { P("t2", 360, GR - 88 * 1.5, 1.5, { la: 10, ra: 10, face: t > 5.6 ? "worried" : "calm" }); wag("t2", t, .4);
+    $$("#lf2 path").forEach((p, i) => { const k = (t * .3 + i / 4) % 1; p.setAttribute("transform", `translate(${1100 - 1200 * k} ${GR - 40 - 60 * Math.sin(k * 9 + i)}) rotate(${k * 400})`); }); },
+  s3(lt, t) { P("t3", 400, GR - 88 * 1.7, 1.7, { la: 20, ra: t > 10.6 ? 90 : 20, face: t > 8.4 ? "happy" : "shock" }); wag("t3", t); capOn("cp3", 400, GR - 88 * 1.7, 1.7, easeOut(prog(t, 7.6, 8.6))); },
+  s4(lt, t) { P("t4", 540, GR - 88 * 1.5, 1.5, { la: 20, ra: 140, face: "happy" }); wag("t4", t); capOn("cp4", 540, GR - 88 * 1.5, 1.5);
+    TOUR.forEach((c, i) => { const k = easeOut(prog(t, 12.8 + i * .5, 14.2 + i * .5)), x = [180, 860, 980][i]; P("v4" + i, lerp(x < 540 ? -200 : 1280, x, k), GR + 30 - 88 * 1.2, 1.2, { la: 140, ra: 140, face: "happy" }); });
+    $("#fl4").innerHTML = Math.sin(t * 7) > .7 ? `<circle cx="${[180, 860, 980][Math.floor(t * 3) % 3]}" cy="${GR - 200}" r="90" fill="#fff" opacity=".8"/>` : ""; },
+  s5(lt, t) { P("t5", 540, GR - 88 * 1.6, 1.6, { la: 30, ra: 30, face: "happy" }); wag("t5", t, .5); capOn("cp5", 540, GR - 88 * 1.6, 1.6); $("#hl5").setAttribute("opacity", .3 + .15 * Math.sin(t * 3)); },
+  s6(lt, t) { P("t6", 400, GR - 88 * 1.6, 1.6, { la: 20, ra: 20, face: "calm" }); wag("t6", t, .5); capOn("cp6", 400, GR - 88 * 1.6, 1.6); },
+  s7(lt, t) { loopTo(U, t, 23.0, 25.4); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.2, (a) => sfx.noise(a, 2.2, "lowpass", 300, 1, .35, .3)); add(.6, sfx.whistle); add(5.6, sfx.no); add(8.5, sfx.ding); add(10.7, sfx.pop);
+  for (let x = 13.2; x < 16; x += .7) add(x, (a) => sfx.noise(a, .05, "highpass", 4000, 1, .25, .005)); add(14.9, sfx.ok); add(17.3, (a) => sfx.osc("sine", 880, a, .3, .06, 2.4, 660));
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(23.05, sfx.whooshDown); add(24.8, (a) => sfx.riser(a, .5));
+}
+ENGINE.start();
+</script>
+</body>
+</html>
