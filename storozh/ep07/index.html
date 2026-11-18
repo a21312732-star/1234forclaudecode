@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правила ночного сторожа — Серия 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css">
+<style>
+.card{position:absolute;left:70px;right:70px;height:180px;border-radius:30px;background:rgba(18,20,30,.92);border:3px solid #3a3f52;display:flex;align-items:center;gap:30px;padding:0 30px;z-index:6;color:#fff}
+.card .n{flex:none;width:120px;height:120px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:900 80px var(--head)}
+.card b{display:block;font:900 50px/1.05 var(--head)} .card span{display:block;font:800 34px var(--head);color:#9fb4c8;margin-top:8px}
+.letter{position:absolute;left:150px;right:60px;top:420px;z-index:6;font:700 96px/1.2 Caveat;color:#1f2a44}
+.letter div{opacity:0} .letter .r{color:#8a1010}
+.say{position:absolute;left:90px;right:90px;top:300px;z-index:6;text-align:center;font:900 76px/1.1 var(--head);color:#ff3b47;text-shadow:0 0 30px rgba(255,40,40,.6);opacity:0}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="ep">СЕРИЯ 7</div><div class="ttl" id="h1" style="top:170px">ВЫ ВЫБРАЛИ:<br><i>ОТВЕТИТЬ ☎</i></div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg>
+    <div class="say" id="sy3">«ТЫ ВЗЯЛ ЖУРНАЛ.<br>ВЕРНИ ЕГО»</div></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+    <div class="letter" id="L4"><div>Правило 13.</div><div class="r">Не отвечай на звонки</div><div class="r">из подвала.</div></div></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg>
+    <div class="ttl" id="q5" style="top:240px">ЧТО МНЕ <i>ДЕЛАТЬ?</i></div>
+    <div class="card" id="c5a" style="top:470px"><div class="n" style="background:#c8242f">1</div><div><b>ОТНЕСТИ ЖУРНАЛ 📖</b><span>вниз, в подвал</span></div></div>
+    <div class="card" id="c5b" style="top:690px"><div class="n" style="background:#2f6fd6">2</div><div><b>СЖЕЧЬ СТРАНИЦУ 🔥</b><span>с новым правилом</span></div></div>
+    <div class="bdg" id="b5a" style="top:930px;background:#fff;color:#111">💬 ПИШИ ЦИФРУ В КОММЕНТЫ</div>
+    <div class="bdg" id="b5b" style="top:1060px;background:#c8242f;color:#fff">СЕРИЯ 8 — РЕШАЕШЬ ТЫ</div></div>
+  <div class="scene" id="s6"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../common.js"></script>
+<script src="../zap.js"></script>
+<script>
+"use strict";
+const DUR = 29.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2, 2.71], [3.6, 4.87], [4.8, 6.33], [5.8, 8.85], [8.4, 11.01], [10.2, 12.91], [13, 16.03], [14.2, 17.78], [17, 21.07], [19.4, 24.43], [21.4, 26.99], [22.6, 28.12], [24.2, 31.11], [26, 33.94], [29, 35.83], [29.3, 36.13]];
+const SCENES = [{ id: "s1", s: 0, e: 3.6 }, { id: "s2", s: 3.6, e: 8.4 }, { id: "s3", s: 8.4, e: 13.0 }, { id: "s4", s: 13.0, e: 21.4 }, { id: "s5", s: 21.4, e: 29.0 }, { id: "s6", s: 29.0, e: 29.3 }];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [19.4], FLASHES = [];
+const clockText = (t) => (t >= 3.6 && t < 21.4 ? "ПРАВИЛА НОЧНОГО СТОРОЖА · СЕРИЯ 7" : null);
+const CAPS = [
+  [0.1, "В прошлой серии {r:мне позвонили из подвала.}"], [2, "Вы выбрали: {y:ответить.}"],
+  [3.6, "Я снял трубку."], [4.8, "{r:Тишина.}"], [5.8, "Только где-то {r:капала вода.}"],
+  [8.4, "А потом {r:детский голос} сказал:"], [10.2, "{r:ты взял журнал. Верни его на место.}"],
+  [13, "Я посмотрел на стол."], [14.2, "Журнал был открыт {y:на странице, которой раньше не было.}"], [17, "Там было новое правило, {r:написанное моим почерком:}"], [19.4, "{r:не отвечай на звонки из подвала.}"],
+  [21.4, "Что мне делать?"], [22.6, "{y:Один} — отнести журнал в подвал."], [24.2, "{y:Два} — сжечь эту страницу."], [26, "Пиши {y:цифру} в комменты."], [29, ""]
+];
+const MUSIC = { bpm: 60, root: 41, parts: [[0, 21.4, "pad", .6], [21.4, 29.3, "pad", .35]] };
+const phone = (id, lcd) => `<g id="${id}"><path d="M-260 140 L-200 -60 L200 -60 L260 140Z" fill="#2a2a30" stroke="${OL}" stroke-width="10"/>
+  <g class="hs"><path d="M-250 -70 Q-260 -150 -170 -150 L170 -150 Q260 -150 250 -70 L180 -70 Q170 -110 120 -110 L-120 -110 Q-170 -110 -180 -70Z" fill="#1c1c22" stroke="${OL}" stroke-width="10"/></g>
+  <rect x="-130" y="-30" width="260" height="70" rx="8" fill="#1a3a2a" stroke="${OL}" stroke-width="6"/><text class="lcd" y="16" font-family="JetBrains Mono" font-weight="800" font-size="34" text-anchor="middle" fill="#6aff9a">${lcd}</text>
+  ${[0, 1, 2].map((r) => [0, 1, 2].map((c) => `<rect x="${-75 + c * 55}" y="${55 + r * 26}" width="40" height="18" rx="5" fill="#55555f"/>`).join("")).join("")}</g>`;
+const handset = (id) => `<g id="${id}"><path d="M-300 -60 Q-320 -160 -220 -170 L220 -170 Q320 -160 300 -60 L220 -60 Q200 -110 150 -110 L-150 -110 Q-200 -110 -220 -60Z" fill="#1c1c22" stroke="#555" stroke-width="10"/>
+  ${[0, 1, 2, 3, 4].map((i) => `<circle cx="${-260 + (i % 3) * 22}" cy="${-110 + Math.floor(i / 3) * 22}" r="7" fill="#444"/>`).join("")}</g>`;
+function build() {
+  $("#a1").innerHTML = DEFS + journal("j1") + `<rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a2").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#06070b"/><g id="dp2" fill="#5aa0d8"></g><g transform="translate(540 1000) rotate(-20) scale(1.6)">${handset("hd2")}</g><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a3").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#06070b"/><g id="wv3" fill="none" stroke="#ff3b47" stroke-width="8"></g><g transform="translate(540 1000) rotate(-20) scale(1.6)">${handset("hd3")}</g><rect width="1080" height="1920" fill="url(#gVig)"/>`;
+  $("#a4").innerHTML = DEFS + `<rect width="1080" height="1920" fill="#e8dcbc"/>${Array.from({ length: 22 }, (_, i) => `<path d="M80 ${340 + i * 78} H1000" stroke="#9cb4c9" stroke-width="2" opacity=".6"/>`).join("")}<path d="M120 0 V1920" stroke="#d98a8a" stroke-width="3"/><rect width="1080" height="1920" fill="url(#gTorch)"/>`;
+  $("#a5").innerHTML = DEFS + `<g filter="url(#fBlur)"><rect width="1080" height="1920" fill="#0b0d14"/><g transform="translate(540 1000) scale(1.5)">${phone("ph5", "ВНУТР · ПОДВАЛ")}</g></g><rect width="1080" height="1920" fill="#05060a" opacity=".6"/>`;
+}
+const zoom = (sel, k, ox = 540, oy = 960) => { const e = $(sel); e.style.transformOrigin = `${ox}px ${oy}px`; e.style.transform = `scale(${k})`; };
+const U = {
+  s1(lt, t) { zoom("#a1", 1 + .03 * t, 540, 900); const h = $("#h1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .02 * Math.sin(t * 5)})`; },
+  s2(lt, t) { zoom("#a2", 1 + .05 * lt, 540, 1000); $("#dp2").innerHTML = [0, 1, 2].map((i) => { const q = (t * .7 + i / 3) % 1; return `<ellipse cx="${300 + i * 60}" cy="${700 + q * 500}" rx="12" ry="18" opacity="${(1 - q) * prog(t, 5.8, 6.4)}"/>`; }).join(""); },
+  s3(lt, t) { zoom("#a3", 1 + .08 * lt, 540, 1000); $("#wv3").innerHTML = t > 8.6 ? [0, 1, 2, 3].map((i) => { const q = (t * .9 + i / 4) % 1; return `<circle cx="300" cy="830" r="${60 + q * 400}" opacity="${(1 - q) * .8}"/>`; }).join("") : "";
+    const s = $("#sy3"); s.style.opacity = prog(t, 10.2, 10.6); s.style.transform = `translate(${t > 11.6 ? 4 * Math.sin(t * 40) : 0}px,0)`; },
+  s4(lt, t) { zoom("#a4", 1 + .04 * lt, 540, 700); $$("#L4 > div").forEach((d, i) => { const a = [17.0, 19.4, 20.2][i]; d.style.opacity = prog(t, a, a + .5); }); },
+  s5(lt, t) { show($("#q5"), t, 21.45); show($("#c5a"), t, 22.6, .3, 60); show($("#c5b"), t, 24.2, .3, 60); show($("#b5a"), t, 26.0); show($("#b5b"), t, 27.0);
+    if (t < 22.6) $("#c5a").style.opacity = 0; if (t < 24.2) $("#c5b").style.opacity = 0; if (t < 26.0) $("#b5a").style.opacity = 0; if (t < 27.0) $("#b5b").style.opacity = 0; },
+  s6(lt, t) { const s = $("#s5"); s.style.display = "block"; s.style.opacity = 1; U.s5(0, t); },
+};
+const UPD = {}; SCENES.forEach(({ id }) => { UPD[id] = (lt, t) => U[id](lt, t); });
+function SOUND(sfx, add) {
+  add(3.7, (a) => sfx.noise(a, .1, "lowpass", 400, 1, .5, .01)); for (let x = 5.9; x < 8.4; x += .7) add(x, (a) => sfx.osc("sine", 1400, a, .005, .05, .15, 900));
+  add(8.6, (a) => sfx.noise(a, 4.4, "bandpass", 600, 1, .08, .4)); add(10.2, sfx.boom); add(13.1, (a) => sfx.noise(a, .4, "highpass", 3000, 1, .12, .05));
+  for (let x = 17.0; x < 21.4; x += .55) add(x, (a) => sfx.heart(a, .8)); add(19.4, sfx.hit); [22.6, 24.2].forEach((t) => add(t, sfx.ding)); [26.0, 27.0].forEach((t) => add(t, sfx.pop));
+}
+ENGINE.start();
+</script>
+</body>
+</html>

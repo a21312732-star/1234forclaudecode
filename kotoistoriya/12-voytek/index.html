@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #12 — Медведь-капрал Войтек</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#e8d4a8}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:80px">МЕДВЕДЬ СЛУЖИЛ<br><b>В АРМИИ</b> 🐻🎖</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 25.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.6, 3.44], [4.2, 5.02], [7.6, 7.98], [10.4, 10.96], [13.8, 13.79], [16.8, 16.47], [20.4, 20.20], [23, 22.37], [25.6, 23.67], [25.9, 23.97]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.6 }, { id: "s2", s: 2.6, e: 7.6 }, { id: "s3", s: 7.6, e: 10.4 }, { id: "s4", s: 10.4, e: 13.8 },
+  { id: "s5", s: 13.8, e: 20.4 }, { id: "s6", s: 20.4, e: 23.0 }, { id: "s7", s: 23.0, e: 25.6 }, { id: "s8", s: 25.6, e: 25.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [11.0], FLASHES = [];
+const clockText = (t) => (t >= 2.6 && t < 23.0 ? "КОТОИСТОРИЯ · 1942" : null);
+const CAPS = [
+  [0.1, "{y:Медведь служил в армии} и стал капралом."],
+  [2.6, "Тысяча девятьсот сорок второй год, Иран."], [4.2, "Польские солдаты купили {y:маленького медвежонка} и назвали его Войтек."],
+  [7.6, "Он вырос с ними: {y:боролся с солдатами} и спал в палатке."],
+  [10.4, "Чтобы взять его на корабль, {r:медведя официально записали в армию.}"],
+  [13.8, "В бою у Монте-Кассино {y:Войтек носил ящики со снарядами.}"], [16.8, "Ему дали {g:звание капрала,} а эмблемой роты стал медведь со снарядом."],
+  [20.4, "Пиши в комменты, какую историю рассказать дальше."], [23, "Вот так и вышло, что…"], [25.6, ""]
+];
+const MUSIC = { bpm: 112, root: 55, parts: [[0, 7.6, "pulse", .7], [7.6, 20.4, "drive", .45], [20.4, 23.0, "pad", .6], [23.0, 25.9, "pulse", .8]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇵🇱 ПОЛЬСКАЯ АРМИЯ · 1942", 2.7, 99, -2, "font-size:48px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "📄 ЗАЧИСЛЕН В АРМИЮ", 10.5, 99, 2, "font-size:52px"],
+  ["s5", "e5a", "badge b-wht", "c", 220, "📦 НОСИЛ СНАРЯДЫ", 13.9, 99, -2, "font-size:54px"], ["s5", "e5b", "badge b-grn", "c", 340, "🎖 КАПРАЛ ВОЙТЕК", 16.9, 99, 2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "лучший солдат 🐻🎖", 20.5, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "а про голубя-героя? 🕊", 20.9, 99, 2],
+];
+const GR = 1180;
+const BEAR = { fur: "#7a4a24", fur2: "#5a3418", coat: "#7a4a24", coat2: "#5a3418", belly: "#b07a48" };
+const SOL = [{ fur: "#e8a14a", fur2: "#c27a2a", coat: "#7a7a4a", coat2: "#5a5a32" }, { fur: "#9a9a9a", fur2: "#555", coat: "#7a7a4a", coat2: "#5a5a32" }, { fur: "#3a3a3a", fur2: "#111", coat: "#7a7a4a", coat2: "#5a5a32" }];
+const camp = () => `<rect width="${W}" height="${H}" fill="#f2d9a0"/><circle cx="860" cy="360" r="110" fill="#ffd23f"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#d9b070"/>
+  ${[[180, 520], [760, 560]].map(([x, w]) => `<path d="M${x - w / 2} ${GR} L${x} ${GR - 300} L${x + w / 2} ${GR}Z" fill="#8a8a5a" stroke="${OL}" stroke-width="8"/><path d="M${x} ${GR - 300} V${GR}" stroke="${OL}" stroke-width="6"/>`).join("")}`;
+const bearEars = (id) => `<g id="${id}"><circle cx="-34" cy="-46" r="22" fill="#7a4a24" stroke="${OL}" stroke-width="5"/><circle cx="34" cy="-46" r="22" fill="#7a4a24" stroke="${OL}" stroke-width="5"/><circle cx="-34" cy="-46" r="10" fill="#b07a48"/><circle cx="34" cy="-46" r="10" fill="#b07a48"/></g>`;
+const bear = (id) => cat(id, BEAR) + bearEars(id + "e");
+const PB = (id, x, y, s, pose, r = 0, o = 1) => { P(id, x, y, s, pose, r, o); at(id + "e", x, y - 136 * s, s, o, r); };
+const crate = (id) => `<g id="${id}"><rect x="-70" y="-50" width="140" height="100" fill="#a87a4a" stroke="${OL}" stroke-width="7"/><path d="M-70 -50 L70 50 M70 -50 L-70 50" stroke="#7a5232" stroke-width="6"/></g>`;
+const emblem = `<g transform="translate(540 760)"><circle r="230" fill="#fff" stroke="${OL}" stroke-width="10"/><circle r="205" fill="none" stroke="#c8242f" stroke-width="10"/>
+  <circle cy="-30" r="70" fill="#7a4a24" stroke="${OL}" stroke-width="7"/><circle cx="-55" cy="-90" r="25" fill="#7a4a24" stroke="${OL}" stroke-width="6"/><circle cx="55" cy="-90" r="25" fill="#7a4a24" stroke="${OL}" stroke-width="6"/>
+  <rect x="-30" y="40" width="60" height="120" rx="30" fill="#c9a24a" stroke="${OL}" stroke-width="6"/></g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = camp() + SOL.map((c, i) => cat("s1_" + i, c)).join("") + bear("b1");
+  $("#a2").innerHTML = camp() + SOL.map((c, i) => cat("s2_" + i, c)).join("") + bear("b2");
+  $("#a3").innerHTML = camp() + cat("w3", SOL[0]) + bear("b3");
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#8cc8ee"/><rect y="${GR}" width="${W}" height="${H - GR}" fill="#2b7bbf"/><path d="M80 ${GR - 40} H1000 L940 ${GR + 80} H140Z" fill="#666" stroke="${OL}" stroke-width="8"/><rect x="420" y="${GR - 260}" width="120" height="220" fill="#888" stroke="${OL}" stroke-width="7"/>
+    <g transform="translate(540 640) rotate(-4)"><rect x="-300" y="-200" width="600" height="400" fill="#fffaf0" stroke="${OL}" stroke-width="8"/><text y="-110" font-family="Montserrat" font-weight="900" font-size="54" text-anchor="middle" fill="#111">ЗАЧИСЛЕН</text>
+    <text y="-20" font-family="Montserrat" font-weight="900" font-size="64" text-anchor="middle" fill="#7a4a24">ВОЙТЕК 🐻</text><path d="M-220 60 H220 M-220 110 H120" stroke="#999" stroke-width="8"/><g id="st4"><circle cx="170" cy="120" r="70" fill="none" stroke="#c8242f" stroke-width="10"/><text x="170" y="135" font-family="Montserrat" font-weight="900" font-size="34" text-anchor="middle" fill="#c8242f">22 РОТА</text></g></g>`;
+  $("#a5").innerHTML = camp() + `<g id="em5" opacity="0">${emblem}</g>` + bear("b5") + crate("cr5");
+  $("#a6").innerHTML = camp() + bear("b6") + SOL.map((c, i) => cat("s6_" + i, c)).join("");
+}
+const solds = (pre, t, pose) => SOL.forEach((c, i) => { P(pre + i, [120, 820, 960][i], GR + 40 - 88 * 1.2, 1.2, pose(t, i)); wag(pre + i, t); });
+const cheer = (t, i) => ({ la: 130 + 20 * Math.sin(t * 6 + i), ra: 120, face: "happy" });
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; solds("s1_", t, cheer); PB("b1", 480, GR + 20 - 88 * 1.8, 1.8, { la: 150, ra: 20, face: "happy" }); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { solds("s2_", t, (t, i) => ({ la: 20, ra: i === 0 ? 90 : 20, face: "happy" })); PB("b2", 500, GR + 40 - 88 * .7, .7, { la: 60 + 20 * Math.sin(t * 4), ra: 60, face: "happy" }); wag("b2", t, 2); },
+  s3(lt, t) { const w = Math.sin(t * 5); P("w3", 420 + 20 * w, GR + 30 - 88 * 1.4, 1.4, { la: 100, ra: 100, face: "happy" }, 10 * w); PB("b3", 640 - 20 * w, GR + 30 - 88 * 1.5, 1.5, { la: 110, ra: 110, face: "happy" }, -10 * w); },
+  s4(lt, t) { const k = prog(t, 11.0, 11.3); $("#st4").setAttribute("transform", `translate(${170 * (1 - k)} ${120 * (1 - k)}) scale(${lerp(2, 1, k)}) translate(${-170 * (1 - 1 / lerp(2, 1, k))} 0)`); $("#st4").setAttribute("opacity", k); },
+  s5(lt, t) { const k = (t * .25) % 1, x = lerp(100, 980, k), em = t > 16.8; PB("b5", em ? 540 : x, GR + 20 - 88 * 1.7, 1.7, { la: 170, ra: 170, ll: em ? 0 : 20 * Math.sin(t * 8), rl: em ? 0 : -20 * Math.sin(t * 8), face: "focus" });
+    at("cr5", em ? 540 : x, GR + 20 - 88 * 1.7 - 136 * 1.7 - 130, 1.2, 1, 0); $("#em5").setAttribute("opacity", prog(t, 16.8, 17.4)); },
+  s6(lt, t) { PB("b6", 540, GR + 20 - 88 * 1.6, 1.6, { la: 30, ra: 120, face: "happy" }); solds("s6_", t, cheer); },
+  s7(lt, t) { loopTo(U, t, 23.0, 25.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  for (let x = .2; x < 2.6; x += .5) add(x, sfx.kick); add(4.3, sfx.pop); for (let x = 7.8; x < 10.4; x += .6) add(x, sfx.hit); add(11.0, sfx.boom); for (let x = 14.0; x < 16.8; x += .5) add(x, (a) => sfx.noise(a, .1, "lowpass", 300, 1, .3, .01));
+  add(16.9, sfx.ok); E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(23.05, sfx.whooshDown); add(25.0, (a) => sfx.riser(a, .5));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>
