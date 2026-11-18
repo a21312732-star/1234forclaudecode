@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Если вдруг #17 — Взрыв Бетельгейзе</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#05030f}
+#clock{background:#6c3ce0;color:#fff;box-shadow:0 6px 0 #3a1a8a}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:76px">ЕСЛИ ВЗОРВЁТСЯ<br><b>БЕТЕЛЬГЕЙЗЕ?</b> 💥</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 23.1;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [3.2, 3.50], [6.8, 7.27], [8.2, 8.67], [9.4, 9.98], [11.6, 12.75], [14.2, 16.48], [16, 18.47], [17.4, 19.76], [18.8, 21.21], [19.8, 22.12], [21, 23.26], [22.8, 24.33], [23.1, 24.63]];
+const SCENES = [
+  { id: "s1", s: 0, e: 3.2 }, { id: "s2", s: 3.2, e: 8.2 }, { id: "s3", s: 8.2, e: 11.6 }, { id: "s4", s: 11.6, e: 14.2 },
+  { id: "s5", s: 14.2, e: 17.4 }, { id: "s6", s: 17.4, e: 19.8 }, { id: "s7", s: 19.8, e: 22.8 }, { id: "s8", s: 22.8, e: 23.1 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [1.4], FLASHES = [1.4];
+const clockText = (t) => (t >= 3.2 && t < 19.8 ? "ЕСЛИ ВДРУГ · #17" : null);
+const CAPS = [
+  [0.1, "Что будет, если {r:взорвётся звезда Бетельгейзе} из созвездия Ориона?"],
+  [3.2, "Ночью она засияет {y:почти как Луна,}"], [4.89, "а днём её будет видно {y:прямо на небе.}"], [6.8, "Так будет несколько месяцев."],
+  [8.2, "Но нам {g:ничего не грозит:}"], [9.4, "до неё около {y:пятисот пятидесяти световых лет.}"],
+  [11.6, "Опасно, только если взорвётся звезда {r:ближе пятидесяти световых лет.}"], [14.2, "Тогда излучение {r:сорвёт озоновый слой.}"], [16, "{g:Таких звёзд рядом нет.}"],
+  [17.4, "А ты бы хотел это увидеть?"], [18.8, "Пиши в комменты."], [19.8, "А пока представь:"], [21, "{y:что будет, если...}"], [22.8, ""]
+];
+const MUSIC = { bpm: 88, root: 41, parts: [[0, 8.2, "pad", .7], [8.2, 17.4, "pad", .6], [17.4, 23.1, "pulse", .7]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "✨ ЯРКАЯ, КАК ЛУНА", 3.3, 99, -2, "font-size:54px"], ["s2", "e2b", "badge b-blu", "c", 330, "☀ ВИДНО ДАЖЕ ДНЁМ", 5.1, 99, 2, "font-size:52px"],
+  ["s3", "e3a", "badge b-grn", "c", 220, "✅ ДО НЕЁ ~550 СВ. ЛЕТ", 8.3, 99, 2, "font-size:50px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "⚠ ОПАСНО: БЛИЖЕ 50 СВ. ЛЕТ", 11.7, 99, -2, "font-size:44px"],
+  ["s5", "e5a", "badge b-red", "c", 220, "🛡 СОРВЁТ ОЗОНОВЫЙ СЛОЙ", 14.3, 99, 2, "font-size:46px"], ["s5", "e5b", "badge b-grn", "c", 330, "✅ ТАКИХ ЗВЁЗД РЯДОМ НЕТ", 16.1, 99, -2, "font-size:46px"],
+  ["s6", "m6a", "cmt", 90, 1000, "хочу увидеть вживую 🤩", 17.5, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "а если взорвётся Солнце? ☀", 17.9, 99, 2],
+];
+const stars = () => `<rect width="${W}" height="${H}" fill="#05030f"/>${Array.from({ length: 110 }, (_, i) => `<circle cx="${(hash(i) * W).toFixed(0)}" cy="${(hash(i + 70) * H).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const ORI = [[380, 520], [700, 560], [470, 820], [540, 840], [610, 860], [400, 1150], [720, 1120]];
+const orion = () => `<g stroke="#7aa0d8" stroke-width="4" opacity=".7" fill="none"><path d="M380 520 L470 820 L400 1150 M700 560 L610 860 L720 1120 M380 520 L700 560 M470 820 L540 840 L610 860"/></g>${ORI.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 0 ? 20 : 12}" fill="${i === 0 ? "#ff6a3d" : "#cfe0ff"}"/>`).join("")}`;
+const flare = (id, x, y) => `<g id="${id}" transform="translate(${x} ${y})"><circle class="gl" r="160" fill="#ffd8a0" opacity=".35"/><circle class="cr" r="40" fill="#fff6e0"/><path class="ry" d="M-220 0 H220 M0 -220 V220" stroke="#fff6e0" stroke-width="6" opacity=".8"/></g>`;
+const HERO = { coat: "#ff8a3d", coat2: "#d96a1f", pants: "#3a7bd5", hair: "#3b2a1e" };
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = stars() + orion() + flare("fl1", 380, 520);
+  $("#a2").innerHTML = `<rect id="sk2" width="${W}" height="${H}" fill="#0a0a2a"/>` + city() + flare("fl2", 760, 420) + person("p2", HERO);
+  $("#a3").innerHTML = stars() + `<g transform="translate(160 960)">${earth("ea3", 70)}</g><path d="M260 960 H860" stroke="#fff" stroke-width="6" stroke-dasharray="20 16"/><text x="560" y="920" font-family="Montserrat" font-weight="900" font-size="64" text-anchor="middle" fill="#ffd23f">550 св. лет</text><circle cx="920" cy="960" r="50" fill="#ff6a3d"/>`;
+  $("#a4").innerHTML = stars() + `<circle cx="540" cy="960" r="360" fill="#ff3b47" opacity=".15" stroke="#ff3b47" stroke-width="8" stroke-dasharray="24 16"/><text x="540" y="560" font-family="Montserrat" font-weight="900" font-size="54" text-anchor="middle" fill="#ff6a6a">50 св. лет</text><g transform="translate(540 960)">${earth("ea4", 90)}</g>`;
+  $("#a5").innerHTML = stars() + `<g transform="translate(540 960)">${earth("ea5", 220)}</g><circle id="oz5" cx="540" cy="960" r="270" fill="none" stroke="#3aa0ff" stroke-width="22" opacity=".7"/>`;
+  $("#a6").innerHTML = stars() + orion();
+}
+const glow = (id, k, t) => { $(`#${id} .gl`).setAttribute("r", 60 + 240 * k + 10 * Math.sin(t * 4)); $(`#${id} .gl`).setAttribute("opacity", .2 + .3 * k); $(`#${id} .cr`).setAttribute("r", 20 + 40 * k); $(`#${id} .ry`).setAttribute("opacity", k); };
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; glow("fl1", easeOut(prog(t, 1.3, 2.2)), t); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { const day = prog(t, 5.0, 5.8); $("#sk2").setAttribute("fill", `rgb(${Math.round(lerp(10, 95, day))},${Math.round(lerp(10, 182, day))},${Math.round(lerp(42, 255, day))})`); glow("fl2", lerp(1, .5, day), t);
+    P("p2", 400, GR - 88 * 1.6, 1.6, { la: 20, ra: 140, face: "shock", look: 1 }); },
+  s3(lt, t) { setEarth("ea3", t * 30, "happy"); },
+  s4(lt, t) { setEarth("ea4", t * 30, "worried"); },
+  s5(lt, t) { const crack = t > 14.4 && t < 16.0; setEarth("ea5", t * 30, crack ? "shock" : "happy"); $("#oz5").setAttribute("stroke-dasharray", crack ? "40 40" : "none"); $("#oz5").setAttribute("opacity", crack ? .4 + .3 * Math.sin(t * 10) : .8); },
+  s6(lt, t) {},
+  s7(lt, t) { loopTo(U, t, 19.8, 22.8); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.3, (a) => sfx.riser(a, 1.1)); add(1.4, sfx.boom); add(3.3, sfx.ding); add(5.1, sfx.whoosh); add(8.3, sfx.ok); add(11.7, sfx.no); add(14.3, (a) => sfx.noise(a, 1.6, "highpass", 2000, 1, .25, .2)); add(16.1, sfx.ok);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(19.85, sfx.whooshDown); add(22.2, (a) => sfx.riser(a, .5));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>
