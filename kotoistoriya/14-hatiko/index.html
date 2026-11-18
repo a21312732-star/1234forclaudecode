@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #14 — Хатико ждал 10 лет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#bfe3f5}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:80px">ПЁС ЖДАЛ ХОЗЯИНА<br><b>10 ЛЕТ</b> 🐕</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 23.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.4, 3.39], [4, 4.47], [7.2, 8.00], [9.8, 10.73], [13.6, 14.29], [15.8, 17.01], [18.4, 19.62], [21, 21.53], [23.6, 22.83], [23.9, 23.13]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 7.2 }, { id: "s3", s: 7.2, e: 9.8 }, { id: "s4", s: 9.8, e: 13.6 },
+  { id: "s5", s: 13.6, e: 18.4 }, { id: "s6", s: 18.4, e: 21.0 }, { id: "s7", s: 21.0, e: 23.6 }, { id: "s8", s: 23.6, e: 23.9 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [], FLASHES = [];
+const clockText = (t) => (t >= 2.4 && t < 21.0 ? "КОТОИСТОРИЯ · 1925" : null);
+const CAPS = [
+  [0.1, "{y:Пёс ждал хозяина} почти десять лет."],
+  [2.4, "Тысяча девятьсот двадцать пятый год, Токио."], [4, "Каждый день пёс Хатико {y:встречал профессора Уэно на станции.}"],
+  [7.2, "Однажды профессор не вернулся: {r:он умер на работе.}"],
+  [9.8, "А Хатико {y:продолжал приходить к поезду каждый вечер,}"], [12.5, "{r:почти десять лет.}"],
+  [13.6, "Люди приносили ему еду, о нём писали газеты."], [15.8, "Сейчас у станции Сибуя {g:стоит памятник Хатико.}"],
+  [18.4, "Пиши в комменты, какую историю рассказать дальше."], [21, "Вот так и вышло, что…"], [23.6, ""]
+];
+const MUSIC = { bpm: 80, root: 50, parts: [[0, 23.9, "pad", .6]] };
+const E = [
+  ["s2", "e2a", "badge b-yel", "c", 220, "🇯🇵 ТОКИО · 1925", 2.5, 99, -2, "font-size:56px"],
+  ["s3", "e3a", "badge b-red", "c", 220, "💔 ПРОФЕССОР НЕ ВЕРНУЛСЯ", 7.3, 99, 2, "font-size:46px"],
+  ["s4", "e4a", "badge b-wht", "c", 220, "⏳ ЖДАЛ ПОЧТИ 10 ЛЕТ", 9.9, 99, -2, "font-size:54px"],
+  ["s5", "e5a", "badge b-grn", "c", 220, "🗿 ПАМЯТНИК В СИБУЕ", 15.9, 99, 2, "font-size:54px"],
+  ["s6", "m6a", "cmt", 90, 1000, "я плачу 😭", 18.5, 99, -3], ["s6", "m6b", "cmt", 360, 1100, "самый верный пёс 🐕❤", 18.9, 99, 2],
+];
+const GR = 1180;
+const HACHI = { fur: "#e8c08a", fur2: "#c8945a", coat: "#e8c08a", coat2: "#c8945a", belly: "#fff6e0" }, STATUE = { fur: "#7a6a4a", fur2: "#5a4a32", coat: "#7a6a4a", coat2: "#5a4a32", belly: "#8a7a5a" };
+const PROF = { coat: "#3a3a4a", coat2: "#22222e", hair: "#555", pants: "#2a2a34", hat: "#2a2a34", hat2: "#2a2a34" };
+const platform = (sky = "#bfe3f5") => `<rect id="sky" width="${W}" height="${H}" fill="${sky}"/><rect y="${GR - 260}" width="${W}" height="40" fill="#8a8a8a"/><rect y="${GR - 240}" width="${W}" height="14" fill="#555"/>
+  <rect y="${GR}" width="${W}" height="${H - GR}" fill="#c9c2b0"/><rect y="${GR}" width="${W}" height="24" fill="#f0e04a"/><g transform="translate(820 ${GR - 470})"><rect x="-6" y="0" width="12" height="220" fill="#555"/><rect x="-150" y="-70" width="300" height="100" rx="10" fill="#fff" stroke="${OL}" stroke-width="8"/><text y="2" font-family="Montserrat" font-weight="900" font-size="54" text-anchor="middle" fill="#1a3a8a">СИБУЯ</text></g>`;
+const train = (id) => `<g id="${id}"><rect x="-420" y="-200" width="840" height="200" rx="40" fill="#7aa86a" stroke="${OL}" stroke-width="8"/>${[-320, -170, -20, 130, 280].map((x) => `<rect x="${x}" y="-170" width="110" height="80" rx="12" fill="#bfe3f5" stroke="${OL}" stroke-width="6"/>`).join("")}</g>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = platform() + cat("d1", HACHI);
+  $("#a2").innerHTML = platform() + person("pr2", PROF) + cat("d2", HACHI);
+  $("#a3").innerHTML = platform("#2a2a4a") + train("tr3") + cat("d3", HACHI);
+  $("#a4").innerHTML = platform() + `<g id="wx4"></g>` + cat("d4", HACHI) + `<text id="yr4" x="540" y="700" font-family="Montserrat" font-weight="900" font-size="120" text-anchor="middle" fill="#c8242f" stroke="#fff" stroke-width="10" paint-order="stroke">1 год</text>`;
+  $("#a5").innerHTML = platform() + `<g id="ft5"><ellipse cx="420" cy="${GR + 10}" rx="60" ry="20" fill="#d96a3a" stroke="${OL}" stroke-width="5"/></g>` + cat("d5", HACHI) + `<g id="st5" opacity="0"><rect x="380" y="${GR - 160}" width="320" height="160" fill="#9a9a9a" stroke="${OL}" stroke-width="8"/>${cat("s5d", STATUE)}</g>`;
+  $("#a6").innerHTML = platform() + cat("d6", HACHI);
+}
+const sit = (t) => ({ la: 10, ra: 10, ll: 0, rl: 0, face: "calm" });
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; P("d1", 540, GR + 20 - 88 * 1.6, 1.6, { la: 10, ra: 10, face: "calm", look: 1 }); wag("d1", t, .5); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { const k = easeOut(prog(t, 4.0, 5.6)); P("pr2", lerp(1200, 680, k), GR + 20 - 88 * 1.6, 1.6, k < 1 ? walk(t, 1, { face: "happy" }) : { la: 20, ra: 60, face: "happy" }); P("d2", 420, GR + 20 - 88 * 1.3 - (k >= 1 ? Math.abs(Math.sin(t * 8)) * 20 : 0), 1.3, { la: 30, ra: 30, face: "happy" }); wag("d2", t, 3); },
+  s3(lt, t) { const k = prog(t, 7.2, 9.4); at("tr3", lerp(1500, -500, k), GR - 270, 1); P("d3", 420, GR + 20 - 88 * 1.3, 1.3, { la: 10, ra: 10, face: t > 8.4 ? "worried" : "calm", look: 1 }); },
+  s4(lt, t) { const y = Math.min(10, 1 + Math.floor(prog(t, 9.9, 12.6) * 10)); $("#yr4").textContent = y === 1 ? "1 год" : y < 5 ? `${y} года` : `${y} лет`; const season = Math.floor(t * 1.5) % 2;
+    $("#wx4").innerHTML = Array.from({ length: 24 }, (_, i) => { const q = (t * .25 + hash(i)) % 1; return season ? `<circle cx="${(hash(i + 5) * W).toFixed(0)}" cy="${(q * GR).toFixed(0)}" r="7" fill="#fff"/>` : `<ellipse cx="${(hash(i + 5) * W).toFixed(0)}" cy="${(q * GR).toFixed(0)}" rx="10" ry="6" fill="#f6b6c8"/>`; }).join("");
+    P("d4", 540, GR + 20 - 88 * 1.3, 1.3, { la: 10, ra: 10, face: "worried", look: 1 }); },
+  s5(lt, t) { const st = prog(t, 15.8, 16.6); P("d5", 540, GR + 20 - 88 * 1.3, 1.3, { la: 10, ra: 10, face: "calm" }, 0, 1 - st); $("#ft5").setAttribute("opacity", 1 - st); $("#st5").setAttribute("opacity", st); P("s5d", 540, GR - 160 + 10 - 88 * 1.3, 1.3, { la: 10, ra: 10, face: "calm" }); },
+  s6(lt, t) { P("d6", 540, GR + 20 - 88 * 1.5, 1.5, { la: 10, ra: 10, face: "happy" }); wag("d6", t); },
+  s7(lt, t) { loopTo(U, t, 21.0, 23.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(4.2, (a) => sfx.osc("sine", 660, a, .02, .05, .4)); add(7.3, (a) => sfx.noise(a, 2.2, "lowpass", 300, 1, .35, .3)); add(7.4, sfx.whistle); for (let x = 9.9; x < 12.6; x += .27) add(x, sfx.tick); add(15.9, sfx.ding);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(21.05, sfx.whooshDown); add(23.0, (a) => sfx.riser(a, .5));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>

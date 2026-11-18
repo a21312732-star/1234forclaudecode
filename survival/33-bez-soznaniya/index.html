@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выживи #33 — Человек не дышит</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../engine.css"><link rel="stylesheet" href="../choice.css">
+<style>#stage{background:#dfe6ea}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:90px">ЧЕЛОВЕК<br><b>НЕ ДЫШИТ</b> 😱</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg>
+    <div class="big" style="top:200px;font-size:100px;color:#fff" id="q2">ЧТО ДЕЛАЕШЬ? <span class="em">😱</span></div>
+    <div class="cnt" id="c2" style="top:1000px;font-size:240px;color:#ffd23f"></div></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg>
+</div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg>
+    <div class="big" style="top:180px;font-size:88px;line-height:1.05;color:#111;text-shadow:none" id="q6">А ТЫ ЧТО<br>ВЫБРАЛ? <span class="em">🤔</span></div></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../engine.js"></script>
+<script src="../choice.js"></script>
+<script>
+"use strict";
+const DUR = 30.3;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0.00], [0.1, 0.10], [2.8, 1.82], [3.8, 2.63], [6.2, 4.47], [8.8, 7.49], [10.4, 9.29], [12.4, 11.28], [14.2, 12.67], [16.2, 15.11], [20.4, 20.94], [22, 23.13], [23.4, 24.87], [24.6, 25.82], [30, 29.30], [30.3, 29.60]];
+const SCENES = [
+  { id: "s1", s: 0, e: 2.8 }, { id: "s2", s: 2.8, e: 12.4 }, { id: "s3", s: 12.4, e: 14.2 }, { id: "s4", s: 14.2, e: 16.2 },
+  { id: "s5", s: 16.2, e: 23.4 }, { id: "s6", s: 23.4, e: 27.3 }, { id: "s7", s: 27.3, e: 30.0 }, { id: "s8", s: 30.0, e: 30.3 },
+];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [0.6], FLASHES = [12.4];
+const clockText = (t) => (t >= 2.8 && t < 27.3 ? "ВЫЖИВИ #33 · НЕ ДЫШИТ" : null);
+const CAPS = [
+  [0.1, "Человек {r:упал на улице и не дышит.}"],
+  [2.8, "Что делаешь?"], [3.8, "{y:А} — даёшь ему воды и ждёшь."], [6.2, "{y:Б} — звонишь {g:сто двенадцать} и начинаешь давить на грудь."], [8.8, "{y:В} — уходишь, вдруг он просто спит."],
+  [10.4, "{r:Три, два, один!}"], [12.4, "Правильный ответ — {g:Б.}"],
+  [14.2, "Без дыхания {r:мозг живёт всего несколько минут.}"],
+  [16.2, "Положи ладони {g:в центр груди}"], [17.56, "и дави сильно и быстро: {g:сто — сто двадцать раз в минуту.}"], [20.4, "{y:Не останавливайся,} пока не приедет скорая."], [22, "Ты сохраняешь мозгу кислород."],
+  [23.4, "А ты что выбрал?"], [24.6, "{y:Пиши букву в комменты}"], [26.38, "и запомни это,"], [27.59, "потому что {r:если однажды...}"], [30, ""]
+];
+const MUSIC = { bpm: 112, root: 52, parts: [[0, 12.4, "pulse", .8], [12.4, 23.4, "drive", .5], [23.4, 27.3, "pad", .6], [27.3, 30.3, "pulse", .8]] };
+const OPTS = [["💧", "ДАТЬ ВОДЫ И ЖДАТЬ", "А"], ["🫀", "112 И ДАВИТЬ НА ГРУДЬ", "Б"], ["🚶", "УЙТИ", "В"]];
+const E = [
+  ["s1", "e1a", "badge b-red", "c", 300, "🫁 НЕ ДЫШИТ!", 0.8, 99, -2, "font-size:56px"],
+  ...OPTS3("s2", ["o2a", "o2b", "o2c"], 470, OPTS, [3.8, 6.2, 8.8]),
+  ["s3", "o3a", "opt", 0, 470, ["❌", "ДАТЬ ВОДЫ И ЖДАТЬ", "А"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "o3b", "opt", 0, 640, ["✅", "112 И ДАВИТЬ НА ГРУДЬ", "Б"], 12.45, 99, -2, "background:#7ee08a"],
+  ["s3", "o3c", "opt", 0, 810, ["❌", "УЙТИ", "В"], 0, 99, 0, "background:#ccc;color:#666"],
+  ["s3", "e3a", "badge b-grn", "c", 1040, "ВЕРНО! 🎉", 12.7, 99, 3, "font-size:60px"],
+  ["s4", "e4a", "badge b-red", "c", 220, "🧠 МОЗГ — НЕСКОЛЬКО МИНУТ", 14.3, 99, -2, "font-size:46px"],
+  ["s5", "e5a", "badge b-grn", 60, 200, "🤲 ЦЕНТР ГРУДИ", 16.3, 99, -2, "font-size:50px"], ["s5", "e5b", "badge b-grn", 60, 310, "⏱ 100–120 В МИНУТУ", 17.7, 99, 2, "font-size:48px"],
+  ["s5", "e5c", "badge b-yel", 60, 420, "🚑 НЕ ОСТАНАВЛИВАЙСЯ", 20.5, 99, -2, "font-size:46px"],
+  ...OPTS3("s6", ["o6a", "o6b", "o6c"], 520, OPTS, [24.6, 24.85, 25.1]),
+  ["s6", "m6a", "cmt", 110, 1060, "Б, давить на грудь 🫀", 26.0, 99, -3], ["s6", "m6b", "cmt", 520, 1120, "я бы растерялся 😰", 26.4, 99, 3],
+];
+const HERO = { coat: "#4caf50", coat2: "#2e7d32", hair: "#3b2a1e", pants: "#3b3f58" }, MAN = { coat: "#8a6ad9", coat2: "#6a4ab9", hair: "#555", pants: "#333" };
+const W = 1080, H = 1920, GR = 1180;
+const street = () => `<rect width="${W}" height="${H}" fill="#cfe6f5"/>${[[40, 220, 560, "#e8a87c"], [300, 200, 680, "#9fb4e8"], [560, 240, 520, "#c3e88d"], [840, 220, 640, "#f3d38a"]].map(([x, w, h, c]) => `<rect x="${x}" y="${GR - h}" width="${w}" height="${h}" fill="${c}" stroke="#000" stroke-width="7"/>`).join("")}
+  <rect y="${GR}" width="${W}" height="${H - GR}" fill="#b8b8b8"/><path d="M0 ${GR} H${W}" stroke="#000" stroke-width="6"/>`;
+function build() {
+  buildE(E);
+  $("#a1").innerHTML = street() + person("m1", MAN) + person("p1", HERO);
+  $("#a2").innerHTML = `<rect width="${W}" height="${H}" fill="#3a2a55"/>`;
+  $("#a3").innerHTML = `<rect width="${W}" height="${H}" fill="#2e8a5c"/>`;
+  $("#a4").innerHTML = `<rect width="${W}" height="${H}" fill="#1a1030"/><g transform="translate(540 800)"><path d="M-200 40 Q-230 -160 -40 -190 Q60 -260 170 -170 Q260 -100 210 40 Q150 140 0 120 Q-150 150 -200 40Z" fill="#f2a6b0" stroke="#000" stroke-width="10"/>
+    <path d="M-120 -80 q40 30 0 70 M-20 -150 q50 40 0 90 M80 -110 q40 40 0 90" stroke="#c96a7a" stroke-width="10" fill="none"/></g><text id="tm4" x="540" y="1150" font-family="JetBrains Mono" font-weight="800" font-size="130" text-anchor="middle" fill="#ff3b47">4:00</text>`;
+  $("#a5").innerHTML = street() + person("m5", MAN) + person("p5", HERO) + `<g id="hb5"></g><text x="900" y="${GR - 420}" font-size="90" id="am5">🚑</text>`;
+  $("#a6").innerHTML = `<rect width="${W}" height="${H}" fill="#e6f4ff"/>`;
+}
+const lying = (id, x) => P(id, x, GR + 40, 1.3, { la: 10, ra: 160, ll: 0, rl: 10, face: "calm", blink: true }, 90);
+const U = {
+  s1(lt, t) { $("#a1").style.transform = ""; if (t < .6) P("m1", 620, GR - 88 * 1.3 + 40, 1.3, { la: 20, ra: 20, face: "worried" }, 150 * t); else lying("m1", 640);
+    P("p1", 280, GR - 88 * 1.4 + 40, 1.4, { la: 30, ra: 120, face: "shock", look: 1 }); $("#hook1").style.opacity = 1; $("#hook1").style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; },
+  s2(lt, t) { show($("#q2"), t, 2.85); countdown($("#c2"), t, 10.4); },
+  s3() {},
+  s4(lt, t) { const sec = Math.max(0, Math.round(240 * (1 - prog(t, 14.2, 16.0)))); $("#tm4").textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; },
+  s5(lt, t) { lying("m5", 640); const push = t > 16.6 ? Math.abs(Math.sin(t * Math.PI * 1.83)) : 0; P("p5", 718, GR - 30 + 14 * push, 1.2, { la: 12, ra: 12, ll: 80, rl: 95, face: "focus" }, 0);
+    $("#hb5").innerHTML = t > 16.6 ? `<text x="700" y="${GR - 300}" font-size="${70 + 20 * push}" text-anchor="middle">🫀</text>` : ""; const k = prog(t, 20.4, 23.0); $("#am5").setAttribute("x", lerp(1100, 820, k)); $("#am5").setAttribute("opacity", k > 0 ? 1 : 0); },
+  s6(lt, t) { show($("#q6"), t, 23.45); },
+  s7(lt, t) { loopTo(U, t, 27.3, 30.0); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(.6, sfx.hit); add(.8, sfx.no); for (let x = 14.3; x < 16.2; x += .5) add(x, sfx.tick); for (let x = 16.7; x < 23.4; x += .55) add(x, (a) => sfx.heart(a, .9)); add(20.5, (a) => sfx.osc("square", 700, a, .02, .04, 1.2, 900));
+  choiceSound(sfx, add, { tick: [3.3, 10.4], cd: 10.4, ans: 12.4, loop: [27.3, 30.0] });
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>
