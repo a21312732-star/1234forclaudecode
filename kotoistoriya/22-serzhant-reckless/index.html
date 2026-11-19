@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Котоистория #22 — Лошадь-сержант Рэклесс</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../survival/engine.css"><link rel="stylesheet" href="../../survival/choice.css">
+<style>#stage{background:#d8d0bc}</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"><div id="cam">
+  <div class="scene" id="s1"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a1"></svg>
+    <div class="hook" id="hook1" style="font-size:80px">ЛОШАДЬ СТАЛА<br><b>СЕРЖАНТОМ</b> 🐴🎖</div></div>
+  <div class="scene" id="s2"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a2"></svg></div>
+  <div class="scene" id="s3"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a3"></svg></div>
+  <div class="scene" id="s4"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a4"></svg></div>
+  <div class="scene" id="s5"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a5"></svg></div>
+  <div class="scene" id="s6"><svg class="full" width="1080" height="1920" viewBox="0 0 1080 1920" id="a6"></svg></div>
+  <div class="scene" id="s7"></div>
+  <div class="scene" id="s8"></div>
+</div></div></div>
+<script src="../../survival/engine.js"></script>
+<script src="../../survival/choice.js"></script>
+<script src="../common.js"></script>
+<script>
+"use strict";
+const DUR = 23.9;
+// Растяжка таймлайна под озвучку: пары [время сценария, время видео]. Строку генерирует tools/make-voice.py
+const WARP = [[0, 0], [23.9, 23.9]];
+const SCENES = [{ id: "s1", s: 0, e: 2.4 }, { id: "s2", s: 2.4, e: 7.2 }, { id: "s3", s: 7.2, e: 9.8 }, { id: "s4", s: 9.8, e: 13.6 }, { id: "s5", s: 13.6, e: 18.4 }, { id: "s6", s: 18.4, e: 21.0 }, { id: "s7", s: 21.0, e: 23.6 }, { id: "s8", s: 23.6, e: 23.9 }];
+const SPEAK = [];
+const DROP = ["подписывайся"];
+const SHAKES = [7.4], FLASHES = [];
+const clockText = (t) => (t >= 2.4 && t < 21.0 ? "КОТОИСТОРИЯ · 1953" : null);
+const CAPS = [
+  [0.1, "{y:Лошадь стала сержантом} морской пехоты США."],
+  [2.4, "Тысяча девятьсот пятьдесят третий год, Корея."],
+  [4.0, "Маленькую кобылу Рэклесс {y:купили, чтобы носить снаряды.}"],
+  [7.2, "В одном бою она {r:пятьдесят один раз} поднялась на холм под обстрелом."],
+  [9.8, "Часто одна, без погонщика: {y:дорогу она запомнила сама.}"],
+  [12.4, "Её ранило дважды, {g:но она не остановилась.}"],
+  [13.6, "Рэклесс {g:получила звание сержанта}"],
+  [15.8, "и {y:две медали «Пурпурное сердце».}"],
+  [18.4, "Пиши в комменты, какую историю рассказать дальше."],
+  [21.0, "Вот так и вышло, что…"],
+  [23.6, ""]
+];
+const MUSIC = { bpm: 84, root: 50, parts: [[0, 23.9, "pad", .6]] };
+const E = [["s2", "e2a", "badge b-yel", "c", 220, "🇰🇷 КОРЕЯ · 1953", 2.5, 99, -2, "font-size:52px"], ["s2", "e2b", "badge b-wht", "c", 330, "📦 НОСИЛА СНАРЯДЫ", 4.1, 99, 2, "font-size:52px"], ["s3", "e3a", "badge b-red", "c", 220, "⛰ 51 ПОДЪЁМ", 7.3, 99, -2, "font-size:52px"], ["s4", "e4a", "badge b-wht", "c", 220, "🧠 ЗАПОМНИЛА ДОРОГУ", 9.9, 99, -2, "font-size:46px"], ["s4", "e4b", "badge b-grn", "c", 330, "💪 РАНЕНА, НО ШЛА", 12.5, 99, 2, "font-size:52px"], ["s5", "e5a", "badge b-yel", "c", 220, "🎖 СЕРЖАНТ", 13.7, 99, -2, "font-size:52px"], ["s5", "e5b", "badge b-red", "c", 330, "❤ ДВЕ МЕДАЛИ", 15.9, 99, 2, "font-size:52px"], ["s6", "m6a", "cmt", 90, 1000, "самая храбрая лошадка 🐴", 18.5, 99, -3], ["s6", "m6b", "cmt", 330, 1100, "почему про неё нет фильма? 🎬", 18.9, 99, 2]];
+const GR = 1180;
+const SC = {"1": {"bg": "war", "ch": [{"k": "c", "x": 540, "s": 1.5, "m": "happy", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a", "medal": 1}}]}, "2": {"bg": "war", "ch": [{"k": "c", "x": 300, "s": 1.4, "m": "point", "o": {"fur": "#e8a14a", "coat": "#5a6a3a", "coat2": "#3a4a24", "hat": "helmet", "hatC": "#5a6a3a"}}, {"k": "c", "x": 1200, "x2": 680, "w0": 1.6, "w1": 3.0, "s": 1.4, "m": "walk", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a"}}], "pr": [["📦", 860, 1060, 140, "bob", 0, 2.0]]}, "3": {"bg": "mountain", "ch": [{"k": "c", "x": 1200, "x2": 420, "w0": 0, "w1": 2.4, "s": 1.3, "m": "run", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a"}}], "pr": [["💥", 820, 520, 220, "blink"]], "tx": [["51 РАЗ", 540, 640, 170, "#ff3b47", 0.2]]}, "4": {"bg": "war", "ch": [{"k": "c", "x": -200, "x2": 860, "w0": 0, "w1": 3.4, "s": 1.3, "m": "run", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a"}}], "pr": [["📦", 300, 1060, 130, "bob"], ["💪", 820, 560, 170, "grow", 1, 2.7]]}, "5": {"bg": "paper", "ch": [{"k": "c", "x": 640, "s": 1.5, "m": "salute", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a", "medal": 1}}, {"k": "c", "x": 280, "s": 1.4, "m": "salute", "o": {"fur": "#e8a14a", "coat": "#5a6a3a", "coat2": "#3a4a24", "hat": "helmet", "hatC": "#5a6a3a"}}], "pr": [["🎖", 640, 560, 220, "grow", 1, 0.2], ["❤", 860, 760, 150, "pulse", 0, 2.2]]}, "6": {"bg": "war", "ch": [{"k": "c", "x": 540, "s": 1.5, "m": "wave", "o": {"fur": "#8a4a2a", "fur2": "#5a2a1a", "coat": "#c8242f", "coat2": "#8a1a20", "belly": "#c8885a", "medal": 1}}]}};
+
+let KN = 0;
+const grad = (c1, c2) => { const id = "kg" + (++KN); return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="1080" height="1920" fill="url(#${id})"/>`; };
+const pine = (x, h, c = "#2f6b3a") => `<path d="M${x} ${GR - h} L${x - h * .3} ${GR - h * .45} L${x - h * .15} ${GR - h * .45} L${x - h * .38} ${GR} L${x + h * .38} ${GR} L${x + h * .15} ${GR - h * .45} L${x + h * .3} ${GR - h * .45}Z" fill="${c}" stroke="#000" stroke-width="7"/>`;
+const gnd = (c, c2 = "#000") => `<rect y="${GR}" width="1080" height="${1920 - GR}" fill="${c}"/><path d="M0 ${GR} H1080" stroke="${c2}" stroke-width="6"/>`;
+const stars = (bg = "#05030f") => `<rect width="1080" height="1920" fill="${bg}"/>${Array.from({ length: 110 }, (_, i) => `<circle cx="${(hash(i) * 1080).toFixed(0)}" cy="${(hash(i + 70) * 1920).toFixed(0)}" r="${(1 + 3 * hash(i + 9)).toFixed(1)}" fill="#fff" opacity="${(.3 + .6 * hash(i + 3)).toFixed(2)}"/>`).join("")}`;
+const tree2 = (x, s = 1, c = "#5cc46a") => `<g transform="translate(${x} ${GR}) scale(${s})"><rect x="-16" y="-160" width="32" height="160" fill="#7a5232" stroke="#000" stroke-width="6"/><circle cy="-230" r="110" fill="${c}" stroke="#000" stroke-width="7"/></g>`;
+const blds = (cols) => [[40, 220, 560], [300, 200, 680], [560, 240, 520], [840, 220, 640]].map(([x, w, h], i) => `<rect x="${x}" y="${GR - h}" width="${w}" height="${h}" fill="${cols[i]}" stroke="#000" stroke-width="7"/>${Array.from({ length: Math.floor(h / 130) }, (_, r) => `<rect x="${x + 30}" y="${GR - h + 30 + r * 130}" width="${w - 60}" height="64" fill="#fff" opacity=".55" stroke="#000" stroke-width="4"/>`).join("")}`).join("");
+const BG = {
+  street: () => grad("#9fd3ff", "#e6f4ff") + blds(["#e8a87c", "#9fb4e8", "#c3e88d", "#f3d38a"]) + gnd("#b8b8b8"),
+  night: () => grad("#0b1030", "#2a2f5a") + `<circle cx="850" cy="260" r="70" fill="#f4f1d0"/>` + blds(["#3a3f6a", "#2e3358", "#444a78", "#353a66"]) + gnd("#555a66"),
+  forest: () => grad("#8fd0ff", "#dff3ff") + `<circle cx="860" cy="260" r="80" fill="#ffe36a"/>` + [80, 250, 430, 640, 820, 1000].map((x, i) => pine(x, 420 + 160 * hash(i + 3))).join("") + gnd("#6aa84f"),
+  snowforest: () => grad("#b8c8dc", "#eef3f8") + [80, 250, 430, 640, 820, 1000].map((x, i) => pine(x, 420 + 160 * hash(i + 3), "#3d6b52")).join("") + gnd("#f6f9fc", "#8aa"),
+  mountain: () => grad("#7fc4ff", "#e8f6ff") + `<path d="M-100 ${GR} L250 500 L560 ${GR}Z" fill="#9aa8b8" stroke="#000" stroke-width="7"/><path d="M250 500 L190 640 L250 615 L310 650Z" fill="#fff"/><path d="M380 ${GR} L780 420 L1180 ${GR}Z" fill="#8a98aa" stroke="#000" stroke-width="7"/><path d="M780 420 L710 580 L780 545 L850 590Z" fill="#fff"/>` + gnd("#f4f8fc", "#8aa"),
+  sea: () => grad("#8fd0ff", "#e6f6ff") + `<rect y="${GR - 260}" width="1080" height="${2180 - GR}" fill="#2f86d6"/>${Array.from({ length: 8 }, (_, i) => `<path d="M${i * 150 - 40} ${GR - 200 + (i % 2) * 50} q40 -24 80 0 t80 0" stroke="#bfe6ff" stroke-width="8" fill="none"/>`).join("")}`,
+  boat: () => BG.sea() + `<path d="M-40 ${GR - 210} H470 L410 ${GR - 60} H-40Z" fill="#b5713a" stroke="#000" stroke-width="8"/><path d="M-40 ${GR - 250} H440" stroke="#7a4a22" stroke-width="12"/>`,
+  beach: () => BG.sea() + `<path d="M-20 ${GR} L440 ${GR} Q520 ${GR + 120} 600 1920 H-20Z" fill="#f2d48a" stroke="#000" stroke-width="7"/>`,
+  kitchen: () => `<rect width="1080" height="1920" fill="#f3e6c8"/>${Array.from({ length: 7 }, (_, i) => `<path d="M0 ${300 + i * 90} H1080" stroke="#e0d0a8" stroke-width="4"/>`).join("")}${Array.from({ length: 7 }, (_, j) => `<path d="M${j * 180} 300 V${GR - 350}" stroke="#e0d0a8" stroke-width="4"/>`).join("")}<rect x="0" y="${GR - 330}" width="1080" height="330" fill="#b07a4a" stroke="#000" stroke-width="7"/><rect x="0" y="${GR - 352}" width="1080" height="30" fill="#e8e8e8" stroke="#000" stroke-width="6"/><rect x="600" y="${GR - 352}" width="320" height="30" fill="#333"/>` + gnd("#c9a27a"),
+  room: () => `<rect width="1080" height="1920" fill="#e6dcf2"/><rect x="620" y="420" width="320" height="380" fill="#bfe3ff" stroke="#000" stroke-width="10"/><path d="M780 420 V800 M620 610 H940" stroke="#000" stroke-width="8"/><rect x="40" y="${GR - 230}" width="420" height="160" rx="30" fill="#5b7bd5" stroke="#000" stroke-width="7"/><rect x="40" y="${GR - 320}" width="420" height="110" rx="30" fill="#6d8ce6" stroke="#000" stroke-width="7"/>` + gnd("#c69a6a"),
+  park: () => grad("#8fd0ff", "#e6f6ff") + tree2(120) + tree2(430, .8) + tree2(930, 1.1) + gnd("#7cc46a"),
+  parking: () => grad("#ffd27a", "#fff3d6") + `<circle cx="860" cy="300" r="110" fill="#ffb02e"/>` + gnd("#8a8f99") + `<g transform="translate(720 ${GR - 30})"><rect x="-300" y="-150" width="600" height="160" rx="40" fill="#d94a4a" stroke="#000" stroke-width="8"/><path d="M-200 -150 L-140 -270 H140 L210 -150Z" fill="#9fd3ff" stroke="#000" stroke-width="8"/><path d="M0 -270 V-150" stroke="#000" stroke-width="8"/><circle cx="-180" cy="20" r="56" fill="#222"/><circle cx="180" cy="20" r="56" fill="#222"/></g>`,
+  space: () => stars("#140a33"),
+  deep: () => stars("#05030f"),
+  sky: () => grad("#5fb6ff", "#cfeaff") + gnd("#7cc46a"),
+  city: () => grad("#5fb6ff", "#cfeaff") + blds(["#e8a87c", "#9fb4e8", "#c3e88d", "#f3d38a"]) + gnd("#8a8f99"),
+  desert: () => grad("#ffcf7a", "#fff0cc") + `<circle cx="820" cy="300" r="120" fill="#ff9a2e"/>` + gnd("#e8c27a", "#a8823a"),
+  ice: () => grad("#cfe8ff", "#f4fbff") + `<path d="M-50 ${GR} L200 820 L420 ${GR}Z M500 ${GR} L760 760 L1120 ${GR}Z" fill="#e6f4ff" stroke="#000" stroke-width="7"/>` + gnd("#f4fbff", "#8ab"),
+  lava: () => grad("#3a0a0a", "#c8361a") + `<path d="M-50 ${GR} L260 700 L560 ${GR}Z" fill="#2a1a1a" stroke="#000" stroke-width="7"/><path d="M260 700 l-30 120 l40 -30 l20 140" stroke="#ff7a1a" stroke-width="16" fill="none"/>` + gnd("#3a2020", "#ff5a1a"),
+  paper: () => grad("#f3e2c0", "#e2c99a") + gnd("#c9a873", "#7a5a32"),
+  war: () => grad("#a8a090", "#d8d0bc") + `<path d="M0 ${GR - 60} q90 -60 180 0 t180 0 t180 0 t180 0 t180 0 t180 0 V${GR}H0Z" fill="#8a7a5a" stroke="#000" stroke-width="6"/>` + gnd("#6a5a3a"),
+  snow: () => grad("#b8c8dc", "#eef3f8") + `<path d="M-50 ${GR} L300 760 L620 ${GR}Z M480 ${GR} L820 700 L1150 ${GR}Z" fill="#fff" stroke="#000" stroke-width="7"/>` + gnd("#fbfdff", "#8aa"),
+  ship: () => BG.sea() + `<path d="M-40 ${GR - 230} H1120 V${GR - 60} Q540 ${GR + 60} -40 ${GR - 60}Z" fill="#6a7a8a" stroke="#000" stroke-width="8"/><rect x="620" y="${GR - 520}" width="260" height="290" fill="#dfe4ea" stroke="#000" stroke-width="8"/><rect x="700" y="${GR - 640}" width="70" height="120" fill="#c8242f" stroke="#000" stroke-width="7"/>`,
+  rails: () => grad("#ffd9a0", "#fff4dc") + gnd("#9a8a6a") + `<path d="M0 ${GR + 120} H1080 M0 ${GR + 200} H1080" stroke="#555" stroke-width="12"/>${Array.from({ length: 12 }, (_, i) => `<rect x="${i * 95}" y="${GR + 100}" width="40" height="120" fill="#6a4a2a"/>`).join("")}`,
+  lab: () => `<rect width="1080" height="1920" fill="#dfe8ee"/><rect x="0" y="${GR - 300}" width="1080" height="300" fill="#b8c4cc" stroke="#000" stroke-width="7"/><rect x="80" y="380" width="380" height="300" fill="#2a3a4a" stroke="#000" stroke-width="8"/><path d="M110 560 l60 -60 l50 40 l70 -110 l80 80" stroke="#3dff8a" stroke-width="8" fill="none"/>` + gnd("#9aa6ae"),
+  town: () => grad("#ffe2b0", "#fff6e0") + blds(["#d9a066", "#c27a4a", "#e0b88a", "#b5835a"]) + gnd("#a89070"),
+  castle: () => grad("#8fb8d8", "#e0eef8") + `<g stroke="#000" stroke-width="7"><rect x="200" y="${GR - 560}" width="680" height="560" fill="#b8a888"/>${[200, 330, 460, 590, 720, 850].map((x) => `<rect x="${x}" y="${GR - 600}" width="60" height="50" fill="#b8a888"/>`).join("")}<rect x="460" y="${GR - 260}" width="160" height="260" fill="#4a3a2a"/></g>` + gnd("#7cac5a"),
+};
+const EM = (e) => ([...e].length === 1 ? e + "\uFE0F" : e);
+const bgHTML = (b) => (b && b[0] === "#" ? `<rect width="1080" height="1920" fill="${b}"/>` : BG[b || "#222"]());
+function sceneHTML(k, sc) {
+  let s = bgHTML(sc.bg);
+  if (sc.earth) { const e = sc.earth; s += `<g transform="translate(${e.x || 540} ${e.y || 1000})">${earth("ea" + k, e.r || 300)}<circle id="et${k}" r="${(e.r || 300) * 1.0}" fill="${e.tint || "#f00"}" opacity="0"/></g>`; }
+  if (sc.tint) s += `<rect id="tn${k}" width="1080" height="1920" fill="${sc.tint[0]}" opacity="0"/>`;
+  if (sc.back) s += sc.back;
+  (sc.ch || []).forEach((c, i) => (s += c.k === "c" ? cat(`ch${k}_${i}`, c.o || {}) : person(`ch${k}_${i}`, c.o || {})));
+  if (sc.front) s += sc.front;
+  (sc.pr || []).forEach((p, i) => (s += `<text id="pr${k}_${i}" font-size="${p[3] || 120}" text-anchor="middle" dominant-baseline="central" opacity="0">${EM(p[0])}</text>`));
+  if (sc.rain) s += `<g id="rn${k}"></g>`;
+  (sc.tx || []).forEach((x, i) => (s += `<text id="tx${k}_${i}" x="${x[1]}" y="${x[2]}" font-family="Montserrat" font-weight="900" font-size="${x[3]}" text-anchor="middle" fill="${x[4]}" stroke="#000" stroke-width="10" paint-order="stroke" opacity="0">${x[0]}</text>`));
+  return s;
+}
+function charUpd(id, c, t, lt, G) {
+  const s = c.s || 1.3, kc = c.k === "c" ? 20 : 0; let x = c.x, y = G - 88 * s + kc, r = 0, pose = { la: 10, ra: 10 };
+  const mv = c.x2 !== undefined ? prog(lt, c.w0 || 0, c.w1 || 1.5) : 1;
+  if (c.x2 !== undefined) x = lerp(c.x, c.x2, easeInOut(mv));
+  switch (c.m || "stand") {
+    case "walk": pose = mv < 1 ? walk(t) : { la: 10, ra: 10 }; break;
+    case "shock": pose = { la: 30, ra: 120, face: "shock", look: 1 }; break;
+    case "panic": pose = { la: 150, ra: 150, face: "panic" }; x += 4 * Math.sin(t * 40); break;
+    case "happy": pose = { la: 150, ra: 150, face: "happy" }; y -= Math.abs(Math.sin(t * 7)) * 24; break;
+    case "salute": pose = { la: 10, ra: 140, face: "focus" }; break;
+    case "point": pose = { la: 10, ra: 90, face: "focus", look: 1 }; break;
+    case "wave": pose = { la: 10, ra: 130 + 30 * Math.sin(t * 8), face: "happy" }; break;
+    case "cold": pose = { la: 40, ra: 40, face: "cold" }; x += 3 * Math.sin(t * 50); break;
+    case "sit": pose = { la: 20, ra: 20, ll: -85, rl: 85, face: "worried" }; y = G - 12 * s + kc; break;
+    case "lie": pose = { la: 10, ra: 160, ll: 0, rl: 10, face: "calm", blink: true }; y = G + 40; r = 90; break;
+    case "seize": pose = { la: 40 + 30 * Math.sin(t * 30), ra: 40 + 30 * Math.cos(t * 30), ll: 12 * Math.sin(t * 25), rl: 10, face: "panic", blink: true }; y = G + 40; r = 90; break;
+    case "kneel": pose = { la: 12, ra: 12, ll: 80, rl: 95, face: "focus" }; y = G - 25 * s; break;
+    case "push": pose = { la: 12, ra: 12, ll: 80, rl: 95, face: "focus" }; y = G - 25 * s + 14 * Math.abs(Math.sin(t * 5.75)); break;
+    case "phone": pose = { la: 10, ra: 165, face: "focus" }; break;
+    case "drown": pose = { la: 160 + 15 * Math.sin(t * 9), ra: 160 + 15 * Math.cos(t * 9), face: "panic" }; y = G + 60 + 10 * Math.sin(t * 4); break;
+    case "hold": pose = { la: 150, ra: 150, face: "worried" }; break;
+    case "throw": pose = { la: 10, ra: lt < (c.at || 1) ? 170 : 60, face: "focus" }; break;
+    case "carry": pose = { la: 80, ra: 80, face: "focus" }; break;
+    case "sad": pose = { la: 5, ra: 5, face: "worried", tilt: 10 }; break;
+    case "think": pose = { la: 10, ra: 150, face: "focus", tilt: -8 }; break;
+    case "run": pose = walk(t, 1.8); break;
+    case "fly": pose = { la: 100, ra: 100, ll: -30, rl: 30, face: "happy" }; y -= 30 * Math.sin(t * 3); r = -10; break;
+  }
+  if (c.p) Object.assign(pose, c.p);
+  if (c.f) pose.face = c.f; if (c.look !== undefined) pose.look = c.look; if (c.y !== undefined) y = c.y;
+  P(id, x, y, s, pose, r + (c.r || 0), c.op === undefined ? 1 : c.op * prog(lt, c.oa || 0, (c.oa || 0) + .3));
+  if (c.k === "c") wag(id, t, c.m === "happy" ? 3 : 1);
+}
+function propUpd(id, p, t, lt) {
+  const [, x0, y0, , an, a2] = p, st = p[6] || 0; let x = x0, y = y0, sc = 1, r = 0, o = 1;
+  switch (an) {
+    case "bob": y += 14 * Math.sin(t * 4 + x0); break;
+    case "pulse": sc = 1 + .08 * Math.sin(t * 8); break;
+    case "spin": r = t * 90; break;
+    case "fall": y = lerp(-250, y0, easeOut(prog(lt, st, st + (a2 || 1.2)))); break;
+    case "rise": y = lerp(y0, y0 - (a2 || 300), prog(lt, st, st + 2)); o = 1 - prog(lt, st + 1.2, st + 2); break;
+    case "flyL": x = lerp(1300, x0, easeOut(prog(lt, st, st + (a2 || 1.2)))); break;
+    case "flyR": x = lerp(-250, x0, easeOut(prog(lt, st, st + (a2 || 1.2)))); break;
+    case "grow": sc = Math.max(.01, easeOut(prog(lt, st, st + .5))) * (a2 || 1); break;
+    case "shake": x += 8 * Math.sin(t * 45); break;
+    case "blink": o = Math.sin(t * 10) > 0 ? 1 : .25; break;
+  }
+  if (lt < st && !["fall", "flyL", "flyR"].includes(an)) o = 0;
+  const el = $("#" + id); el.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${r.toFixed(1)}) scale(${sc.toFixed(3)})`); el.setAttribute("opacity", o);
+}
+function sceneUpd(k, sc, lt, t, d) {
+  const G = sc.g || GR, a = $("#a" + k);
+  a.style.transformOrigin = "540px 900px"; a.style.transform = `scale(${1 + .04 * prog(lt, 0, d)})`;
+  if (sc.earth) { const e = sc.earth; setEarth("ea" + k, t * (e.spin === undefined ? 20 : e.spin), e.mood || "calm", t); $("#et" + k).setAttribute("opacity", e.tint ? (e.ta || .5) * prog(lt, e.t0 || 0, e.t1 || d) : 0); }
+  (sc.ch || []).forEach((c, i) => charUpd(`ch${k}_${i}`, c, t, lt, G));
+  (sc.pr || []).forEach((p, i) => propUpd(`pr${k}_${i}`, p, t, lt));
+  if (sc.rain) { const [e, n, sz, sp] = sc.rain; $("#rn" + k).innerHTML = Array.from({ length: n }, (_, i) => { const q = (t * (sp || .3) + hash(i)) % 1; return `<text x="${(hash(i + 5) * 1080).toFixed(0)}" y="${(q * 1920).toFixed(0)}" font-size="${sz}" text-anchor="middle">${e}</text>`; }).join(""); }
+  if (sc.tint) $("#tn" + k).setAttribute("opacity", sc.tint[3] * prog(lt, sc.tint[1], sc.tint[2]));
+  (sc.tx || []).forEach((x, i) => $(`#tx${k}_${i}`).setAttribute("opacity", lt >= (x[5] || 0) ? 1 : 0));
+}
+const SD = {}; SCENES.forEach(({ id, s, e }) => (SD[id] = e - s));
+function buildScenes() { Object.entries(SC).forEach(([k, sc]) => { $("#a" + k).innerHTML = sceneHTML(k, sc); }); }
+const hookPulse = (t) => { const h = $("#hook1"); h.style.opacity = 1; h.style.transform = `scale(${1 + .03 * Math.sin(t * 7)})`; };
+
+function build() { buildE(E); buildScenes(); }
+const U = {
+  s1(lt, t) { sceneUpd("1", SC["1"], lt, t, SD.s1); hookPulse(t); },
+  s2(lt, t) { sceneUpd("2", SC["2"], lt, t, SD.s2); },
+  s3(lt, t) { sceneUpd("3", SC["3"], lt, t, SD.s3); },
+  s4(lt, t) { sceneUpd("4", SC["4"], lt, t, SD.s4); },
+  s5(lt, t) { sceneUpd("5", SC["5"], lt, t, SD.s5); },
+  s6(lt, t) { sceneUpd("6", SC["6"], lt, t, SD.s6); },
+  s7(lt, t) { loopTo(U, t, 21.0, 23.6); },
+  s8() { holdFirst(U); },
+};
+const UPD = makeUPD(U);
+function SOUND(sfx, add) {
+  add(7.4, sfx.boom); add(8.2, sfx.boom); for (let x = 9.9; x < 13.4; x += .3) add(x, (a) => sfx.kick(a, .5)); add(13.7, sfx.ok); add(15.9, sfx.ding);
+  E.forEach((e) => { if (e[6] > 0) add(Math.max(0, e[6] - .02), sfx.pop); }); add(21.05, sfx.whooshDown); add(23.0, (a) => sfx.riser(a, .5));
+}
+
+ENGINE.start();
+</script>
+</body>
+</html>
